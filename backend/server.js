@@ -3,7 +3,7 @@ const connectDB = require("./app/db/db");
 
 async function startServer() {
   try {
-    await connectDB();
+    connectDB();
     app.listen(3000, () => {
       console.log("Server is running on port 3000");
     });

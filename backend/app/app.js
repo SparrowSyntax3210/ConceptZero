@@ -7,6 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../../frontend/public/src")));
 app.use("/api/users", userRoutes);
+app.use("/api/profile", require("./routes/Profile.routes"));
 
 app.get("/test", (req, res) => {
   res.send("Hello World");

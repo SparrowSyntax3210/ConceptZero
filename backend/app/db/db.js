@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-async function connectDB() {
+const connectDB = async () => {
   const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
 
   if (!mongoUri) {
@@ -18,6 +18,5 @@ async function connectDB() {
     console.error("MongoDB connection error:", error.message);
     throw error;
   }
-}
-
+};
 module.exports = connectDB;
