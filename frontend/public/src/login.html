@@ -3,28 +3,921 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>STACKED | Welcome Back</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-      body {
-        font-family: Arial, sans-serif;
+      * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --lime: #b9f500;
+        --lime-dark: #9bd400;
+        --ink: #10111c;
+        --muted: #777b8e;
+        --border: #e9eaf0;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        min-height: 100vh;
+        background:
+          radial-gradient(ellipse at 15% 15%, #f0f3ff 0%, transparent 35%),
+          radial-gradient(ellipse at 85% 85%, #f2f8df 0%, transparent 35%),
+          #fafafd;
+        color: var(--ink);
+        overflow-x: hidden;
+      }
+
+      /* Navbar */
+
+      .navbar {
+        height: 85px;
+        padding: 0 6%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-size: 23px;
+        font-weight: 900;
+        letter-spacing: -1px;
+      }
+
+      .logo-icon {
+        display: flex;
+        align-items: end;
+        gap: 3px;
+        height: 23px;
+      }
+
+      .logo-icon span {
+        width: 5px;
+        border-radius: 5px;
+        background: var(--ink);
+      }
+
+      .logo-icon span:nth-child(1) {
+        height: 10px;
+      }
+      .logo-icon span:nth-child(2) {
+        height: 16px;
+      }
+      .logo-icon span:nth-child(3) {
+        height: 23px;
+      }
+
+      .nav-right {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .nav-right strong {
+        color: var(--ink);
+      }
+
+      /* Main layout */
+
+      .container {
+        max-width: 1450px;
+        min-height: calc(100vh - 85px);
+        margin: auto;
+        padding: 25px 6% 55px;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 65px;
+        align-items: center;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+      /* Left section */
+
+      .hero {
+        position: relative;
+        min-height: 610px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        background: white;
+        border-radius: 30px;
+        padding: 10px 17px;
+        font-size: 12px;
+        font-weight: 600;
+        width: fit-content;
+        box-shadow: 0 5px 20px #17172a0c;
+        margin-bottom: 25px;
+      }
+
+      .dot {
+        height: 9px;
+        width: 9px;
+        background: var(--lime);
+        border-radius: 50%;
+        box-shadow: 0 0 12px #b9f50099;
+      }
+
+      .hero h1 {
+        font-size: clamp(48px, 5.3vw, 76px);
+        line-height: 0.99;
+        letter-spacing: -5px;
+        font-weight: 900;
+        max-width: 570px;
+      }
+
+      .hero h1 span {
+        color: #a7e900;
+      }
+
+      .hero-description {
+        max-width: 380px;
+        margin-top: 23px;
+        color: #74788b;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      /* Illustration area */
+
+      .visual {
+        position: relative;
+        height: 275px;
+        margin-top: 25px;
+      }
+
+      .visual-title {
+        position: absolute;
+        font-size: 115px;
+        font-weight: 900;
+        letter-spacing: -9px;
+        color: #e9eaf0;
+        left: 0;
+        top: 35px;
+        z-index: 0;
+      }
+
+      .person {
+        position: absolute;
+        bottom: 4px;
+        left: 30%;
+        transform: translateX(-50%);
+        width: 180px;
+        height: 220px;
+        border-radius: 90px 90px 30px 30px;
+        background: linear-gradient(145deg, #242c3e, #090c17);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 70px;
+        box-shadow: 0 20px 35px #17172a25;
+        z-index: 1;
+      }
+
+      .person::before {
+        content: "";
+        position: absolute;
+        top: -45px;
+        width: 78px;
+        height: 85px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f0c4a6, #b87e62);
+        border: 5px solid white;
+      }
+
+      .person-label {
+        position: absolute;
+        bottom: 40px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--lime);
+      }
+
+      .orbit {
+        position: absolute;
+        width: 270px;
+        height: 80px;
+        border: 2px solid #c8f52d;
+        border-radius: 50%;
+        left: 4%;
+        bottom: 40px;
+        transform: rotate(-15deg);
+        filter: drop-shadow(0 0 7px #b9f500);
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      .floating {
+        position: absolute;
+        background: #ffffffed;
+        padding: 14px 18px;
+        border-radius: 17px;
+        box-shadow: 0 12px 35px #22243b12;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 3;
+      }
+
+      .floating.one {
+        top: 15px;
+        right: 3%;
+      }
+
+      .floating.two {
+        bottom: 12px;
+        right: 0;
+        color: #686c7f;
+      }
+
+      .floating strong {
+        color: var(--ink);
+        font-size: 18px;
+        display: block;
+        margin-top: 5px;
+      }
+
+      .floating span {
+        color: #a4dc00;
+      }
+
+      /* Form panel */
+
+      .auth-wrapper {
+        position: relative;
+      }
+
+      .auth-card {
+        background: rgba(255, 255, 255, 0.83);
+        border: 1px solid #ffffff;
+        border-radius: 30px;
+        padding: 42px;
+        box-shadow:
+          0 25px 75px #25283d12,
+          0 3px 12px #25283d05;
+        backdrop-filter: blur(20px);
+      }
+
+      .auth-top {
+        margin-bottom: 28px;
+      }
+
+      .auth-top .eyebrow {
+        font-size: 12px;
+        color: #8b8e9e;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .auth-top h2 {
+        font-size: 34px;
+        font-weight: 850;
+        letter-spacing: -1.8px;
+      }
+
+      .auth-top p {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 9px;
+      }
+
+      /* Tabs */
+
+      .tabs {
+        background: #f0f1f5;
+        padding: 5px;
+        display: flex;
+        border-radius: 13px;
+        margin-bottom: 27px;
+      }
+
+      .tab {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 12px;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 650;
+        cursor: pointer;
+        color: #777b8c;
+        transition: 0.25s;
+      }
+
+      .tab.active {
+        background: white;
+        color: var(--ink);
+        box-shadow: 0 3px 10px #0000000b;
+      }
+
+      /* Inputs */
+
+      .form-group {
+        margin-bottom: 17px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 650;
+        margin-bottom: 9px;
+      }
+
+      .input-wrap {
+        position: relative;
+      }
+
+      .input-wrap input {
+        width: 100%;
+        height: 51px;
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 12px;
+        padding: 0 15px;
+        font-family: inherit;
+        font-size: 13px;
+        outline: none;
+        transition: 0.2s;
+        color: var(--ink);
+      }
+
+      .input-wrap input:focus {
+        border-color: #b2e82a;
+        box-shadow: 0 0 0 4px #b9f5001b;
+      }
+
+      .input-wrap input::placeholder {
+        color: #b1b3bf;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: none;
+        color: #85899a;
+        font-size: 11px;
+        cursor: pointer;
+        font-weight: 650;
+      }
+
+      .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+        color: #777b8c;
+        margin: 5px 0 23px;
+      }
+
+      .remember {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .remember input {
+        accent-color: #a9e900;
+      }
+
+      a {
+        text-decoration: none;
+        color: #84b800;
+        font-weight: 650;
+      }
+
+      /* Buttons */
+
+      .submit-btn {
+        width: 100%;
+        height: 53px;
+        border: none;
+        border-radius: 13px;
+        background: var(--ink);
+        color: white;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.25s;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        background-color: #f7f7fb;
+        gap: 10px;
       }
-      h1 {
-        color: #333;
+
+      .submit-btn:hover {
+        background: #a5e500;
+        color: #10111c;
+        transform: translateY(-2px);
+        box-shadow: 0 9px 22px #b9f50040;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 24px 0;
+        color: #a0a2ad;
+        font-size: 11px;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        height: 1px;
+        flex: 1;
+        background: #e9eaf0;
+      }
+
+      .google-btn {
+        width: 100%;
+        height: 49px;
+        border: 1px solid var(--border);
+        background: white;
+        border-radius: 12px;
+        font-family: inherit;
+        font-weight: 650;
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .google-btn:hover {
+        background: #f8f9fb;
+      }
+
+      .google-icon {
+        font-weight: 900;
+        font-size: 15px;
+        margin-right: 9px;
+        color: #4285f4;
+      }
+
+      .auth-footer {
+        text-align: center;
+        margin-top: 23px;
+        color: #9699a8;
+        font-size: 11px;
+      }
+
+      .auth-footer a {
+        color: var(--ink);
+      }
+
+      /* Registration state */
+
+      #registerFields {
+        display: none;
+      }
+
+      #registerFields .form-group {
+        margin-bottom: 13px;
+      }
+
+      .terms {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 11px;
+        color: #777b8c;
+        margin: 15px 0 19px;
+        line-height: 1.5;
+      }
+
+      .terms input {
+        accent-color: #a9e900;
+        margin-top: 2px;
+      }
+
+      #message {
+        font-size: 12px;
+        margin-top: 12px;
+        text-align: center;
+        color: #6e9d00;
+      }
+
+      /* Bottom */
+
+      .bottom-note {
+        position: absolute;
+        bottom: -37px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 10px;
+        color: #999baa;
+      }
+
+      /* Responsive */
+
+      @media (max-width: 1000px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 30px;
+          max-width: 620px;
+        }
+
+        .hero {
+          min-height: auto;
+        }
+
+        .hero h1 {
+          font-size: 55px;
+        }
+
+        .visual {
+          height: 230px;
+        }
+
+        .auth-card {
+          padding: 32px;
+        }
+
+        .bottom-note {
+          position: static;
+          margin-top: 22px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .navbar {
+          height: 70px;
+          padding: 0 22px;
+        }
+
+        .container {
+          padding: 20px 17px 35px;
+        }
+
+        .hero h1 {
+          font-size: 45px;
+          letter-spacing: -3px;
+        }
+
+        .hero-description {
+          font-size: 12px;
+        }
+
+        .visual {
+          height: 200px;
+        }
+
+        .person {
+          width: 130px;
+          height: 160px;
+        }
+
+        .person::before {
+          width: 62px;
+          height: 65px;
+          top: -35px;
+        }
+
+        .visual-title {
+          font-size: 75px;
+        }
+
+        .floating {
+          padding: 10px;
+          font-size: 10px;
+        }
+
+        .auth-card {
+          padding: 24px 19px;
+          border-radius: 23px;
+        }
+
+        .auth-top h2 {
+          font-size: 29px;
+        }
       }
     </style>
   </head>
+
   <body>
-    <h1>Login</h1>
+    <header class="navbar">
+      <div class="logo">
+        <div class="logo-icon"><span></span><span></span><span></span></div>
+        STACKED
+      </div>
+      <div class="nav-right">
+        Build better habits. <strong>Grow every day.</strong>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- LEFT HERO -->
+      <section class="hero">
+        <div class="hero-tag">
+          <span class="dot"></span>
+          Track. Improve. Grow.
+        </div>
+
+        <h1>
+          Small Habits.<br />
+          <span>Big</span> Changes.<br />
+          Better You.
+        </h1>
+
+        <p class="hero-description">
+          Your journey to a better lifestyle starts here. Track your habits,
+          stay consistent and turn everyday actions into extraordinary progress.
+        </p>
+
+        <div class="visual">
+          <div class="visual-title">GROW.</div>
+
+          <div class="person">
+            <div class="person-label">LEVEL UP</div>
+          </div>
+
+          <div class="orbit"></div>
+
+          <div class="floating one">
+            <span>✦</span> YOUR DAILY PROGRESS
+            <strong>72% Complete</strong>
+          </div>
+
+          <div class="floating two">
+            🔥 Current Streak
+            <strong>7 Days</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT AUTHENTICATION -->
+      <section class="auth-wrapper">
+        <div class="auth-card">
+          <div class="auth-top">
+            <div class="eyebrow">WELCOME TO STACKED ✦</div>
+            <h2 id="heading">Welcome Back.</h2>
+            <p id="subheading">
+              Continue building the best version of yourself.
+            </p>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button type="button" class="tab active" id="loginTab">
+              Login
+            </button>
+
+            <button type="button" class="tab" id="registerTab">
+              Create Account
+            </button>
+          </div>
+
+          <!-- LOGIN FORM -->
+          <form action="/api/users/login" method="POST" id="loginForm">
+            <div class="form-group">
+              <label for="loginEmail">Email Address</label>
+              <div class="input-wrap">
+                <input
+                  type="email"
+                  id="loginEmail"
+                  name="email"
+                  placeholder="you@example.com"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <div class="input-wrap">
+                <input
+                  type="password"
+                  id="loginPassword"
+                  name="password"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  class="password-toggle"
+                  onclick="togglePassword('loginPassword', this)"
+                >
+                  SHOW
+                </button>
+              </div>
+            </div>
+
+            <div class="form-options">
+              <label class="remember">
+                <input type="checkbox" name="rememberMe" value="true" />
+                Remember me
+              </label>
+
+              <a href="/api/users/forgot-password">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              Login to STACKED <span>→</span>
+            </button>
+          </form>
+
+          <!-- REGISTRATION FORM -->
+          <form
+            action="/api/users/register"
+            method="POST"
+            id="registerForm"
+            hidden
+          >
+            <div class="form-group">
+              <label for="registerName">Full Name</label>
+              <div class="input-wrap">
+                <input
+                  type="text"
+                  id="registerName"
+                  name="username"
+                  placeholder="Enter your full name"
+                  autocomplete="name"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="registerEmail">Email Address</label>
+              <div class="input-wrap">
+                <input
+                  type="email"
+                  id="registerEmail"
+                  name="email"
+                  placeholder="you@example.com"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="registerPassword">Password</label>
+              <div class="input-wrap">
+                <input
+                  type="password"
+                  id="registerPassword"
+                  name="password"
+                  placeholder="Create a password"
+                  minlength="8"
+                  autocomplete="new-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  class="password-toggle"
+                  onclick="togglePassword('registerPassword', this)"
+                >
+                  SHOW
+                </button>
+              </div>
+            </div>
+
+            <div class="terms">
+              <input type="checkbox" id="terms" required />
+              <label for="terms">
+                I agree to the
+                <a href="/terms">Terms of Service</a>
+                and
+                <a href="/privacy">Privacy Policy</a>.
+              </label>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              Create My Account <span>→</span>
+            </button>
+          </form>
+
+          <!-- Google Authentication -->
+          <div class="divider">OR CONTINUE WITH</div>
+
+          <a href="/auth/google" style="text-decoration: none">
+            <button type="button" class="google-btn">
+              <span class="google-icon">G</span>
+              Continue with Google
+            </button>
+          </a>
+
+          <!-- Footer -->
+          <div class="auth-footer" id="footerText">
+            New to STACKED?
+            <a
+              href="#"
+              onclick="
+                switchForm('register');
+                return false;
+              "
+            >
+              Create an account
+            </a>
+          </div>
+        </div>
+
+        <div class="bottom-note">
+          © 2026 STACKED. BUILD BETTER HABITS, EVERY DAY.
+        </div>
+      </section>
+    </main>
 
     <script>
-      // Add your JavaScript code here if needed
+      document.addEventListener("DOMContentLoaded", () => {
+        const loginTab = document.getElementById("loginTab");
+        const registerTab = document.getElementById("registerTab");
+
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+
+        const heading = document.getElementById("heading");
+        const subheading = document.getElementById("subheading");
+        const footerText = document.getElementById("footerText");
+
+        function switchForm(mode) {
+          const isLogin = mode === "login";
+
+          // Show / hide forms
+          loginForm.hidden = !isLogin;
+          registerForm.hidden = isLogin;
+
+          // Active tab styling
+          loginTab.classList.toggle("active", isLogin);
+          registerTab.classList.toggle("active", !isLogin);
+
+          // Headings
+          heading.textContent = isLogin ? "Welcome Back." : "Start Growing.";
+
+          subheading.textContent = isLogin
+            ? "Continue building the best version of yourself."
+            : "Create your account and begin your growth journey.";
+
+          // Footer
+          footerText.innerHTML = isLogin
+            ? `New to STACKED?
+               <a href="#" data-switch="register">Create an account</a>`
+            : `Already have an account?
+               <a href="#" data-switch="login">Login</a>`;
+        }
+
+        // Tab switching
+        loginTab.addEventListener("click", () => {
+          switchForm("login");
+        });
+
+        registerTab.addEventListener("click", () => {
+          switchForm("register");
+        });
+
+        // Footer switching
+        footerText.addEventListener("click", (event) => {
+          const link = event.target.closest("[data-switch]");
+
+          if (!link) return;
+
+          event.preventDefault();
+          switchForm(link.dataset.switch);
+        });
+
+        // Initial state
+        switchForm("login");
+      });
+
+      // Password visibility toggle
+      function togglePassword(inputId, button) {
+        const input = document.getElementById(inputId);
+
+        if (input.type === "password") {
+          input.type = "text";
+          button.textContent = "HIDE";
+        } else {
+          input.type = "password";
+          button.textContent = "SHOW";
+        }
+      }
     </script>
   </body>
 </html>

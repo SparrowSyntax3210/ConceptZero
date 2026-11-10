@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
+  // MongoDB generates this ObjectId automatically and other user-owned
+  // documents can reference it with `ref: "User"`.
   username: {
     type: String,
     required: true,
@@ -14,6 +16,14 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+  },
+  sessionTokenHash: {
+    type: String,
+    select: false,
+  },
+  sessionExpiresAt: {
+    type: Date,
+    select: false,
   },
 });
 

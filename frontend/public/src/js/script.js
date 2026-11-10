@@ -210,8 +210,3 @@ document.querySelectorAll("nav a").forEach((link) => {
   });
 });
 
-const Account = document.getElementsByClassName("avatar");
-
-Account.addEventListener("click", () => {
-  window.location.href = "/login";
-});

@@ -26,7 +26,12 @@
           ><a href="#insights">Insights</a><a href="#goals">Goals</a
           ><a href="#profile">Profile</a>
         </nav>
-        <button class="avatar" aria-label="Open profile"><span>●</span></button>
+        <div class="account-control">
+          <button class="avatar" type="button" aria-label="Open account menu" aria-expanded="false">
+            <span>●</span>
+          </button>
+          <button class="logout-button" type="button" hidden>Log out</button>
+        </div>
       </header>
 
       <section class="hero" id="top">
@@ -104,6 +109,7 @@
         <span>12 habits</span><span>7-day streak</span><span>89% success</span>
       </footer>
     </main>
+    <script defer src="./js/auth-ui.js"></script>
     <script type="module" src="./js/script.js"></script>
   </body>
 </html>
