@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f7fb" />
+    <title>Stacked — Build Better Habits</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <div class="ambient ambient-one"></div>
+      <div class="ambient ambient-two"></div>
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="Stacked home"
+          ><span class="brand-mark"><i></i><i></i><i></i></span>STACKED</a
+        >
+        <nav aria-label="Main navigation">
+          <a class="active" href="#tracker">Tracker</a
+          ><a href="#insights">Insights</a><a href="#goals">Goals</a
+          ><a href="#profile">Profile</a>
+        </nav>
+        <button class="avatar" aria-label="Open profile"><span>●</span></button>
+      </header>
+
+      <section class="hero" id="top">
+        <div class="wordmark" aria-hidden="true">STACKED</div>
+        <div class="copy-block">
+          <div class="eyebrow">
+            <span class="status-dot"></span> Track. Improve. Grow.
+          </div>
+          <h1>Build Better<br />Habits.<br /><em>Stack</em> Your<br />Life.</h1>
+          <p>
+            Track your habits, improve your routine,<br class="desktop-break" />
+            and see your growth — all in one place.
+          </p>
+          <a class="cta" href="#tracker">Start Tracking <span>→</span></a>
+        </div>
+
+        <div class="stage" aria-label="Interactive 3D habit growth models">
+          <canvas id="model-canvas"></canvas>
+          <img
+            class="side-character character-left"
+            src="./assets/left1.png"
+            alt="Athlete building a healthier routine"
+          />
+          <img
+            class="side-character character-right"
+            src="./assets/right.png"
+            alt="Person checking their phone"
+          />
+          <div class="state-pill float-card">
+            <span class="status-dot"></span> Your Current State
+          </div>
+          <div class="habit-card habit-good float-card">
+            <b>↗</b><span>Sleep</span><strong>8h+</strong><b>↗</b
+            ><span>Workout</span><strong>4x/week</strong><b>↗</b
+            ><span>Productivity</span><strong>90%</strong><b>↘</b
+            ><span>Screen Time</span><strong>↓ 1h</strong>
+          </div>
+          <div class="habit-card habit-low float-card">
+            <b class="down">↓</b><span>Sleep</span><strong>5h</strong
+            ><b class="down">↓</b><span>Workout</span><strong>0x/week</strong
+            ><b class="down">↓</b><span>Productivity</span><strong>45%</strong
+            ><b class="down">↑</b><span>Screen Time</span><strong>↑ 4h</strong>
+          </div>
+          <div class="score-pill float-card">
+            <span class="score-ring">◌</span
+            ><span>Overall Score<strong>72%</strong></span>
+          </div>
+          <div class="orbit orbit-a"></div>
+          <div class="orbit orbit-b"></div>
+        </div>
+
+        <div class="mini-note float-card">
+          <span class="spark">✦</span><strong>With Better Habits</strong>
+        </div>
+        <div class="mini-note note-low float-card">
+          <span class="minus">⊖</span><strong>Same Habits</strong>
+        </div>
+        <div class="bottom-stats float-card">
+          <span>● <b>12</b><small>Habits</small></span
+          ><span>▮ <b>7-Day</b><small>Streak</small></span
+          ><span class="trophy">🏆 <b>89%</b><small>Success</small></span>
+        </div>
+        <div class="bot float-card">
+          <div class="bot-head"><i></i><i></i></div>
+          <div class="bot-body">⌁</div>
+          <span class="bot-hand">⌁</span>
+        </div>
+        <div class="bot-note float-card">
+          See the difference.<br />Choose your path. <span>✦</span>
+        </div>
+        <div class="edge-orbit edge-left"></div>
+        <div class="edge-orbit edge-right"></div>
+      </section>
+      <footer class="mobile-stats">
+        <span>12 habits</span><span>7-day streak</span><span>89% success</span>
+      </footer>
+    </main>
+    <script type="module" src="./js/script.js"></script>
+  </body>
+</html>
