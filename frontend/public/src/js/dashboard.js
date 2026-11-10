@@ -1,11 +1,19 @@
+const accountButton = document.querySelector("#accountButton");
+const logoutButton = document.querySelector("#logoutButton");
+const avatarInitial = document.querySelector("#avatarInitial");
+const welcomeLabel = document.querySelector("#welcomeLabel");
+const completedCategories = document.querySelector("#completedCategories");
+
+let statusReady = false;
+
 async function loadDashboard() {
-  const heading = document.querySelector("#welcomeHeading");
+  accountButton.disabled = true;
 
   try {
     const response = await fetch("/api/users/status", {
       credentials: "same-origin",
     });
-    if (!response.ok) throw new Error("Could not check the account session");
+    if (!response.ok) throw new Error("Could not check account status");
 
     const { authenticated, user } = await response.json();
     if (!authenticated || !user) {
@@ -14,14 +22,26 @@ async function loadDashboard() {
     }
 
     document.body.dataset.userId = user.id;
-    heading.textContent = `Welcome, ${user.username}.`;
+    welcomeLabel.textContent = `WELCOME BACK, ${user.username.toUpperCase()}`;
+    avatarInitial.textContent = user.username.charAt(0).toUpperCase();
+    accountButton.setAttribute("aria-label", `Account for ${user.username}`);
+    loadCategoryStatus();
   } catch (error) {
     console.error(error);
-    heading.textContent = "Could not load your account.";
+    welcomeLabel.textContent = "YOUR PERSONAL DASHBOARD";
+  } finally {
+    statusReady = true;
+    accountButton.disabled = false;
   }
 }
 
-document.querySelector("#logoutButton").addEventListener("click", async () => {
+accountButton.addEventListener("click", () => {
+  if (!statusReady) return;
+  logoutButton.hidden = !logoutButton.hidden;
+  accountButton.setAttribute("aria-expanded", String(!logoutButton.hidden));
+});
+
+logoutButton.addEventListener("click", async () => {
   try {
     const response = await fetch("/api/users/logout", {
       method: "POST",
@@ -31,8 +51,45 @@ document.querySelector("#logoutButton").addEventListener("click", async () => {
     window.location.replace("/");
   } catch (error) {
     console.error(error);
-    document.querySelector("#logoutButton").textContent = "Try logging out again";
+    logoutButton.textContent = "Try logging out again";
+  }
+});
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".account-control")) {
+    logoutButton.hidden = true;
+    accountButton.setAttribute("aria-expanded", "false");
   }
 });
 
 loadDashboard();
+
+async function loadCategoryStatus() {
+  try {
+    const response = await fetch("/api/categories", { credentials: "same-origin" });
+    if (!response.ok) return;
+    const { categories } = await response.json();
+    const completed = categories.filter((category) => category.completed).length;
+    completedCategories.textContent = `${completed}/4`;
+  } catch (error) {
+    console.error("Could not load category completion:", error);
+  }
+}
+
+function openCategoryForm(tile) {
+  const categoryId = tile.dataset.categoryId;
+  if (!categoryId) return;
+  localStorage.setItem("selectedCategoryId", categoryId);
+  localStorage.setItem("selectedCategoryFieldId", tile.id || categoryId);
+  window.location.href = "/forms.html";
+}
+
+document.querySelectorAll("[data-category-id]").forEach((tile) => {
+  tile.addEventListener("click", () => openCategoryForm(tile));
+  tile.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openCategoryForm(tile);
+    }
+  });
+});

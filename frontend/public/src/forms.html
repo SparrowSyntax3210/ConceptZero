@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f7fb" />
+    <title>Your Growth Profile — STACKED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/forms.css" />
+  </head>
+  <body>
+    <header class="form-topbar">
+      <a class="form-brand" href="/">STACKED</a>
+      <a class="back-link" href="/dashboard.html">← Back to dashboard</a>
+    </header>
+
+    <main class="form-layout">
+      <aside class="form-sidebar">
+        <span class="overline">YOUR PROFILE</span>
+        <h1>Build your baseline.</h1>
+        <p>Choose an area, share what feels relevant, and update it whenever life changes.</p>
+        <nav class="category-list" aria-label="Profile categories">
+          <button type="button" data-category-select="health-fitness"><span>01</span>Health & Fitness<i></i></button>
+          <button type="button" data-category-select="mind-digital"><span>02</span>Mind & Digital Wellbeing<i></i></button>
+          <button type="button" data-category-select="academics-career"><span>03</span>Academics & Career Growth<i></i></button>
+          <button type="button" data-category-select="lifestyle-growth"><span>04</span>Lifestyle & Personal Growth<i></i></button>
+        </nav>
+        <div class="privacy-note"><span>◈</span><p>Your answers are saved privately to your account.</p></div>
+      </aside>
+
+      <section class="form-panel">
+        <div class="form-panel-heading">
+          <span class="overline" id="categoryEyebrow">CATEGORY 01</span>
+          <h2 id="categoryTitle">Health & Fitness</h2>
+          <p>Fields are optional unless marked required. Your satisfaction rating is required for this section.</p>
+        </div>
+
+        <form class="category-form" data-category-form="health-fitness" hidden>
+          <div class="form-section-title">Your health and routine</div>
+          <div class="form-grid">
+            <label>Age<input id="hf-age" type="number" min="13" max="120" data-path="age" placeholder="e.g. 21" /></label>
+            <label>Height (cm)<input id="hf-height" type="number" min="80" max="250" step="0.1" data-path="heightCm" placeholder="e.g. 172" /></label>
+            <label>Current weight (kg)<input id="hf-current-weight" type="number" min="20" max="500" step="0.1" data-path="currentWeightKg" placeholder="e.g. 68" /></label>
+            <label>Target weight (kg)<input id="hf-target-weight" type="number" min="20" max="500" step="0.1" data-path="targetWeightKg" placeholder="Optional" /></label>
+            <label class="span-two">Fitness goal<select id="hf-goal" data-path="fitnessGoal"><option value="">Choose a goal</option><option value="weight_loss">Weight loss</option><option value="muscle_building">Muscle building</option><option value="general_fitness">General fitness</option><option value="stay_healthy">Staying healthy</option></select></label>
+            <label>Daily steps<input id="hf-steps" type="number" min="0" max="100000" data-path="physicalActivity.dailySteps" placeholder="e.g. 6500" /></label>
+            <label>Workouts per week<input id="hf-workouts" type="number" min="0" max="14" data-path="physicalActivity.workoutsPerWeek" placeholder="e.g. 3" /></label>
+            <label>Average workout (minutes)<input id="hf-workout-duration" type="number" min="0" max="600" data-path="physicalActivity.averageWorkoutMinutes" placeholder="e.g. 45" /></label>
+            <label>Average sleep (hours)<input id="hf-sleep" type="number" min="0" max="24" step="0.25" data-path="sleepRoutine.averageSleepHours" placeholder="e.g. 7.5" /></label>
+            <label>Usual bedtime<input id="hf-bedtime" type="time" data-path="sleepRoutine.bedtime" /></label>
+            <label>Usual wake-up time<input id="hf-waketime" type="time" data-path="sleepRoutine.wakeTime" /></label>
+            <label>Meals per day<input id="hf-meals" type="number" min="0" max="10" data-path="eatingHabits.mealsPerDay" placeholder="e.g. 3" /></label>
+            <label>Breakfast days per week<input id="hf-breakfast" type="number" min="0" max="7" data-path="eatingHabits.breakfastDaysPerWeek" placeholder="0–7" /></label>
+            <label>Junk/outside meals per week<input id="hf-junk" type="number" min="0" max="21" data-path="eatingHabits.junkOrOutsideMealsPerWeek" placeholder="e.g. 3" /></label>
+            <label>Water per day (ml)<input id="hf-water" type="number" min="0" max="10000" data-path="nutritionHydration.waterMlPerDay" placeholder="e.g. 2000" /></label>
+            <label>Fruit/vegetable servings per day<input id="hf-produce" type="number" min="0" max="30" data-path="nutritionHydration.fruitVegetableServingsPerDay" placeholder="e.g. 4" /></label>
+            <label>Dietary preference<select id="hf-diet" data-path="nutritionHydration.dietaryPreference"><option value="">Choose if relevant</option><option value="none">No preference</option><option value="vegetarian">Vegetarian</option><option value="vegan">Vegan</option><option value="pescatarian">Pescatarian</option><option value="other">Other</option></select></label>
+            <label>Fitness consistency (1–10)<input id="hf-consistency" type="number" min="1" max="10" data-path="fitnessConsistencyRating" placeholder="1–10" /></label>
+          </div>
+          <label class="satisfaction-field">How satisfied are you with this area of your life currently?<select id="hf-satisfaction" data-path="satisfaction" data-value-type="number" required><option value="">Choose a rating</option><option value="1">1 — Not satisfied</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10 — Very satisfied</option></select></label>
+          <div class="form-actions"><span class="save-message" aria-live="polite"></span><button class="save-button" type="submit">Save Health & Fitness <span>→</span></button></div>
+        </form>
+
+        <form class="category-form" data-category-form="mind-digital" hidden>
+          <div class="form-section-title">Your digital habits and wellbeing</div>
+          <div class="form-grid">
+            <label>Total daily screen time (minutes)<input id="md-screen" type="number" min="0" max="1440" data-path="screenTimeMinutesPerDay" placeholder="e.g. 360" /></label>
+            <label>Social media (minutes/day)<input id="md-social" type="number" min="0" max="1440" data-path="digitalUsage.socialMediaMinutesPerDay" placeholder="e.g. 90" /></label>
+            <label>YouTube/OTT (minutes/day)<input id="md-video" type="number" min="0" max="1440" data-path="digitalUsage.youtubeOttMinutesPerDay" placeholder="e.g. 60" /></label>
+            <label>Gaming (minutes/day)<input id="md-gaming" type="number" min="0" max="1440" data-path="digitalUsage.gamingMinutesPerDay" placeholder="e.g. 30" /></label>
+            <label>Most distracting app<input id="md-app" type="text" maxlength="100" data-path="digitalDistractions.mostDistractingApp" placeholder="e.g. Instagram" /></label>
+            <label>Phone before sleep (nights/week)<input id="md-before-sleep" type="number" min="0" max="7" data-path="digitalDistractions.phoneBeforeSleepNightsPerWeek" placeholder="0–7" /></label>
+            <label>Phone after waking (days/week)<input id="md-after-wake" type="number" min="0" max="7" data-path="digitalDistractions.phoneAfterWakeNightsPerWeek" placeholder="0–7" /></label>
+            <label>Mood (1–10)<input id="md-mood" type="number" min="1" max="10" data-path="moodMentalEnergy.averageMoodRating" placeholder="1–10" /></label>
+            <label>Mental energy (1–10)<input id="md-energy" type="number" min="1" max="10" data-path="moodMentalEnergy.mentalEnergyRating" placeholder="1–10" /></label>
+            <label>Stress (1–10)<input id="md-stress" type="number" min="1" max="10" data-path="stress.rating" placeholder="1–10" /></label>
+            <label>Major stress source<input id="md-stress-source" type="text" maxlength="500" data-path="stress.majorSource" placeholder="Optional" /></label>
+            <label>Motivation (1–10)<input id="md-motivation" type="number" min="1" max="10" data-path="motivationFocus.motivationRating" placeholder="1–10" /></label>
+            <label>Managing distractions (1–10)<input id="md-distraction" type="number" min="1" max="10" data-path="motivationFocus.distractionManagementRating" placeholder="1–10" /></label>
+            <label>Relaxation sessions per week<input id="md-relaxation" type="number" min="0" max="21" data-path="relaxationSessionsPerWeek" placeholder="e.g. 3" /></label>
+          </div>
+          <label class="satisfaction-field">How satisfied are you with this area of your life currently?<select id="md-satisfaction" data-path="satisfaction" data-value-type="number" required><option value="">Choose a rating</option><option value="1">1 — Not satisfied</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10 — Very satisfied</option></select></label>
+          <div class="form-actions"><span class="save-message" aria-live="polite"></span><button class="save-button" type="submit">Save Mind & Digital <span>→</span></button></div>
+        </form>
+
+        <form class="category-form" data-category-form="academics-career" hidden>
+          <div class="form-section-title">Your learning and career direction</div>
+          <div class="form-grid">
+            <label>Course<input id="ac-course" type="text" maxlength="150" data-path="academicProfile.course" placeholder="e.g. Computer Science" /></label>
+            <label>Year<input id="ac-year" type="number" min="1" max="20" data-path="academicProfile.year" placeholder="e.g. 2" /></label>
+            <label>Semester<input id="ac-semester" type="number" min="1" max="40" data-path="academicProfile.semester" placeholder="e.g. 4" /></label>
+            <label>Current grade value<input id="ac-grade" type="number" min="0" step="0.01" data-path="academicProfile.currentGradeValue" placeholder="e.g. 8.2" /></label>
+            <label>Current grade scale<select id="ac-grade-scale" data-path="academicProfile.currentGradeScale" data-value-type="number"><option value="">Choose scale</option><option value="4">4.0 GPA</option><option value="10">10-point CGPA</option><option value="100">Percentage</option></select></label>
+            <label>Target grade value<input id="ac-target-grade" type="number" min="0" step="0.01" data-path="academicGoals.targetGradeValue" placeholder="e.g. 9.0" /></label>
+            <label>Target grade scale<select id="ac-target-scale" data-path="academicGoals.targetGradeScale" data-value-type="number"><option value="">Choose scale</option><option value="4">4.0 GPA</option><option value="10">10-point CGPA</option><option value="100">Percentage</option></select></label>
+            <label>Daily study hours<input id="ac-study" type="number" min="0" max="24" step="0.25" data-path="studyRoutine.dailyStudyHours" placeholder="e.g. 3" /></label>
+            <label>Attendance (%)<input id="ac-attendance" type="number" min="0" max="100" data-path="studyRoutine.attendancePct" placeholder="0–100" /></label>
+            <label>Assignments on time (%)<input id="ac-assignments" type="number" min="0" max="100" data-path="studyRoutine.assignmentOnTimePct" placeholder="0–100" /></label>
+            <label>Desired role<input id="ac-role" type="text" maxlength="150" data-path="careerObjective.desiredRole" placeholder="e.g. Software Engineer" /></label>
+            <label>Industry<input id="ac-industry" type="text" maxlength="150" data-path="careerObjective.industry" placeholder="e.g. AI and software" /></label>
+            <label class="span-two">Academic goals (comma separated)<textarea id="ac-goals" rows="2" data-path="academicGoals.goals" data-value-type="string-list" placeholder="e.g. Improve CGPA, finish semester project"></textarea></label>
+            <label class="span-two">Target companies (comma separated)<textarea id="ac-companies" rows="2" data-path="careerObjective.targetCompanies" data-value-type="string-list" placeholder="e.g. Google, Microsoft"></textarea></label>
+            <label class="span-two">Skills being learned (one per line: skill | level 1–5)<textarea id="ac-skills" rows="3" data-path="technicalSkills" data-value-type="skills" placeholder="JavaScript | 3&#10;Python | 2"></textarea></label>
+            <label class="span-two">Projects, hackathons, internships, certifications (one per line: type | title | date)<textarea id="ac-experience" rows="3" data-path="practicalExperience" data-value-type="experiences" placeholder="project | Habit tracker | 2026-10-20&#10;hackathon | Campus build | 2026-11-01"></textarea></label>
+            <label>DSA practice days/week<input id="ac-dsa-days" type="number" min="0" max="7" data-path="careerPreparation.dsaPracticeDaysPerWeek" placeholder="0–7" /></label>
+            <label>Problems solved/week<input id="ac-problems" type="number" min="0" max="1000" data-path="careerPreparation.problemsSolvedPerWeek" placeholder="e.g. 5" /></label>
+            <label>Career prep consistency (1–10)<input id="ac-consistency" type="number" min="1" max="10" data-path="careerPreparation.consistencyRating" placeholder="1–10" /></label>
+          </div>
+          <label class="satisfaction-field">How satisfied are you with this area of your life currently?<select id="ac-satisfaction" data-path="satisfaction" data-value-type="number" required><option value="">Choose a rating</option><option value="1">1 — Not satisfied</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10 — Very satisfied</option></select></label>
+          <div class="form-actions"><span class="save-message" aria-live="polite"></span><button class="save-button" type="submit">Save Academics & Career <span>→</span></button></div>
+        </form>
+
+        <form class="category-form" data-category-form="lifestyle-growth" hidden>
+          <div class="form-section-title">Your routines and personal goals</div>
+          <div class="form-grid">
+            <label>Most productive time<select id="lg-productive" data-path="dailyRoutine.mostProductiveTime"><option value="">Choose a time</option><option value="early_morning">Early morning</option><option value="morning">Morning</option><option value="afternoon">Afternoon</option><option value="evening">Evening</option><option value="night">Night</option><option value="varies">It varies</option></select></label>
+            <label>Free time per day (minutes)<input id="lg-free-time" type="number" min="0" max="1440" data-path="timeManagement.freeMinutesPerDay" placeholder="e.g. 180" /></label>
+            <label>Procrastination days/week<input id="lg-procrastination" type="number" min="0" max="7" data-path="timeManagement.procrastinationDaysPerWeek" placeholder="0–7" /></label>
+            <label>Days you plan/week<input id="lg-planning" type="number" min="0" max="7" data-path="timeManagement.planningDaysPerWeek" placeholder="0–7" /></label>
+            <label>Routine consistency (1–10)<input id="lg-routine" type="number" min="1" max="10" data-path="personalHabits.routineConsistency" placeholder="1–10" /></label>
+            <label>Self-discipline (1–10)<input id="lg-discipline" type="number" min="1" max="10" data-path="personalHabits.selfDiscipline" placeholder="1–10" /></label>
+            <label>Confidence (1–10)<input id="lg-confidence" type="number" min="1" max="10" data-path="personalHabits.confidence" placeholder="1–10" /></label>
+            <label>Monthly allowance (optional)<input id="lg-allowance" type="number" min="0" data-path="financialHabits.monthlyAllowance" placeholder="Amount" /></label>
+            <label>Monthly income (optional)<input id="lg-income" type="number" min="0" data-path="financialHabits.monthlyIncome" placeholder="Amount" /></label>
+            <label>Monthly savings (optional)<input id="lg-savings" type="number" min="0" data-path="financialHabits.monthlySavings" placeholder="Amount" /></label>
+            <label>Monthly spending (optional)<input id="lg-spending" type="number" min="0" data-path="financialHabits.monthlySpending" placeholder="Amount" /></label>
+            <label>Currency code<input id="lg-currency" type="text" maxlength="3" data-path="financialHabits.currencyCode" placeholder="INR" /></label>
+            <label>Time with friends/family (hours/week)<input id="lg-social-hours" type="number" min="0" max="168" step="0.5" data-path="socialLife.timeWithFriendsFamilyHoursPerWeek" placeholder="e.g. 8" /></label>
+            <label>Social satisfaction (1–10)<input id="lg-social-rating" type="number" min="1" max="10" data-path="socialLife.socialSatisfaction" placeholder="1–10" /></label>
+            <label class="span-two">Short-term goals (one per line: title | target date | progress %)<textarea id="lg-short-goals" rows="3" data-path="personalGoals.shortTerm" data-value-type="goals" placeholder="Finish portfolio | 2026-12-15 | 20"></textarea></label>
+            <label class="span-two">Long-term goals (one per line: title | target date | progress %)<textarea id="lg-long-goals" rows="3" data-path="personalGoals.longTerm" data-value-type="goals" placeholder="Get first internship | 2027-06-01 | 0"></textarea></label>
+            <label>Habits to build (comma separated)<textarea id="lg-build" rows="2" data-path="selfImprovement.habitsToBuild" data-value-type="string-list" placeholder="Read daily, exercise"></textarea></label>
+            <label>Habits to eliminate (comma separated)<textarea id="lg-eliminate" rows="2" data-path="selfImprovement.habitsToEliminate" data-value-type="string-list" placeholder="Late scrolling"></textarea></label>
+            <label>Improvement time available (minutes/week)<input id="lg-improvement-time" type="number" min="0" max="10080" data-path="selfImprovement.availableMinutesPerWeek" placeholder="e.g. 300" /></label>
+          </div>
+          <label class="satisfaction-field">How satisfied are you with this area of your life currently?<select id="lg-satisfaction" data-path="satisfaction" data-value-type="number" required><option value="">Choose a rating</option><option value="1">1 — Not satisfied</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10 — Very satisfied</option></select></label>
+          <div class="form-actions"><span class="save-message" aria-live="polite"></span><button class="save-button" type="submit">Save Lifestyle & Growth <span>→</span></button></div>
+        </form>
+      </section>
+    </main>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./js/forms.js"></script>
+  </body>
+</html>
