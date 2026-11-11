@@ -10,6 +10,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/profile", require("./routes/Profile.routes"));
 app.use("/api/categories", require("./routes/category.routes"));
 app.use("/api/analysis", require("./routes/analysis.routes"));
+app.use("/api/goals", require("./routes/goal.routes"));
 
 app.get("/test", (req, res) => {
   res.send("Hello World");

@@ -22,7 +22,7 @@ async function createChatCompletion({ messages, responseFormat, temperature = 0.
         model,
         messages,
         temperature,
-        max_tokens: 800,
+        max_tokens: 1600,
         response_format: responseFormat,
       }),
       signal: AbortSignal.timeout(45000),

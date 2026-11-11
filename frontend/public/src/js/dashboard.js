@@ -3,6 +3,9 @@ const logoutButton = document.querySelector("#logoutButton");
 const avatarInitial = document.querySelector("#avatarInitial");
 const welcomeLabel = document.querySelector("#welcomeLabel");
 const completedCategories = document.querySelector("#completedCategories");
+const goalCountElement = document.querySelector("#heroGoalCount");
+const todayCountElement = document.querySelector("#heroTodayCount");
+const streakElement = document.querySelector("#heroStreak");
 
 let statusReady = false;
 
@@ -26,6 +29,7 @@ async function loadDashboard() {
     avatarInitial.textContent = user.username.charAt(0).toUpperCase();
     accountButton.setAttribute("aria-label", `Account for ${user.username}`);
     loadCategoryStatus();
+    loadGoalSnapshot();
   } catch (error) {
     console.error(error);
     welcomeLabel.textContent = "YOUR PERSONAL DASHBOARD";
@@ -73,6 +77,35 @@ async function loadCategoryStatus() {
     completedCategories.textContent = `${completed}/4`;
   } catch (error) {
     console.error("Could not load category completion:", error);
+  }
+}
+
+function localDateKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+async function loadGoalSnapshot() {
+  try {
+    const response = await fetch("/api/goals?includeArchived=true", { credentials: "same-origin" });
+    if (!response.ok) return;
+    const { goals = [] } = await response.json();
+    const active = goals.filter((goal) => goal.active);
+    const today = localDateKey(new Date());
+    const completeToday = active.filter((goal) => goal.logs?.some((entry) => entry.date === today && entry.completed)).length;
+    goalCountElement.textContent = `${active.length} active`;
+    todayCountElement.textContent = `${completeToday} completed`;
+
+    const completedDates = new Set(active.flatMap((goal) => (goal.logs || []).filter((entry) => entry.completed).map((entry) => entry.date)));
+    const cursor = new Date(); cursor.setHours(0, 0, 0, 0);
+    if (!completedDates.has(localDateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+    let streak = 0;
+    while (completedDates.has(localDateKey(cursor))) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    streakElement.textContent = `${streak} ${streak === 1 ? "day" : "days"} streak`;
+  } catch (error) {
+    console.error("Could not load goal summary:", error);
   }
 }
 

@@ -3,86 +3,87 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f7f7fb" />
-    <title>Dashboard — STACKED</title>
+    <meta name="theme-color" content="#f5f6fb" />
+    <meta name="description" content="Build better habits with STACKED. Track your goals and see your growth across health, wellbeing, learning, and lifestyle." />
+    <title>STACKED — Build Better Habits</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./css/dashboard.css" />
     <link rel="stylesheet" href="./css/dashboard-cards.css" />
+    <link rel="stylesheet" href="./css/dashboard-home.css" />
+    <link rel="stylesheet" href="./css/hero-3d.css" />
   </head>
   <body>
     <div class="dashboard-shell">
       <header class="dashboard-nav">
-        <a class="dashboard-brand" href="/" aria-label="STACKED home">
-          <span class="brand-mark"><i></i><i></i><i></i></span>STACKED
-        </a>
-        <nav aria-label="Dashboard navigation">
-          <a class="active" href="#tracker">Tracker</a>
-          <a href="#insights">Insights</a>
-          <a href="#goals">Goals</a>
-          <a href="#profile">Profile</a>
+        <a class="dashboard-brand" href="/dashboard.html" aria-label="STACKED home"><span class="brand-mark"><i></i><i></i><i></i></span>STACKED</a>
+        <nav aria-label="Main navigation">
+          <a class="active" href="/tracker.html" aria-current="page">Tracker</a><a href="/analysis.html">Insights</a><a href="/goals.html">Goals</a><a href="/profile.html">Profile</a>
         </nav>
         <div class="account-control">
-          <button class="avatar" id="accountButton" type="button" aria-label="Open account menu" aria-expanded="false">
-            <span id="avatarInitial">●</span>
-          </button>
+          <button class="avatar" id="accountButton" type="button" aria-label="Open account menu" aria-expanded="false"><span id="avatarInitial">●</span></button>
           <button class="logout-button" id="logoutButton" type="button" hidden>Log out</button>
         </div>
       </header>
 
       <main>
-        <section class="dashboard-hero" id="tracker">
+        <section class="dashboard-hero" id="home">
           <div class="hero-wordmark" aria-hidden="true">STACKED</div>
+          <div class="hero-contour contour-one" aria-hidden="true"></div><div class="hero-contour contour-two" aria-hidden="true"></div>
           <div class="welcome-copy">
-            <div class="eyebrow"><span class="status-dot"></span><span id="welcomeLabel">YOUR PERSONAL DASHBOARD</span></div>
+            <div class="eyebrow"><span class="status-dot"></span><span id="welcomeLabel">YOUR PERSONAL GROWTH SPACE</span></div>
             <h1>Build Better<br />Habits.<br /><em>Stack</em> Your<br />Life.</h1>
-            <p>Small, consistent steps add up. Track the routines that matter and see your progress take shape.</p>
-            <a class="primary-cta" href="#habit-panels">Explore your habits <span>→</span></a>
+            <p>One clear view of your health, focus, learning, and everyday growth. Turn what matters into small steps you can track.</p>
+            <a class="primary-cta" href="/tracker.html">Start Tracking <span>→</span></a>
+            <a class="hero-secondary" href="/forms.html">Set up your profile <span>↗</span></a>
           </div>
 
-          <div class="character-stage" aria-label="Your habit journey">
-            <div class="stage-glow"></div>
-            <img class="dashboard-character" src="./assets/dashboard.png" alt="Your digital self, ready to build better habits" />
-            <article class="habit-tile tile-sleep" data-category-id="health-fitness" role="button" tabindex="0" aria-label="Open Health and Fitness form">
-              <span class="tile-icon">☾</span><span class="tile-label">HEALTH & FITNESS</span>
-              <strong>Move with purpose.</strong><small>Sleep, activity, and nutrition</small><span class="tile-arrow">↗</span>
-            </article>
-            <article class="habit-tile tile-activity" data-category-id="mind-digital" role="button" tabindex="0" aria-label="Open Mind and Digital Wellbeing form">
-              <span class="tile-icon">◉</span><span class="tile-label">MIND & DIGITAL</span>
-              <strong>Find your balance.</strong><small>Mood, focus, and screen use</small><span class="tile-arrow">↗</span>
-            </article>
-            <article class="habit-tile tile-focus" data-category-id="academics-career" role="button" tabindex="0" aria-label="Open Academics and Career Growth form">
-              <span class="tile-icon">▤</span><span class="tile-label">ACADEMICS & CAREER</span>
-              <strong>Keep growing.</strong><small>Study, skills, and career goals</small><span class="tile-arrow">↗</span>
-            </article>
-            <article class="habit-tile tile-screen" data-category-id="lifestyle-growth" role="button" tabindex="0" aria-label="Open Lifestyle and Personal Growth form">
-              <span class="tile-icon">✦</span><span class="tile-label">LIFESTYLE & GROWTH</span>
-              <strong>Build your routine.</strong><small>Goals, time, and personal habits</small><span class="tile-arrow">↗</span>
-            </article>
-            <span class="sparkle sparkle-one">✦</span><span class="sparkle sparkle-two">✦</span>
-            <div class="stage-orbit"></div>
+          <div class="character-stage" aria-label="A visual of your growth journey">
+            <div class="stage-glow"></div><div class="stage-orbit orbit-a"></div><div class="stage-orbit orbit-b"></div>
+            <div class="platform platform-left"><i></i></div><div class="platform platform-center"><i></i></div><div class="platform platform-right"><i></i></div>
+            <img class="hero-person person-left" src="./assets/left1.png" alt="Active STACKED member standing confidently" />
+            <canvas class="hero-model-canvas" id="heroModelCanvas" aria-label="3D STACKED member in a confident relaxed pose"></canvas>
+            <img class="hero-person person-center" src="./assets/dashboard.png" alt="STACKED member standing with arms crossed in a confident professional pose" />
+            <img class="hero-person person-right" src="./assets/right.png" alt="STACKED member reflecting on his digital habits" />
+            <div class="current-state-pill"><span class="status-dot"></span><span>YOUR CURRENT STATE</span><strong id="completedCategories">0/4</strong></div>
+
+            <a class="hero-insight-card insight-left" href="/forms.html" data-category-id="health-fitness">
+              <span class="insight-symbol">✣</span><span class="insight-copy"><small>HEALTH & FITNESS</small><strong>Move with purpose.</strong><em>Sleep, activity, nutrition</em></span><span class="insight-arrow">↗</span>
+            </a>
+            <a class="hero-insight-card insight-top" href="/forms.html" data-category-id="mind-digital">
+              <span class="insight-symbol">◉</span><span class="insight-copy"><small>MIND & DIGITAL</small><strong>Find your balance.</strong><em>Focus and screen habits</em></span><span class="insight-arrow">↗</span>
+            </a>
+            <a class="hero-insight-card insight-bottom" href="/forms.html" data-category-id="academics-career">
+              <span class="insight-symbol">▤</span><span class="insight-copy"><small>ACADEMICS & CAREER</small><strong>Keep growing.</strong><em>Study, skills, next steps</em></span><span class="insight-arrow">↗</span>
+            </a>
+            <a class="hero-insight-card insight-right" href="/forms.html" data-category-id="lifestyle-growth">
+              <span class="insight-symbol">✦</span><span class="insight-copy"><small>LIFESTYLE & GROWTH</small><strong>Shape your routine.</strong><em>Time and personal goals</em></span><span class="insight-arrow">↗</span>
+            </a>
+
+            <div class="hero-score-card"><span class="score-check">✦</span><span><small>YOUR GOALS</small><strong id="heroGoalCount">0 active</strong></span><span class="score-divider"></span><span><small>DAILY CHECK-INS</small><strong id="heroTodayCount">0 completed</strong></span></div>
+            <span class="hero-spark sparkle-one" aria-hidden="true">✦</span><span class="hero-spark sparkle-two" aria-hidden="true">✧</span>
           </div>
 
-          <div class="robot" aria-hidden="true"><div class="robot-face"><i></i><i></i></div><div class="robot-body">⌁</div></div>
-          <div class="encouragement"><strong>Small steps.</strong><br />Big changes. <span>✦</span></div>
-          <div class="progress-strip" id="habit-panels">
-            <div class="progress-item"><span class="progress-icon">◉</span><span><strong id="completedCategories">0/4</strong><small>Areas completed</small></span></div>
-            <div class="progress-divider"></div>
-            <div class="progress-item"><span class="progress-icon bars">▮</span><span><strong>Today</strong><small>Start your check-in</small></span></div>
-            <div class="progress-divider"></div>
-            <div class="progress-item"><span class="progress-icon trophy">✦</span><span><strong>One step</strong><small>Build your streak</small></span></div>
-          </div>
+          <div class="hero-footnote"><span class="footnote-icon">✦</span><span><strong>Small steps.</strong><br />Big changes.</span></div>
+          <a class="hero-progress" href="/tracker.html"><span class="progress-trophy">↗</span><span><strong id="heroStreak">0 day streak</strong><small>Pick up where you left off</small></span><i>→</i></a>
         </section>
 
-        <section class="below-fold" id="insights">
-          <div><span class="section-kicker">YOUR BASELINE</span><h2>Progress starts with a check-in.</h2></div>
-          <p>Complete your four growth areas to create your personal baseline. As you add daily entries, your dashboard can reveal trends and meaningful changes over time.</p>
-          <div class="goal-note" id="goals"><strong>Choose one goal to begin.</strong><span>Health, digital wellbeing, academics, or personal growth — start with the area that matters most to you.</span></div>
-          <a href="#profile" class="setup-link" id="profile">Set up your profile <span>→</span></a>
+        <section class="home-overview" aria-labelledby="overviewTitle">
+          <div class="overview-heading"><div><span class="section-kicker">A LITTLE MORE CLARITY</span><h2 id="overviewTitle">Your life, in four focus areas.</h2></div><p>Start with a snapshot. Keep showing up. Let your progress tell the story.</p></div>
+          <div class="overview-grid">
+            <a href="/tracker.html" class="overview-card"><span class="overview-icon">⌁</span><small>01 · TRACKER</small><h3>Make today count.</h3><p>Check in on the goals you set and see your consistency build, one day at a time.</p><span class="overview-link">Open tracker →</span></a>
+            <a href="/analysis.html" class="overview-card"><span class="overview-icon">◌</span><small>02 · INSIGHTS</small><h3>See the bigger picture.</h3><p>Understand your current habits and get practical targets for the areas you choose.</p><span class="overview-link">Explore insights →</span></a>
+            <a href="/goals.html" class="overview-card"><span class="overview-icon">✦</span><small>03 · GOALS</small><h3>Turn plans into action.</h3><p>Save measurable targets and make them part of your daily or weekly routine.</p><span class="overview-link">View goals →</span></a>
+            <a href="/forms.html" class="overview-card"><span class="overview-icon">◎</span><small>04 · PROFILE</small><h3>Start with your story.</h3><p>Share as much as you’re comfortable with across health, wellbeing, learning, and lifestyle.</p><span class="overview-link">Edit profile →</span></a>
+          </div>
         </section>
       </main>
     </div>
+    <script type="importmap">
+      {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+    </script>
     <script src="./js/dashboard.js"></script>
+    <script type="module" src="./js/hero-model.js"></script>
   </body>
 </html>

@@ -11,6 +11,7 @@ const categoryButtons = [...document.querySelectorAll("[data-category-select]")]
 const categoryTitle = document.querySelector("#categoryTitle");
 const categoryEyebrow = document.querySelector("#categoryEyebrow");
 const toast = document.querySelector("#toast");
+const analysisOverlay = document.querySelector("#analysisOverlay");
 let activeCategoryId = null;
 let toastTimer;
 
@@ -41,11 +42,20 @@ function parseArrayField(type, rawValue) {
   }
   if (type === "experiences") {
     return lines.map((line) => {
-      const [experienceType, title, completedAt] = line.split("|").map((part) => part.trim());
+      const parts = line.split("|").map((part) => part.trim()).filter(Boolean);
+      const acceptedTypes = new Set(["project", "hackathon", "internship", "certification", "other"]);
+      const first = (parts[0] || "").toLowerCase();
+      const hasType = acceptedTypes.has(first);
+      const experienceType = hasType ? first : "other";
+      const trailingDate = /^\d{4}-\d{2}-\d{2}$/.test(parts.at(-1) || "");
+      const titleParts = hasType ? parts.slice(1, 2) : (trailingDate ? parts.slice(0, -1) : parts);
+      const title = titleParts.join(" | ");
+      const possibleDate = hasType ? parts[2] : trailingDate ? parts.at(-1) : null;
+      const completedAt = /^\d{4}-\d{2}-\d{2}$/.test(possibleDate || "") ? possibleDate : null;
       return {
         type: experienceType,
         title,
-        ...(completedAt ? { completedAt } : {}),
+        ...(title && completedAt ? { completedAt } : {}),
       };
     }).filter((item) => item.type && item.title);
   }
@@ -66,7 +76,7 @@ function serializeArrayField(type, value) {
   if (!Array.isArray(value)) return "";
   if (type === "string-list") return value.join(", ");
   if (type === "skills") return value.map((item) => `${item.name}${item.level ? ` | ${item.level}` : ""}`).join("\n");
-  if (type === "experiences") return value.map((item) => `${item.type} | ${item.title}${item.completedAt ? ` | ${String(item.completedAt).slice(0, 10)}` : ""}`).join("\n");
+  if (type === "experiences") return value.map((item) => `${item.type === "other" ? item.title : `${item.type} | ${item.title}`}${item.completedAt ? ` | ${String(item.completedAt).slice(0, 10)}` : ""}`).join("\n");
   if (type === "goals") return value.map((item) => `${item.title}${item.targetDate ? ` | ${String(item.targetDate).slice(0, 10)}` : ""}${item.progressPct != null ? ` | ${item.progressPct}` : ""}`).join("\n");
   return "";
 }
@@ -108,6 +118,28 @@ function showToast(message, isError = false) {
   toast.classList.toggle("error", isError);
   toast.classList.add("show");
   toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+}
+
+async function analyzeWhenComplete(categoryId) {
+  document.querySelector("#analysisOverlayMessage").textContent = `Reviewing ${categoryNames[categoryId]} and shaping measurable suggestions…`;
+  analysisOverlay.hidden = false;
+  const response = await fetch(`/api/analysis/category/${encodeURIComponent(categoryId)}`, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  });
+  const result = await response.json();
+  if (response.status === 401) {
+    window.location.replace("/login.html");
+    return false;
+  }
+  if (!response.ok) throw new Error(result.message || "Could not create your comparison.");
+  sessionStorage.setItem("stackedAnalysisResult", JSON.stringify(result));
+  sessionStorage.setItem("stackedSubmittedCategory", categoryId);
+  localStorage.setItem("lastInsightCategoryId", categoryId);
+  window.location.assign("/analysis.html");
+  return true;
 }
 
 function selectCategory(categoryId) {
@@ -196,10 +228,11 @@ categoryForms.forEach((form) => {
       if (!response.ok) throw new Error(result.message || "Could not save this category");
       setFormValues(form, result.data);
       message.textContent = "Saved to your profile.";
-      showToast(`${categoryNames[categoryId]} saved.`);
+      await analyzeWhenComplete(categoryId);
     } catch (error) {
       console.error(error);
       message.textContent = error.message;
+      analysisOverlay.hidden = true;
       showToast(error.message, true);
     } finally {
       button.disabled = false;

@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const skillSchema = new Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 100 },
-    level: { type: Number, min: 1, max: 5 },
+    level: { type: Number, min: 1, max: 10 },
   },
   { _id: false },
 );

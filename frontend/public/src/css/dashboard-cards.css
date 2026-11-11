@@ -32,3 +32,10 @@
     padding: 13px 14px;
   }
 }
+
+@media (max-width: 720px) {
+  .dashboard-nav { height: auto; min-height: 96px; padding: 8px 16px 5px; grid-template-columns: 1fr auto; grid-template-rows: 43px 36px; }
+  .dashboard-nav nav { display: flex; grid-column: 1 / -1; grid-row: 2; justify-content: space-between; gap: 16px; overflow-x: auto; }
+  .dashboard-nav nav a { flex: 0 0 auto; font-size: 11px; }
+  .dashboard-nav nav a.active:after { bottom: -7px; }
+}

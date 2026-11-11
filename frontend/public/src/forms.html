@@ -9,11 +9,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./css/forms.css" />
+    <link rel="stylesheet" href="./css/analysis.css" />
+    <link rel="stylesheet" href="./css/app-nav.css" />
   </head>
   <body>
-    <header class="form-topbar">
-      <a class="form-brand" href="/">STACKED</a>
-      <a class="back-link" href="/dashboard.html">← Back to dashboard</a>
+    <header class="app-topbar">
+      <a class="app-brand" href="/dashboard.html"><span class="app-brand-mark"><i></i><i></i><i></i></span>STACKED</a>
+      <nav class="app-links" aria-label="Main navigation">
+        <a href="/tracker.html">Tracker</a><a href="/analysis.html">Insights</a><a href="/goals.html">Goals</a><a href="/profile.html">Profile</a>
+      </nav>
+      <div class="app-account"><button class="app-avatar" id="navAvatar" type="button" aria-expanded="false">●</button><button class="app-logout" id="navLogout" type="button" hidden>Log out</button></div>
     </header>
 
     <main class="form-layout">
@@ -102,8 +107,8 @@
             <label>Industry<input id="ac-industry" type="text" maxlength="150" data-path="careerObjective.industry" placeholder="e.g. AI and software" /></label>
             <label class="span-two">Academic goals (comma separated)<textarea id="ac-goals" rows="2" data-path="academicGoals.goals" data-value-type="string-list" placeholder="e.g. Improve CGPA, finish semester project"></textarea></label>
             <label class="span-two">Target companies (comma separated)<textarea id="ac-companies" rows="2" data-path="careerObjective.targetCompanies" data-value-type="string-list" placeholder="e.g. Google, Microsoft"></textarea></label>
-            <label class="span-two">Skills being learned (one per line: skill | level 1–5)<textarea id="ac-skills" rows="3" data-path="technicalSkills" data-value-type="skills" placeholder="JavaScript | 3&#10;Python | 2"></textarea></label>
-            <label class="span-two">Projects, hackathons, internships, certifications (one per line: type | title | date)<textarea id="ac-experience" rows="3" data-path="practicalExperience" data-value-type="experiences" placeholder="project | Habit tracker | 2026-10-20&#10;hackathon | Campus build | 2026-11-01"></textarea></label>
+            <label class="span-two">Skills being learned (one per line: skill | level 1–10)<textarea id="ac-skills" rows="3" data-path="technicalSkills" data-value-type="skills" placeholder="JavaScript | 8&#10;Python | 6"></textarea></label>
+            <label class="span-two">Projects, hackathons, internships, certifications (one per line: type | title | date; type is optional)<textarea id="ac-experience" rows="3" data-path="practicalExperience" data-value-type="experiences" placeholder="project | Habit tracker | 2026-10-20&#10;SANKET | ResQGrid"></textarea></label>
             <label>DSA practice days/week<input id="ac-dsa-days" type="number" min="0" max="7" data-path="careerPreparation.dsaPracticeDaysPerWeek" placeholder="0–7" /></label>
             <label>Problems solved/week<input id="ac-problems" type="number" min="0" max="1000" data-path="careerPreparation.problemsSolvedPerWeek" placeholder="e.g. 5" /></label>
             <label>Career prep consistency (1–10)<input id="ac-consistency" type="number" min="1" max="10" data-path="careerPreparation.consistencyRating" placeholder="1–10" /></label>
@@ -141,6 +146,13 @@
       </section>
     </main>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <section class="analysis-overlay" id="analysisOverlay" aria-live="polite" aria-label="Analyzing your profile" hidden>
+      <div class="analysis-loader" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p class="overline">SECTION SAVED</p>
+      <h2>Connecting the dots.</h2>
+      <p id="analysisOverlayMessage">Measuring this area and shaping practical suggestions…</p>
+    </section>
+    <script src="./js/app-nav.js"></script>
     <script src="./js/forms.js"></script>
   </body>
 </html>

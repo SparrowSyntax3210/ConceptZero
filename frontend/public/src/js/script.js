@@ -61,6 +61,20 @@ loader.load(
       });
     });
 
+    const bones = new Map();
+    fbx.traverse((node) => {
+      if (node.isBone) bones.set(node.name.replace(/[^a-z]/gi, "").toLowerCase(), node);
+    });
+    // Relax the imported T-pose into a composed, confident stance.
+    const leftArm = bones.get("leftarm");
+    const rightArm = bones.get("rightarm");
+    if (leftArm) leftArm.rotation.z += 0.78;
+    if (rightArm) rightArm.rotation.z -= 0.78;
+    const leftForeArm = bones.get("leftforearm");
+    const rightForeArm = bones.get("rightforearm");
+    if (leftForeArm) leftForeArm.rotation.z -= 0.12;
+    if (rightForeArm) rightForeArm.rotation.z += 0.12;
+
     const bounds = new THREE.Box3().setFromObject(fbx);
     const size = bounds.getSize(new THREE.Vector3());
     const center = bounds.getCenter(new THREE.Vector3());
@@ -75,6 +89,7 @@ loader.load(
 
     fbx.position.set(0, -1.75, 0);
     figures.add(fbx);
+    gsap.to(".center-fallback", { autoAlpha: 0, duration: 0.65, ease: "power2.out" });
 
     figures.scale.setScalar(1.08);
     gsap.fromTo(
@@ -194,19 +209,42 @@ intro
     0.85,
   );
 
-document.querySelectorAll("nav a").forEach((link) => {
-  link.addEventListener("click", (event) => {
-    event.preventDefault();
-    const label = link.textContent.trim();
-    document
-      .querySelectorAll("nav a")
-      .forEach((item) => item.classList.toggle("active", item === link));
-    gsap.fromTo(
-      ".copy-block",
-      { y: 5 },
-      { y: 0, duration: 0.35, ease: "power2.out" },
-    );
-    if (label === "Tracker") window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-});
+async function updateLandingStats() {
+  try {
+    const [categoryResponse, goalResponse] = await Promise.all([
+      fetch("/api/categories", { credentials: "same-origin" }),
+      fetch("/api/goals?includeArchived=true", { credentials: "same-origin" }),
+    ]);
+
+    if (categoryResponse.ok) {
+      const { categories = [] } = await categoryResponse.json();
+      const completed = categories.filter((category) => category.completed).length;
+      document.querySelector("#profile-count").textContent = `${completed}/4`;
+      document.querySelector("#profile-count-card").textContent = `${completed} of 4`;
+    }
+    if (!goalResponse.ok) return;
+
+    const { goals = [] } = await goalResponse.json();
+    const active = goals.filter((goal) => goal.active);
+    const keyFor = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const today = keyFor(new Date());
+    const todayDone = active.filter((goal) => goal.logs?.some((log) => log.date === today && log.completed)).length;
+    const dates = new Set(active.flatMap((goal) => (goal.logs || []).filter((log) => log.completed).map((log) => log.date)));
+    const cursor = new Date(); cursor.setHours(0, 0, 0, 0);
+    if (!dates.has(keyFor(cursor))) cursor.setDate(cursor.getDate() - 1);
+    let streak = 0;
+    while (dates.has(keyFor(cursor))) { streak += 1; cursor.setDate(cursor.getDate() - 1); }
+
+    document.querySelector("#landing-goal-count").textContent = String(active.length);
+    document.querySelector("#landing-streak").textContent = String(streak);
+    document.querySelector("#landing-today-count").textContent = String(todayDone);
+    document.querySelector("#mobile-goal-count").textContent = String(active.length);
+    document.querySelector("#mobile-streak").textContent = String(streak);
+    document.querySelector("#mobile-today-count").textContent = String(todayDone);
+  } catch (error) {
+    console.error("Could not load landing page summary:", error);
+  }
+}
+
+updateLandingStats();
 
