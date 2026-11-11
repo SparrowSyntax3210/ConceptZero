@@ -46,6 +46,10 @@ navLogout.addEventListener("click", async () => {
       credentials: "same-origin",
     });
     if (!response.ok) throw new Error("Could not log out.");
+    sessionStorage.removeItem("stackedInsightsViewsV1");
+    sessionStorage.removeItem("stackedFutureSelfLetterV1");
+    sessionStorage.removeItem("stackedAnalysisResult");
+    sessionStorage.removeItem("stackedSubmittedCategory");
     window.location.replace("/");
   } catch (error) {
     navLogout.disabled = false;

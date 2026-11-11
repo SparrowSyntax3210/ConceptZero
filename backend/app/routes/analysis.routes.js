@@ -9,6 +9,8 @@ const Goal = require("../models/Goal.model");
 const {
   analyzeHealthFitnessComparison,
   analyzeCategorySuggestions,
+  analyzeOverviewProjection,
+  writeFutureSelfLetter,
 } = require("../services/healthFitnessAnalysis.service");
 
 const profileCategories = [
@@ -555,6 +557,138 @@ router.post("/health-fitness/compare", requireAuth, async (req, res) => {
       message:
         error.message ||
         "The analysis provider could not complete this request.",
+    });
+  }
+});
+
+router.post("/letter", requireAuth, async (req, res) => {
+  try {
+    const documents = await Promise.all(
+      profileCategories.map(({ model }) =>
+        model.findOne({ userId: req.user._id }).lean(),
+      ),
+    );
+    const sections = profileCategories.flatMap((category, index) => {
+      const document = documents[index];
+      if (!document) return [];
+      const profile = toPlainProfile(document);
+      return [{
+        id: category.id,
+        label: category.label,
+        currentScore: Math.max(0, Math.min(100, Math.round(category.score(document) || 0))),
+        quantities: currentQuantities(category.id, profile),
+        profile,
+      }];
+    });
+    if (!sections.length) {
+      return res.status(404).json({
+        message: "Complete at least one profile area before asking your future self to write a letter.",
+      });
+    }
+
+    const result = await writeFutureSelfLetter({ sections });
+    return res.json({
+      model: result.model,
+      letter: result.analysis,
+      profileAreas: sections.map(({ id, label }) => ({ id, label })),
+      disclaimer: "A hopeful reflection based on your current check-in, not a prediction of what will happen.",
+    });
+  } catch (error) {
+    console.error("Future-self letter generation failed:", error);
+    if (error.message.includes("OPENROUTER_API_KEY")) {
+      return res.status(503).json({ message: error.message });
+    }
+    return res.status(502).json({
+      message: error.message || "The letter service could not complete this request.",
+    });
+  }
+});
+
+router.post("/overview", requireAuth, async (req, res) => {
+  try {
+    const documents = await Promise.all(
+      profileCategories.map(({ model }) =>
+        model.findOne({ userId: req.user._id }).lean(),
+      ),
+    );
+    const sections = profileCategories.flatMap((category, index) => {
+      const document = documents[index];
+      if (!document) return [];
+      const profile = toPlainProfile(document);
+      return [{
+        id: category.id,
+        label: category.label,
+        currentScore: Math.max(0, Math.min(100, Math.round(category.score(document) || 0))),
+        quantities: currentQuantities(category.id, profile),
+        profile,
+      }];
+    });
+    if (!sections.length) {
+      return res.status(404).json({
+        message: "Complete at least one profile area before requesting an overview.",
+      });
+    }
+
+    const baselineScore = Math.round(
+      sections.reduce((sum, section) => sum + section.currentScore, 0) /
+        sections.length,
+    );
+    const result = await analyzeOverviewProjection({ baselineScore, sections });
+    const expectedWeeks = [0, 2, 4, 6, 8];
+    const pointsByWeek = new Map(
+      (result.analysis.trajectory || []).map((point) => [Number(point.week), point]),
+    );
+    if (expectedWeeks.some((week) => {
+      const point = pointsByWeek.get(week);
+      return !point || !Number.isFinite(Number(point.currentScore)) || !Number.isFinite(Number(point.guidelineScore));
+    })) {
+      throw new Error("The overview model returned an incomplete projection. Please retry.");
+    }
+    const trajectory = expectedWeeks.map((week) => {
+      const point = pointsByWeek.get(week) || {};
+      const currentScore = Math.max(0, Math.min(100, Number(point.currentScore) || 0));
+      const guidelineScore = Math.max(0, Math.min(100, Number(point.guidelineScore) || 0));
+      return {
+        week,
+        currentScore: week === 0 ? baselineScore : Math.round(currentScore),
+        guidelineScore: week === 0 ? baselineScore : Math.round(guidelineScore),
+      };
+    });
+    const currentEnd = trajectory[trajectory.length - 1].currentScore;
+    const guidelineEnd = trajectory[trajectory.length - 1].guidelineScore;
+
+    return res.json({
+      model: result.model,
+      timeHorizonWeeks: 8,
+      baselineScore,
+      sections: sections.map(({ id, label, currentScore }) => ({ id, label, currentScore })),
+      currentPath: {
+        label: "If your current patterns continue",
+        summary: result.analysis.currentSummary,
+        startScore: baselineScore,
+        projectedScore: currentEnd,
+      },
+      guidelinePath: {
+        label: "If you follow these guidelines",
+        summary: result.analysis.guidelineSummary,
+        startScore: baselineScore,
+        projectedScore: guidelineEnd,
+        guidelines: result.analysis.guidelines || [],
+      },
+      trajectory,
+      confidence: result.analysis.confidence,
+      keyInsights: result.analysis.keyInsights || [],
+      assumptions: result.analysis.assumptions || [],
+      disclaimer:
+        "These are illustrative scenarios based on your current check-in, not measured forecasts. Outcomes vary with consistency and other factors.",
+    });
+  } catch (error) {
+    console.error("Overview analysis failed:", error);
+    if (error.message.includes("OPENROUTER_API_KEY")) {
+      return res.status(503).json({ message: error.message });
+    }
+    return res.status(502).json({
+      message: error.message || "The overview analysis provider could not complete this request.",
     });
   }
 });

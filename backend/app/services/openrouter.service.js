@@ -14,9 +14,8 @@ async function createChatCompletion({
   }
 
   const model = process.env.OPENROUTER_MODEL || "qwen/qwen3.5-9b";
-  let response;
-  try {
-    response = await fetch(OPENROUTER_URL, {
+  async function sendRequest(requestMessages, requestFormat, maxTokens = 1600) {
+    const response = await fetch(OPENROUTER_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -26,13 +25,26 @@ async function createChatCompletion({
       },
       body: JSON.stringify({
         model,
-        messages,
+        messages: requestMessages,
         temperature,
-        max_tokens: 1600,
-        response_format: responseFormat,
+        max_tokens: maxTokens,
+        response_format: requestFormat,
+        ...(requestFormat?.type === "json_schema"
+          ? { provider: { require_parameters: true } }
+          : {}),
       }),
       signal: AbortSignal.timeout(45000),
     });
+    const result = await response.json().catch(() => ({}));
+    return { response, result };
+  }
+
+  let response;
+  let result;
+  let activeMessages = messages;
+  let activeFormat = responseFormat;
+  try {
+    ({ response, result } = await sendRequest(messages, responseFormat));
   } catch (error) {
     if (error.name === "TimeoutError" || error.name === "AbortError") {
       throw new Error("OpenRouter request timed out. Please try again.");
@@ -42,22 +54,140 @@ async function createChatCompletion({
     );
   }
 
-  const result = await response.json().catch(() => ({}));
+  const providerMessage = result.error?.message || "";
+  const schemaRejected =
+    !response.ok &&
+    (response.status === 400 || response.status === 422) &&
+    /response.?format|json.?schema|structured output|unsupported parameter|no.*endpoint|support.*requested.*parameter/i.test(
+      providerMessage,
+    );
+
+  // Some upstream routes for a model may reject strict JSON Schema even when
+  // other routes support it. Retry once in JSON mode and include the schema in
+  // the prompt; the response is still parsed and validated by the caller.
+  if (schemaRejected && responseFormat?.json_schema?.schema) {
+    const schemaMessage = {
+      role: "system",
+      content: `Return one JSON object that follows this schema exactly: ${JSON.stringify(responseFormat.json_schema.schema)}`,
+    };
+    activeMessages = [...messages, schemaMessage];
+    activeFormat = { type: "json_object" };
+    try {
+      ({ response, result } = await sendRequest(
+        activeMessages,
+        activeFormat,
+      ));
+    } catch (error) {
+      if (error.name === "TimeoutError" || error.name === "AbortError") {
+        throw new Error("OpenRouter request timed out. Please try again.");
+      }
+      throw new Error(
+        "Could not reach OpenRouter. Check the server network connection.",
+      );
+    }
+  }
+
   if (!response.ok) {
-    const providerMessage = result.error?.message;
+    const finalProviderMessage = result.error?.message;
     console.error(
       "OpenRouter error:",
       response.status,
-      providerMessage || "No error message",
+      finalProviderMessage || "No error message",
     );
     throw new Error(
-      `OpenRouter request failed (${response.status})${providerMessage ? `: ${providerMessage}` : ""}`,
+      `OpenRouter request failed (${response.status})${finalProviderMessage ? `: ${finalProviderMessage}` : ""}`,
     );
   }
 
-  const content = result.choices?.[0]?.message?.content;
-  if (typeof content !== "string" || !content.trim()) {
-    throw new Error("OpenRouter returned an empty analysis");
+  if (result.choices?.[0]?.finish_reason === "length") {
+    // Structured projections may need more room than ordinary category
+    // summaries. Retry once with a larger completion budget before failing.
+    try {
+      ({ response, result } = await sendRequest(activeMessages, activeFormat, 3600));
+    } catch (error) {
+      if (error.name === "TimeoutError" || error.name === "AbortError") {
+        throw new Error("OpenRouter request timed out. Please try again.");
+      }
+      throw new Error(
+        "Could not reach OpenRouter. Check the server network connection.",
+      );
+    }
+
+    if (!response.ok) {
+      const retryMessage = result.error?.message;
+      throw new Error(
+        `OpenRouter retry failed (${response.status})${retryMessage ? `: ${retryMessage}` : ""}`,
+      );
+    }
+    if (result.choices?.[0]?.finish_reason === "length") {
+      throw new Error(
+        "OpenRouter response was still cut off after retrying with a larger token limit. Reduce the profile data or increase the model completion limit.",
+      );
+    }
+  }
+
+  const getTextContent = (payload) => {
+    if (typeof payload === "string") return payload.trim();
+    if (Array.isArray(payload)) {
+      return payload
+        .filter((part) => part && (part.type === "text" || part.type === "output_text"))
+        .map((part) => part.text || part.content || "")
+        .join("\n")
+        .trim();
+    }
+    return "";
+  };
+  let content = getTextContent(result.choices?.[0]?.message?.content);
+  if (!content) {
+    const message = result.choices?.[0]?.message || {};
+    let retryMessages = activeMessages;
+    let retryFormat = activeFormat;
+    if (responseFormat?.json_schema?.schema && activeFormat?.type !== "json_object") {
+      retryMessages = [
+        ...messages,
+        {
+          role: "system",
+          content: `Return one complete JSON object matching this schema. Do not return commentary: ${JSON.stringify(responseFormat.json_schema.schema)}`,
+        },
+      ];
+      retryFormat = { type: "json_object" };
+    }
+    try {
+      ({ response, result } = await sendRequest(retryMessages, retryFormat, 3600));
+    } catch (error) {
+      if (error.name === "TimeoutError" || error.name === "AbortError") {
+        throw new Error("OpenRouter request timed out. Please try again.");
+      }
+      throw new Error(
+        "Could not reach OpenRouter. Check the server network connection.",
+      );
+    }
+    if (!response.ok) {
+      const retryMessage = result.error?.message;
+      throw new Error(
+        `OpenRouter retry failed (${response.status})${retryMessage ? `: ${retryMessage}` : ""}`,
+      );
+    }
+    if (result.choices?.[0]?.finish_reason === "length") {
+      throw new Error("OpenRouter response was cut off before the analysis finished, even after retrying with a larger token limit.");
+    }
+    content = getTextContent(result.choices?.[0]?.message?.content);
+    if (!content) {
+      const retryChoice = result.choices?.[0] || {};
+      const refusal = retryChoice.message?.refusal;
+      if (refusal) throw new Error(`OpenRouter could not complete this analysis: ${refusal}`);
+      const finishReason = retryChoice.finish_reason || "unknown";
+      const responseId = result.id || "unavailable";
+      console.error("OpenRouter returned no text content after retry:", {
+        model,
+        responseId,
+        finishReason,
+        messageFields: Object.keys(retryChoice.message || {}),
+      });
+      throw new Error(
+        `OpenRouter returned an empty analysis after retry (finish reason: ${finishReason}; response: ${responseId}). Please retry or check the selected model/provider route.`,
+      );
+    }
   }
 
   try {

@@ -1,4 +1,48 @@
 const root = document.querySelector("#comparisonRoot");
+const loadedViews = new Map();
+const inFlightViews = new Map();
+const persistentCacheKey = "stackedInsightsViewsV1";
+let activeViewKey = null;
+
+function readPersistentCache() {
+  try {
+    const value = JSON.parse(sessionStorage.getItem(persistentCacheKey) || "null");
+    return value && typeof value === "object" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistView(viewKey, data, available) {
+  loadedViews.set(viewKey, data);
+  try {
+    const previous = readPersistentCache() || {};
+    const views = { ...(previous.views || {}), [viewKey]: data };
+    sessionStorage.setItem(
+      persistentCacheKey,
+      JSON.stringify({ views, available, lastView: viewKey }),
+    );
+  } catch (error) {
+    console.warn("Could not persist Insights view for this tab:", error);
+  }
+}
+
+function rememberLastView(viewKey, available) {
+  try {
+    const previous = readPersistentCache() || {};
+    sessionStorage.setItem(
+      persistentCacheKey,
+      JSON.stringify({
+        ...previous,
+        available,
+        lastView: viewKey,
+        views: Object.fromEntries(loadedViews),
+      }),
+    );
+  } catch (error) {
+    console.warn("Could not persist Insights view selection:", error);
+  }
+}
 const categories = [
   ["health-fitness", "Health & Fitness"],
   ["mind-digital", "Mind & Digital Wellbeing"],
@@ -51,6 +95,106 @@ function recommendations(items = []) {
         `<div class="change-item"><span>${escapeHtml(item.metric)}</span><strong>${number(item.currentValue)} → ${number(item.targetValue)} ${escapeHtml(item.unit)}</strong><small>${escapeHtml(item.reason)}</small></div>`,
     )
     .join("");
+}
+
+function overviewSidebar(available) {
+  return `<aside class="insights-sidebar"><h2>Insights</h2><p>Explore a profile area</p><button type="button" class="insight-side-link active" data-insight-overview><span>Overview</span><small>Both paths</small></button>${available
+    .map((category) => `<button type="button" class="insight-side-link" data-insight-category="${category.id}"><span>${escapeHtml(category.label)}</span><small>View analysis →</small></button>`)
+    .join("")}<a class="insight-side-link" href="/tracker.html"><span>Back to Tracker</span><small>Daily check-ins →</small></a></aside>`;
+}
+
+function graphPath(points, property) {
+  const width = 600;
+  const left = 44;
+  const right = width - 18;
+  const top = 18;
+  const bottom = 174;
+  return points.map((point, index) => {
+    const x = left + ((right - left) * index) / Math.max(1, points.length - 1);
+    const y = bottom - ((bottom - top) * Math.max(0, Math.min(100, Number(point[property]) || 0))) / 100;
+    return `${index ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
+  }).join(" ");
+}
+
+function renderOverview(data, available) {
+  const trajectory = Array.isArray(data.trajectory) ? data.trajectory : [];
+  if (trajectory.length < 2) throw new Error("The overview response did not include enough graph points.");
+  const currentLine = graphPath(trajectory, "currentScore");
+  const guidelineLine = graphPath(trajectory, "guidelineScore");
+  const xPositions = trajectory.map((_, index) => 44 + ((582 - 44) * index) / (trajectory.length - 1));
+  const currentDots = trajectory.map((point, index) => `<circle class="scenario-dot current-dot" cx="${xPositions[index].toFixed(1)}" cy="${(174 - (156 * Math.max(0, Math.min(100, Number(point.currentScore) || 0))) / 100).toFixed(1)}" r="4" />`).join("");
+  const guidelineDots = trajectory.map((point, index) => `<circle class="scenario-dot guideline-dot" cx="${xPositions[index].toFixed(1)}" cy="${(174 - (156 * Math.max(0, Math.min(100, Number(point.guidelineScore) || 0))) / 100).toFixed(1)}" r="4" />`).join("");
+  const weekLabels = trajectory.map((point) => `<span>Week ${Number(point.week) || 0}</span>`).join("");
+  const insightItems = (data.keyInsights || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const assumptions = (data.assumptions || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const guidelines = (data.guidelinePath?.guidelines || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+
+  root.innerHTML = `<div class="insights-shell">
+    ${overviewSidebar(available)}
+    <div class="insights-content overview-content">
+      <section class="comparison-heading reveal"><span class="eyebrow">YOUR PERSONAL INSIGHTS</span><h1>Two paths. <span>One you.</span></h1><p>See how your current patterns may compare with practical, personalized guidelines over ${Number(data.timeHorizonWeeks) || 8} weeks.</p><div class="insight-period">Based on ${data.sections?.length || 0} completed profile area${data.sections?.length === 1 ? "" : "s"}</div></section>
+      <section class="scenario-module" aria-labelledby="scenarioTitle">
+        <div class="scenario-heading"><div><span class="page-kicker">A DIRECTIONAL SCENARIO</span><h2 id="scenarioTitle">How your progress could unfold</h2><p>Illustrative score index from your saved baseline. It is not a measured forecast.</p></div><span class="confidence-badge">${escapeHtml(data.confidence || "low")} confidence</span></div>
+        <div class="scenario-legend"><span><i class="legend-current"></i>Current patterns continue</span><span><i class="legend-guideline"></i>Follow the guidelines</span><small>Illustrative index · 0–100</small></div>
+        <div class="scenario-chart" role="img" aria-label="Scenario chart comparing current patterns and following personalized guidelines over eight weeks">
+          <div class="chart-y-labels"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div>
+          <svg viewBox="0 0 600 190" preserveAspectRatio="none" aria-hidden="true"><path class="chart-gridline" d="M44 18H582 M44 57H582 M44 96H582 M44 135H582 M44 174H582"/><path class="scenario-line current-line" d="${currentLine}"/><path class="scenario-line guideline-line" d="${guidelineLine}"/>${currentDots}${guidelineDots}</svg>
+        </div>
+        <div class="chart-x-labels">${weekLabels}</div>
+        <div class="scenario-paths"><article class="scenario-path current-path"><span class="path-label">IF CURRENT PATTERNS CONTINUE</span><h3>${escapeHtml(data.currentPath?.summary || "Your current baseline may hold steady.")}</h3><p>${data.baselineScore == null ? "—" : `${number(data.baselineScore)} index points`} now <span aria-hidden="true">→</span> ${number(data.currentPath?.projectedScore)} illustrative points at week ${Number(data.timeHorizonWeeks) || 8}</p></article><article class="scenario-path guided-path"><span class="path-label">IF YOU FOLLOW THESE GUIDELINES</span><h3>${escapeHtml(data.guidelinePath?.summary || "Small, consistent actions may support progress.")}</h3><p>${data.baselineScore == null ? "—" : `${number(data.baselineScore)} index points`} now <span aria-hidden="true">→</span> ${number(data.guidelinePath?.projectedScore)} illustrative points at week ${Number(data.timeHorizonWeeks) || 8}</p></article></div>
+      </section>
+      <section class="overview-detail-grid"><article class="overview-detail-card guideline-card"><span class="page-kicker">PRACTICAL NEXT STEPS</span><h2>Your guidelines</h2>${guidelines ? `<ul>${guidelines}</ul>` : "<p>No guidelines were returned for this profile yet.</p>"}<a href="/goals.html">Review your AI goals →</a></article><article class="overview-detail-card"><span class="page-kicker">WHAT STANDS OUT</span><h2>Key insights</h2>${insightItems ? `<ul>${insightItems}</ul>` : "<p>Save more profile details to get a more useful comparison.</p>"}</article></section>
+      ${assumptions ? `<details class="scenario-assumptions"><summary>Assumptions and limitations</summary><ul>${assumptions}</ul></details>` : ""}
+      <p class="comparison-note scenario-disclaimer">${escapeHtml(data.disclaimer || "These illustrative scenarios are estimates from a single check-in. Actual outcomes vary and are not guaranteed.")}</p>
+      <div class="comparison-footer"><a href="/tracker.html">Go to your tracker&nbsp; →</a></div>
+    </div>
+  </div>`;
+
+  root.querySelectorAll("[data-insight-category]").forEach((button) => {
+    button.addEventListener("click", () => loadInsight(button.dataset.insightCategory, available));
+  });
+  root.querySelector("[data-insight-overview]")?.addEventListener("click", () => loadOverview(available));
+}
+
+async function loadOverview(available) {
+  const viewKey = "overview";
+  activeViewKey = viewKey;
+  if (loadedViews.has(viewKey)) {
+    rememberLastView(viewKey, available);
+    renderOverview(loadedViews.get(viewKey), available);
+    return;
+  }
+  root.innerHTML = '<section class="comparison-loading"><span class="analysis-loader"><i></i><i></i><i></i></span><p>Comparing your current path with your guideline path…</p></section>';
+  try {
+    const result = await requestAnalysisView(viewKey, "/api/analysis/overview");
+    persistView(viewKey, result, available);
+    if (activeViewKey === viewKey) renderOverview(result, available);
+  } catch (error) {
+    if (activeViewKey !== viewKey) return;
+    root.innerHTML = `<section class="comparison-error"><h1>Overview unavailable</h1><p>${escapeHtml(error.message)}</p><button type="button" id="retryOverview">Try again</button><a href="/tracker.html">Return to Tracker</a></section>`;
+    root.querySelector("#retryOverview")?.addEventListener("click", () => loadOverview(available));
+  }
+}
+
+function requestAnalysisView(viewKey, url) {
+  if (inFlightViews.has(viewKey)) return inFlightViews.get(viewKey);
+  const request = (async () => {
+    const response = await fetch(url, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    const result = await response.json();
+    if (response.status === 401) {
+      window.location.replace("/login.html");
+      throw new Error("Authentication required.");
+    }
+    if (!response.ok) throw new Error(result.message || "Could not load this analysis.");
+    return result;
+  })().finally(() => inFlightViews.delete(viewKey));
+  inFlightViews.set(viewKey, request);
+  return request;
 }
 
 function render(data, available) {
@@ -113,33 +257,94 @@ function render(data, available) {
   });
   root
     .querySelector("[data-insight-overview]")
-    ?.addEventListener("click", () => loadInsight(available[0].id, available));
+    ?.addEventListener("click", () => loadOverview(available));
 }
 
 async function loadInsight(categoryId, available) {
+  const viewKey = `category:${categoryId}`;
+  activeViewKey = viewKey;
   localStorage.setItem("lastInsightCategoryId", categoryId);
-  root.innerHTML = `<section class="comparison-loading"><span class="analysis-loader"><i></i><i></i><i></i></span><p>Refreshing ${escapeHtml(categories.find(([id]) => id === categoryId)?.[1] || "your insight")}…</p></section>`;
+  if (loadedViews.has(viewKey)) {
+    rememberLastView(viewKey, available);
+    render(loadedViews.get(viewKey), available);
+    return;
+  }
+  root.innerHTML = `<section class="comparison-loading"><span class="analysis-loader"><i></i><i></i><i></i></span><p>Loading ${escapeHtml(categories.find(([id]) => id === categoryId)?.[1] || "your insight")}…</p></section>`;
   try {
-    const response = await fetch(
+    const result = await requestAnalysisView(
+      viewKey,
       `/api/analysis/category/${encodeURIComponent(categoryId)}`,
-      {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: "{}",
-      },
     );
-    const result = await response.json();
-    if (response.status === 401) return window.location.replace("/login.html");
-    if (!response.ok)
-      throw new Error(result.message || "Could not load this insight.");
-    render(result, available);
+    persistView(viewKey, result, available);
+    if (activeViewKey === viewKey) render(result, available);
   } catch (error) {
-    root.innerHTML = `<section class="comparison-error"><h1>Insight unavailable</h1><p>${escapeHtml(error.message)}</p><a href="/forms.html">Update your profile</a></section>`;
+    if (activeViewKey !== viewKey) return;
+    root.innerHTML = `<section class="comparison-error"><h1>Insight unavailable</h1><p>${escapeHtml(error.message)}</p><a href="/forms.html">Update your profile</a><button type="button" id="retryInsight">Try again</button></section>`;
+    root.querySelector("#retryInsight")?.addEventListener("click", () => loadInsight(categoryId, available));
   }
 }
 
 async function startInsights() {
+  const savedCache = readPersistentCache();
+  if (Array.isArray(savedCache?.available)) {
+    for (const [key, value] of Object.entries(savedCache.views || {})) {
+      loadedViews.set(key, value);
+    }
+  }
+
+  const availableCache = savedCache?.available;
+  const oneTimeCategory = sessionStorage.getItem("stackedSubmittedCategory");
+  const submittedResult = sessionStorage.getItem("stackedAnalysisResult");
+  sessionStorage.removeItem("stackedSubmittedCategory");
+  sessionStorage.removeItem("stackedAnalysisResult");
+
+  if (
+    submittedResult &&
+    oneTimeCategory &&
+    availableCache?.some((item) => item.id === oneTimeCategory)
+  ) {
+    try {
+      const result = JSON.parse(submittedResult);
+      if (result.categoryId === oneTimeCategory) {
+        loadedViews.delete("overview");
+        const updatedViews = Object.fromEntries(loadedViews);
+        sessionStorage.setItem(
+          persistentCacheKey,
+          JSON.stringify({ views: updatedViews, available: availableCache, lastView: `category:${oneTimeCategory}` }),
+        );
+        persistView(`category:${oneTimeCategory}`, result, availableCache);
+        activeViewKey = `category:${oneTimeCategory}`;
+        render(result, availableCache);
+        return;
+      }
+    } catch (error) {
+      console.warn("Could not restore the submitted analysis result:", error);
+    }
+  }
+
+  const requestedCategory = new URLSearchParams(window.location.search).get("category");
+  const preferredView = requestedCategory
+    ? `category:${requestedCategory}`
+    : savedCache?.lastView;
+  if (
+    !submittedResult &&
+    availableCache?.length &&
+    preferredView &&
+    loadedViews.has(preferredView)
+  ) {
+    root.dataset.available = JSON.stringify(availableCache);
+    root.dataset.activeCategory = preferredView.startsWith("category:")
+      ? preferredView.slice("category:".length)
+      : "";
+    activeViewKey = preferredView;
+    if (preferredView === "overview") {
+      renderOverview(loadedViews.get(preferredView), availableCache);
+    } else {
+      render(loadedViews.get(preferredView), availableCache);
+    }
+    return;
+  }
+
   root.innerHTML =
     '<section class="comparison-loading"><span class="analysis-loader"><i></i><i></i><i></i></span><p>Loading your insights…</p></section>';
   try {
@@ -165,31 +370,26 @@ async function startInsights() {
     root.dataset.available = JSON.stringify(available);
     root.dataset.activeCategory = "";
 
-    const oneTimeCategory = sessionStorage.getItem("stackedSubmittedCategory");
-    const cached = sessionStorage.getItem("stackedAnalysisResult");
-    sessionStorage.removeItem("stackedSubmittedCategory");
-    sessionStorage.removeItem("stackedAnalysisResult");
-    const requestedCategory = new URLSearchParams(window.location.search).get(
-      "category",
-    );
     if (
-      cached &&
+      submittedResult &&
       oneTimeCategory &&
-      !requestedCategory &&
-      oneTimeCategory === JSON.parse(cached).categoryId &&
       available.some((item) => item.id === oneTimeCategory)
     ) {
-      localStorage.setItem("lastInsightCategoryId", oneTimeCategory);
-      render(JSON.parse(cached), available);
-      return;
+      const submittedAnalysis = JSON.parse(submittedResult);
+      if (submittedAnalysis.categoryId === oneTimeCategory) {
+        loadedViews.delete("overview");
+        persistView(`category:${oneTimeCategory}`, submittedAnalysis, available);
+        activeViewKey = `category:${oneTimeCategory}`;
+        render(submittedAnalysis, available);
+        return;
+      }
     }
 
-    const preferred =
-      requestedCategory || localStorage.getItem("lastInsightCategoryId");
-    const categoryId = available.some((item) => item.id === preferred)
-      ? preferred
-      : available[0].id;
-    await loadInsight(categoryId, available);
+    if (requestedCategory && available.some((item) => item.id === requestedCategory)) {
+      await loadInsight(requestedCategory, available);
+      return;
+    }
+    await loadOverview(available);
   } catch (error) {
     root.innerHTML = `<section class="comparison-error"><h1>Insights unavailable</h1><p>${escapeHtml(error.message)}</p><a href="/tracker.html">Go to Tracker</a></section>`;
   }
