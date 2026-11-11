@@ -8,7 +8,9 @@ const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 function getSessionToken(req) {
   const cookies = (req.headers.cookie || "").split(";");
-  const entry = cookies.find((cookie) => cookie.trim().startsWith(`${SESSION_COOKIE}=`));
+  const entry = cookies.find((cookie) =>
+    cookie.trim().startsWith(`${SESSION_COOKIE}=`),
+  );
   return entry ? entry.trim().slice(SESSION_COOKIE.length + 1) : null;
 }
 
@@ -17,7 +19,8 @@ function hashToken(token) {
 }
 
 function setSessionCookie(req, res, token) {
-  const secure = req.secure || process.env.NODE_ENV === "production" ? "; Secure" : "";
+  const secure =
+    req.secure || process.env.NODE_ENV === "production" ? "; Secure" : "";
   res.setHeader(
     "Set-Cookie",
     `${SESSION_COOKIE}=${token}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; HttpOnly; SameSite=Lax${secure}`,
@@ -48,7 +51,9 @@ router.post("/register", async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern || {})[0] || "account";
-      return res.status(409).send(`An account with this ${field} already exists.`);
+      return res
+        .status(409)
+        .send(`An account with this ${field} already exists.`);
     }
     if (error.name === "ValidationError") {
       return res.status(400).send(error.message);
@@ -126,7 +131,10 @@ router.post("/forgot-password", async (req, res) => {
   }
 
   try {
-    const user = await User.findOneAndUpdate({ email }, { password: newPassword });
+    const user = await User.findOneAndUpdate(
+      { email },
+      { password: newPassword },
+    );
     if (!user) return res.status(404).send("User not found");
     return res.send("Password reset successful");
   } catch (error) {

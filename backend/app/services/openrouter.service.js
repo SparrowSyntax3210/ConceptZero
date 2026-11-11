@@ -1,8 +1,14 @@
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-async function createChatCompletion({ messages, responseFormat, temperature = 0.25 }) {
+async function createChatCompletion({
+  messages,
+  responseFormat,
+  temperature = 0.25,
+}) {
   const apiKey =
-    process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY || process.env.KEY;
+    process.env.OPENROUTER_API_KEY ||
+    process.env.OPENROUTER_KEY ||
+    process.env.KEY;
   if (!apiKey) {
     throw new Error("Missing OPENROUTER_API_KEY in the server environment");
   }
@@ -31,14 +37,22 @@ async function createChatCompletion({ messages, responseFormat, temperature = 0.
     if (error.name === "TimeoutError" || error.name === "AbortError") {
       throw new Error("OpenRouter request timed out. Please try again.");
     }
-    throw new Error("Could not reach OpenRouter. Check the server network connection.");
+    throw new Error(
+      "Could not reach OpenRouter. Check the server network connection.",
+    );
   }
 
   const result = await response.json().catch(() => ({}));
   if (!response.ok) {
     const providerMessage = result.error?.message;
-    console.error("OpenRouter error:", response.status, providerMessage || "No error message");
-    throw new Error(`OpenRouter request failed (${response.status})${providerMessage ? `: ${providerMessage}` : ""}`);
+    console.error(
+      "OpenRouter error:",
+      response.status,
+      providerMessage || "No error message",
+    );
+    throw new Error(
+      `OpenRouter request failed (${response.status})${providerMessage ? `: ${providerMessage}` : ""}`,
+    );
   }
 
   const content = result.choices?.[0]?.message?.content;
@@ -50,7 +64,9 @@ async function createChatCompletion({ messages, responseFormat, temperature = 0.
     return { model, analysis: JSON.parse(content) };
   } catch {
     console.error("OpenRouter returned invalid JSON:", content.slice(0, 500));
-    throw new Error("OpenRouter returned an unreadable response. Please retry.");
+    throw new Error(
+      "OpenRouter returned an unreadable response. Please retry.",
+    );
   }
 }
 

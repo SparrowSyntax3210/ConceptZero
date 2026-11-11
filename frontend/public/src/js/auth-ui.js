@@ -15,7 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(({ authenticated: isAuthenticated, user }) => {
       authenticated = Boolean(isAuthenticated);
       if (authenticated && user?.username) {
-        avatar.querySelector("span").textContent = user.username.charAt(0).toUpperCase();
+        avatar.querySelector("span").textContent = user.username
+          .charAt(0)
+          .toUpperCase();
         avatar.setAttribute("aria-label", `Account for ${user.username}`);
       }
     })

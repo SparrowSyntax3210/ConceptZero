@@ -29,7 +29,12 @@
           ><a href="/profile.html">Profile</a>
         </nav>
         <div class="account-control">
-          <button class="avatar" type="button" aria-label="Open account menu" aria-expanded="false">
+          <button
+            class="avatar"
+            type="button"
+            aria-label="Open account menu"
+            aria-expanded="false"
+          >
             <span>●</span>
           </button>
           <button class="logout-button" type="button" hidden>Log out</button>
@@ -52,7 +57,11 @@
 
         <div class="stage" aria-label="Interactive 3D habit growth models">
           <canvas id="model-canvas"></canvas>
-          <img class="center-fallback" src="./assets/dashboard.png" alt="STACKED member standing in a composed professional pose" />
+          <img
+            class="center-fallback"
+            src="./assets/dashboard.png"
+            alt="STACKED member standing in a composed professional pose"
+          />
           <img
             class="side-character character-left"
             src="./assets/left1.png"
@@ -64,7 +73,8 @@
             alt="Person checking their phone"
           />
           <div class="state-pill float-card">
-            <span class="status-dot"></span> Your Profile <strong id="profile-count">0/4</strong>
+            <span class="status-dot"></span> Your Profile
+            <strong id="profile-count">0/4</strong>
           </div>
           <div class="habit-card habit-good float-card">
             <b>✦</b><span>Sleep</span><strong>Build a rhythm</strong><b>✦</b
@@ -76,11 +86,16 @@
             <b>01</b><span>Health</span><strong>Energy & routine</strong
             ><b>02</b><span>Mind</span><strong>Focus & digital habits</strong
             ><b>03</b><span>Learning</span><strong>Study & career growth</strong
-            ><b>04</b><span>Lifestyle</span><strong>Time & personal goals</strong>
+            ><b>04</b><span>Lifestyle</span
+            ><strong>Time & personal goals</strong>
           </div>
           <div class="score-pill float-card">
             <span class="score-ring">◌</span
-            ><span>Areas started<strong id="profile-count-card">0 of 4</strong></span>
+            ><span
+              >Areas started<strong id="profile-count-card"
+                >0 of 4</strong
+              ></span
+            >
           </div>
           <div class="orbit orbit-a"></div>
           <div class="orbit orbit-b"></div>
@@ -93,9 +108,12 @@
           <span class="minus">✦</span><strong>Your Next Small Step</strong>
         </div>
         <div class="bottom-stats float-card">
-          <span>● <b id="landing-goal-count">0</b><small>Active goals</small></span
+          <span
+            >● <b id="landing-goal-count">0</b><small>Active goals</small></span
           ><span>▮ <b id="landing-streak">0</b><small>Day streak</small></span
-          ><span class="trophy">✓ <b id="landing-today-count">0</b><small>Done today</small></span>
+          ><span class="trophy"
+            >✓ <b id="landing-today-count">0</b><small>Done today</small></span
+          >
         </div>
         <div class="bot float-card">
           <div class="bot-head"><i></i><i></i></div>
@@ -109,20 +127,51 @@
         <div class="edge-orbit edge-right"></div>
       </section>
       <footer class="mobile-stats">
-        <span><b id="mobile-goal-count">0</b> active goals</span><span><b id="mobile-streak">0</b> day streak</span><span><b id="mobile-today-count">0</b> done today</span>
+        <span><b id="mobile-goal-count">0</b> active goals</span
+        ><span><b id="mobile-streak">0</b> day streak</span
+        ><span><b id="mobile-today-count">0</b> done today</span>
       </footer>
       <section class="landing-overview" aria-labelledby="landingOverviewTitle">
-        <div class="landing-overview-heading"><div><span class="section-kicker">A CLEARER WAY TO GROW</span><h2 id="landingOverviewTitle">Four areas. One connected picture.</h2></div><p>Start with any section. Your profile, insights, and daily goals work together as you go.</p></div>
+        <div class="landing-overview-heading">
+          <div>
+            <span class="section-kicker">A CLEARER WAY TO GROW</span>
+            <h2 id="landingOverviewTitle">
+              Four areas. One connected picture.
+            </h2>
+          </div>
+          <p>
+            Start with any section. Your profile, insights, and daily goals work
+            together as you go.
+          </p>
+        </div>
         <div class="landing-focus-grid">
-          <a href="/tracker.html"><span>01 · DAILY PRACTICE</span><strong>Tracker</strong><small>Check in on the goals that matter today.</small><i>→</i></a>
-          <a href="/analysis.html"><span>02 · YOUR PATTERNS</span><strong>Insights</strong><small>See your current quantities and suggested targets.</small><i>→</i></a>
-          <a href="/goals.html"><span>03 · SMALL PROMISES</span><strong>Goals</strong><small>Turn useful suggestions into trackable habits.</small><i>→</i></a>
-          <a href="/forms.html"><span>04 · YOUR BASELINE</span><strong>Profile</strong><small>Share one growth area at a time.</small><i>→</i></a>
+          <a href="/tracker.html"
+            ><span>01 · DAILY PRACTICE</span><strong>Tracker</strong
+            ><small>Check in on the goals that matter today.</small><i>→</i></a
+          >
+          <a href="/analysis.html"
+            ><span>02 · YOUR PATTERNS</span><strong>Insights</strong
+            ><small>See your current quantities and suggested targets.</small
+            ><i>→</i></a
+          >
+          <a href="/goals.html"
+            ><span>03 · SMALL PROMISES</span><strong>Goals</strong
+            ><small>Turn useful suggestions into trackable habits.</small
+            ><i>→</i></a
+          >
+          <a href="/forms.html"
+            ><span>04 · YOUR BASELINE</span><strong>Profile</strong
+            ><small>Share one growth area at a time.</small><i>→</i></a
+          >
         </div>
       </section>
     </main>
     <script type="importmap">
-      {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+        }
+      }
     </script>
     <script defer src="./js/auth-ui.js"></script>
     <script type="module" src="./js/script.js"></script>

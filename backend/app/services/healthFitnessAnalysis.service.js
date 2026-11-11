@@ -70,7 +70,15 @@ const categorySuggestionFormat = {
     schema: {
       type: "object",
       additionalProperties: false,
-      required: ["timeHorizon", "confidence", "score", "summary", "changes", "keyInsights", "limits"],
+      required: [
+        "timeHorizon",
+        "confidence",
+        "score",
+        "summary",
+        "changes",
+        "keyInsights",
+        "limits",
+      ],
       properties: {
         timeHorizon: { type: "string" },
         confidence: { type: "string", enum: ["low", "moderate", "high"] },
@@ -81,7 +89,13 @@ const categorySuggestionFormat = {
           items: {
             type: "object",
             additionalProperties: false,
-            required: ["metric", "currentValue", "targetValue", "unit", "reason"],
+            required: [
+              "metric",
+              "currentValue",
+              "targetValue",
+              "unit",
+              "reason",
+            ],
             properties: {
               metric: { type: "string" },
               currentValue: { type: "number" },
@@ -102,11 +116,16 @@ async function analyzeCategorySuggestions(category) {
   const messages = [
     {
       role: "system",
-      content: "You are a supportive personal growth coach. Analyze only the single STACKED profile category provided. Return practical, conservative suggested target quantities for the next 8 weeks. Only suggest metrics with adjustable=true, copy each selected metric label exactly, and only return a change when it has a numeric current value. Do not suggest changing fixed facts, grades, self-reported satisfaction, mood, stress, or confidence ratings. Use the current quantity and unit exactly as supplied; do not invent a current measurement or guarantee an outcome. Return a section-specific score from 0 to 100 as an estimate based only on this section's supplied data. Include at most three measurable changes. If this section has too little data for suggestions, return an empty changes array and state what is missing in summary or keyInsights. Do not refer to other profile sections. Do not diagnose or give medical advice. Return only the requested JSON.",
+      content:
+        "You are a supportive personal growth coach. Analyze only the single STACKED profile category provided. Return practical, conservative suggested target quantities for the next 8 weeks. Only suggest metrics with adjustable=true, copy each selected metric label exactly, and only return a change when it has a numeric current value. Do not suggest changing fixed facts, grades, self-reported satisfaction, mood, stress, or confidence ratings. Use the current quantity and unit exactly as supplied; do not invent a current measurement or guarantee an outcome. Return a section-specific score from 0 to 100 as an estimate based only on this section's supplied data. Include at most three measurable changes. If this section has too little data for suggestions, return an empty changes array and state what is missing in summary or keyInsights. Do not refer to other profile sections. Do not diagnose or give medical advice. Return only the requested JSON.",
     },
     { role: "user", content: JSON.stringify(category) },
   ];
-  return createChatCompletion({ messages, responseFormat: categorySuggestionFormat, temperature: 0.2 });
+  return createChatCompletion({
+    messages,
+    responseFormat: categorySuggestionFormat,
+    temperature: 0.2,
+  });
 }
 
 module.exports = { analyzeHealthFitnessComparison, analyzeCategorySuggestions };

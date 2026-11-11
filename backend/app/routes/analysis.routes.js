@@ -6,18 +6,53 @@ const MindDigitalWellbeing = require("../models/MindDigitalWellbeing.model");
 const AcademicsCareerGrowth = require("../models/AcademicsCareerGrowth.model");
 const LifestylePersonalGrowth = require("../models/LifestylePersonalGrowth.model");
 const Goal = require("../models/Goal.model");
-const { analyzeHealthFitnessComparison, analyzeCategorySuggestions } = require("../services/healthFitnessAnalysis.service");
+const {
+  analyzeHealthFitnessComparison,
+  analyzeCategorySuggestions,
+} = require("../services/healthFitnessAnalysis.service");
 
 const profileCategories = [
-  { id: "health-fitness", label: "Physical Health", model: HealthFitness, score: (doc) => doc.metrics?.overallScore ?? ratingScore(doc.fitnessConsistencyRating, doc.satisfaction) },
-  { id: "mind-digital", label: "Mind & Digital Wellbeing", model: MindDigitalWellbeing, score: (doc) => doc.metrics?.focusWellbeingScore ?? ratingScore(doc.moodMentalEnergy?.averageMoodRating, doc.satisfaction) },
-  { id: "academics-career", label: "Academics & Career Growth", model: AcademicsCareerGrowth, score: (doc) => doc.metrics?.careerPrepScore ?? ratingScore(doc.careerPreparation?.consistencyRating, doc.satisfaction) },
-  { id: "lifestyle-growth", label: "Lifestyle & Personal Growth", model: LifestylePersonalGrowth, score: (doc) => doc.metrics?.overallScore ?? ratingScore(doc.personalHabits?.routineConsistency, doc.satisfaction) },
+  {
+    id: "health-fitness",
+    label: "Physical Health",
+    model: HealthFitness,
+    score: (doc) =>
+      doc.metrics?.overallScore ??
+      ratingScore(doc.fitnessConsistencyRating, doc.satisfaction),
+  },
+  {
+    id: "mind-digital",
+    label: "Mind & Digital Wellbeing",
+    model: MindDigitalWellbeing,
+    score: (doc) =>
+      doc.metrics?.focusWellbeingScore ??
+      ratingScore(doc.moodMentalEnergy?.averageMoodRating, doc.satisfaction),
+  },
+  {
+    id: "academics-career",
+    label: "Academics & Career Growth",
+    model: AcademicsCareerGrowth,
+    score: (doc) =>
+      doc.metrics?.careerPrepScore ??
+      ratingScore(doc.careerPreparation?.consistencyRating, doc.satisfaction),
+  },
+  {
+    id: "lifestyle-growth",
+    label: "Lifestyle & Personal Growth",
+    model: LifestylePersonalGrowth,
+    score: (doc) =>
+      doc.metrics?.overallScore ??
+      ratingScore(doc.personalHabits?.routineConsistency, doc.satisfaction),
+  },
 ];
 
 function ratingScore(...ratings) {
   const values = ratings.filter((value) => Number.isFinite(value));
-  return values.length ? Math.round(values.reduce((sum, value) => sum + value * 10, 0) / values.length) : 0;
+  return values.length
+    ? Math.round(
+        values.reduce((sum, value) => sum + value * 10, 0) / values.length,
+      )
+    : 0;
 }
 
 function toPlainProfile(doc) {
@@ -33,60 +68,317 @@ function addQuantity(list, metric, value, unit, adjustable = false) {
 function currentQuantities(id, profile) {
   const values = [];
   if (id === "health-fitness") {
-    addQuantity(values, "Age", profile.age, "years"); addQuantity(values, "Height", profile.heightCm, "cm");
-    addQuantity(values, "Current weight", profile.currentWeightKg, "kg"); addQuantity(values, "Target weight", profile.targetWeightKg, "kg");
-    addQuantity(values, "Daily steps", profile.physicalActivity?.dailySteps, "steps/day", true);
-    addQuantity(values, "Workouts", profile.physicalActivity?.workoutsPerWeek, "sessions/week", true);
-    addQuantity(values, "Workout duration", profile.physicalActivity?.averageWorkoutMinutes, "minutes/session", true);
-    addQuantity(values, "Average sleep", profile.sleepRoutine?.averageSleepHours, "hours/night", true);
-    addQuantity(values, "Meals", profile.eatingHabits?.mealsPerDay, "meals/day", true);
-    addQuantity(values, "Breakfast days", profile.eatingHabits?.breakfastDaysPerWeek, "days/week", true);
-    addQuantity(values, "Junk or outside meals", profile.eatingHabits?.junkOrOutsideMealsPerWeek, "meals/week", true);
-    addQuantity(values, "Water intake", profile.nutritionHydration?.waterMlPerDay, "ml/day", true);
-    addQuantity(values, "Fruit and vegetable servings", profile.nutritionHydration?.fruitVegetableServingsPerDay, "servings/day", true);
-    addQuantity(values, "Fitness consistency", profile.fitnessConsistencyRating, "/10", true);
+    addQuantity(values, "Age", profile.age, "years");
+    addQuantity(values, "Height", profile.heightCm, "cm");
+    addQuantity(values, "Current weight", profile.currentWeightKg, "kg");
+    addQuantity(values, "Target weight", profile.targetWeightKg, "kg");
+    addQuantity(
+      values,
+      "Daily steps",
+      profile.physicalActivity?.dailySteps,
+      "steps/day",
+      true,
+    );
+    addQuantity(
+      values,
+      "Workouts",
+      profile.physicalActivity?.workoutsPerWeek,
+      "sessions/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Workout duration",
+      profile.physicalActivity?.averageWorkoutMinutes,
+      "minutes/session",
+      true,
+    );
+    addQuantity(
+      values,
+      "Average sleep",
+      profile.sleepRoutine?.averageSleepHours,
+      "hours/night",
+      true,
+    );
+    addQuantity(
+      values,
+      "Meals",
+      profile.eatingHabits?.mealsPerDay,
+      "meals/day",
+      true,
+    );
+    addQuantity(
+      values,
+      "Breakfast days",
+      profile.eatingHabits?.breakfastDaysPerWeek,
+      "days/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Junk or outside meals",
+      profile.eatingHabits?.junkOrOutsideMealsPerWeek,
+      "meals/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Water intake",
+      profile.nutritionHydration?.waterMlPerDay,
+      "ml/day",
+      true,
+    );
+    addQuantity(
+      values,
+      "Fruit and vegetable servings",
+      profile.nutritionHydration?.fruitVegetableServingsPerDay,
+      "servings/day",
+      true,
+    );
+    addQuantity(
+      values,
+      "Fitness consistency",
+      profile.fitnessConsistencyRating,
+      "/10",
+      true,
+    );
     addQuantity(values, "Satisfaction", profile.satisfaction, "/10");
   } else if (id === "mind-digital") {
-    addQuantity(values, "Screen time", profile.screenTimeMinutesPerDay, "minutes/day", true);
-    addQuantity(values, "Social media", profile.digitalUsage?.socialMediaMinutesPerDay, "minutes/day", true);
-    addQuantity(values, "YouTube and OTT", profile.digitalUsage?.youtubeOttMinutesPerDay, "minutes/day", true);
-    addQuantity(values, "Gaming", profile.digitalUsage?.gamingMinutesPerDay, "minutes/day", true);
-    addQuantity(values, "Phone before sleep", profile.digitalDistractions?.phoneBeforeSleepNightsPerWeek, "nights/week", true);
-    addQuantity(values, "Phone after waking", profile.digitalDistractions?.phoneAfterWakeNightsPerWeek, "days/week", true);
-    addQuantity(values, "Mood rating", profile.moodMentalEnergy?.averageMoodRating, "/10");
-    addQuantity(values, "Mental energy", profile.moodMentalEnergy?.mentalEnergyRating, "/10");
+    addQuantity(
+      values,
+      "Screen time",
+      profile.screenTimeMinutesPerDay,
+      "minutes/day",
+      true,
+    );
+    addQuantity(
+      values,
+      "Social media",
+      profile.digitalUsage?.socialMediaMinutesPerDay,
+      "minutes/day",
+      true,
+    );
+    addQuantity(
+      values,
+      "YouTube and OTT",
+      profile.digitalUsage?.youtubeOttMinutesPerDay,
+      "minutes/day",
+      true,
+    );
+    addQuantity(
+      values,
+      "Gaming",
+      profile.digitalUsage?.gamingMinutesPerDay,
+      "minutes/day",
+      true,
+    );
+    addQuantity(
+      values,
+      "Phone before sleep",
+      profile.digitalDistractions?.phoneBeforeSleepNightsPerWeek,
+      "nights/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Phone after waking",
+      profile.digitalDistractions?.phoneAfterWakeNightsPerWeek,
+      "days/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Mood rating",
+      profile.moodMentalEnergy?.averageMoodRating,
+      "/10",
+    );
+    addQuantity(
+      values,
+      "Mental energy",
+      profile.moodMentalEnergy?.mentalEnergyRating,
+      "/10",
+    );
     addQuantity(values, "Stress rating", profile.stress?.rating, "/10");
-    addQuantity(values, "Motivation", profile.motivationFocus?.motivationRating, "/10");
-    addQuantity(values, "Distraction management", profile.motivationFocus?.distractionManagementRating, "/10");
-    addQuantity(values, "Relaxation sessions", profile.relaxationSessionsPerWeek, "sessions/week", true);
+    addQuantity(
+      values,
+      "Motivation",
+      profile.motivationFocus?.motivationRating,
+      "/10",
+    );
+    addQuantity(
+      values,
+      "Distraction management",
+      profile.motivationFocus?.distractionManagementRating,
+      "/10",
+    );
+    addQuantity(
+      values,
+      "Relaxation sessions",
+      profile.relaxationSessionsPerWeek,
+      "sessions/week",
+      true,
+    );
     addQuantity(values, "Satisfaction", profile.satisfaction, "/10");
   } else if (id === "academics-career") {
-    addQuantity(values, "Current grade", profile.academicProfile?.currentGradeValue, `/${profile.academicProfile?.currentGradeScale || "scale"}`);
-    addQuantity(values, "Target grade", profile.academicGoals?.targetGradeValue, `/${profile.academicGoals?.targetGradeScale || "scale"}`);
-    addQuantity(values, "Weekly study time", profile.metrics?.weeklyStudyHours, "hours/week");
-    addQuantity(values, "Daily study", profile.studyRoutine?.dailyStudyHours, "hours/day", true);
-    addQuantity(values, "Attendance", profile.studyRoutine?.attendancePct, "%", true);
-    addQuantity(values, "Assignments on time", profile.studyRoutine?.assignmentOnTimePct, "%", true);
-    addQuantity(values, "DSA practice", profile.careerPreparation?.dsaPracticeDaysPerWeek, "days/week", true);
-    addQuantity(values, "DSA problems", profile.careerPreparation?.problemsSolvedPerWeek, "problems/week", true);
-    addQuantity(values, "Career prep consistency", profile.careerPreparation?.consistencyRating, "/10", true);
-    addQuantity(values, "In-progress skills", profile.metrics?.skillsInProgressCount, "skills");
+    addQuantity(
+      values,
+      "Current grade",
+      profile.academicProfile?.currentGradeValue,
+      `/${profile.academicProfile?.currentGradeScale || "scale"}`,
+    );
+    addQuantity(
+      values,
+      "Target grade",
+      profile.academicGoals?.targetGradeValue,
+      `/${profile.academicGoals?.targetGradeScale || "scale"}`,
+    );
+    addQuantity(
+      values,
+      "Weekly study time",
+      profile.metrics?.weeklyStudyHours,
+      "hours/week",
+    );
+    addQuantity(
+      values,
+      "Daily study",
+      profile.studyRoutine?.dailyStudyHours,
+      "hours/day",
+      true,
+    );
+    addQuantity(
+      values,
+      "Attendance",
+      profile.studyRoutine?.attendancePct,
+      "%",
+      true,
+    );
+    addQuantity(
+      values,
+      "Assignments on time",
+      profile.studyRoutine?.assignmentOnTimePct,
+      "%",
+      true,
+    );
+    addQuantity(
+      values,
+      "DSA practice",
+      profile.careerPreparation?.dsaPracticeDaysPerWeek,
+      "days/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "DSA problems",
+      profile.careerPreparation?.problemsSolvedPerWeek,
+      "problems/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Career prep consistency",
+      profile.careerPreparation?.consistencyRating,
+      "/10",
+      true,
+    );
+    addQuantity(
+      values,
+      "In-progress skills",
+      profile.metrics?.skillsInProgressCount,
+      "skills",
+    );
     addQuantity(values, "Satisfaction", profile.satisfaction, "/10");
   } else {
-    addQuantity(values, "Free time", profile.timeManagement?.freeMinutesPerDay, "minutes/day");
-    addQuantity(values, "Planning", profile.timeManagement?.planningDaysPerWeek, "days/week", true);
-    addQuantity(values, "Procrastination", profile.timeManagement?.procrastinationDaysPerWeek, "days/week", true);
-    addQuantity(values, "Routine consistency", profile.personalHabits?.routineConsistency, "/10", true);
-    addQuantity(values, "Self-discipline", profile.personalHabits?.selfDiscipline, "/10", true);
-    addQuantity(values, "Confidence", profile.personalHabits?.confidence, "/10");
-    addQuantity(values, "Monthly allowance", profile.financialHabits?.monthlyAllowance, profile.financialHabits?.currencyCode || "currency/month");
-    addQuantity(values, "Monthly income", profile.financialHabits?.monthlyIncome, profile.financialHabits?.currencyCode || "currency/month");
-    addQuantity(values, "Monthly savings", profile.financialHabits?.monthlySavings, profile.financialHabits?.currencyCode || "currency/month", true);
-    addQuantity(values, "Monthly spending", profile.financialHabits?.monthlySpending, profile.financialHabits?.currencyCode || "currency/month");
-    addQuantity(values, "Social time", profile.socialLife?.timeWithFriendsFamilyHoursPerWeek, "hours/week", true);
-    addQuantity(values, "Social satisfaction", profile.socialLife?.socialSatisfaction, "/10");
-    addQuantity(values, "Improvement time", profile.selfImprovement?.availableMinutesPerWeek, "minutes/week", true);
-    addQuantity(values, "Goal progress", profile.metrics?.averageGoalProgressPct, "%");
+    addQuantity(
+      values,
+      "Free time",
+      profile.timeManagement?.freeMinutesPerDay,
+      "minutes/day",
+    );
+    addQuantity(
+      values,
+      "Planning",
+      profile.timeManagement?.planningDaysPerWeek,
+      "days/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Procrastination",
+      profile.timeManagement?.procrastinationDaysPerWeek,
+      "days/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Routine consistency",
+      profile.personalHabits?.routineConsistency,
+      "/10",
+      true,
+    );
+    addQuantity(
+      values,
+      "Self-discipline",
+      profile.personalHabits?.selfDiscipline,
+      "/10",
+      true,
+    );
+    addQuantity(
+      values,
+      "Confidence",
+      profile.personalHabits?.confidence,
+      "/10",
+    );
+    addQuantity(
+      values,
+      "Monthly allowance",
+      profile.financialHabits?.monthlyAllowance,
+      profile.financialHabits?.currencyCode || "currency/month",
+    );
+    addQuantity(
+      values,
+      "Monthly income",
+      profile.financialHabits?.monthlyIncome,
+      profile.financialHabits?.currencyCode || "currency/month",
+    );
+    addQuantity(
+      values,
+      "Monthly savings",
+      profile.financialHabits?.monthlySavings,
+      profile.financialHabits?.currencyCode || "currency/month",
+      true,
+    );
+    addQuantity(
+      values,
+      "Monthly spending",
+      profile.financialHabits?.monthlySpending,
+      profile.financialHabits?.currencyCode || "currency/month",
+    );
+    addQuantity(
+      values,
+      "Social time",
+      profile.socialLife?.timeWithFriendsFamilyHoursPerWeek,
+      "hours/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Social satisfaction",
+      profile.socialLife?.socialSatisfaction,
+      "/10",
+    );
+    addQuantity(
+      values,
+      "Improvement time",
+      profile.selfImprovement?.availableMinutesPerWeek,
+      "minutes/week",
+      true,
+    );
+    addQuantity(
+      values,
+      "Goal progress",
+      profile.metrics?.averageGoalProgressPct,
+      "%",
+    );
     addQuantity(values, "Satisfaction", profile.satisfaction, "/10");
   }
   return values;
@@ -95,8 +387,17 @@ function currentQuantities(id, profile) {
 async function ensureSuggestedGoals(userId, categoryId, changes) {
   const goals = [];
   for (const change of changes) {
-    if (!Number.isFinite(Number(change.targetValue)) || Number(change.targetValue) < 0) continue;
-    let goal = await Goal.findOne({ userId, categoryId, metric: change.metric, active: true });
+    if (
+      !Number.isFinite(Number(change.targetValue)) ||
+      Number(change.targetValue) < 0
+    )
+      continue;
+    let goal = await Goal.findOne({
+      userId,
+      categoryId,
+      metric: change.metric,
+      active: true,
+    });
     if (!goal) {
       const unit = String(change.unit || "").trim();
       goal = await Goal.create({
@@ -125,8 +426,16 @@ const profileFields = {
   fitnessGoal: null,
   physicalActivity: ["dailySteps", "workoutsPerWeek", "averageWorkoutMinutes"],
   sleepRoutine: ["averageSleepHours", "bedtime", "wakeTime"],
-  eatingHabits: ["mealsPerDay", "breakfastDaysPerWeek", "junkOrOutsideMealsPerWeek"],
-  nutritionHydration: ["waterMlPerDay", "fruitVegetableServingsPerDay", "dietaryPreference"],
+  eatingHabits: [
+    "mealsPerDay",
+    "breakfastDaysPerWeek",
+    "junkOrOutsideMealsPerWeek",
+  ],
+  nutritionHydration: [
+    "waterMlPerDay",
+    "fruitVegetableServingsPerDay",
+    "dietaryPreference",
+  ],
   fitnessConsistencyRating: null,
   satisfaction: null,
 };
@@ -149,29 +458,43 @@ function pickProfile(source) {
 }
 
 function computeMetrics(profile, savedMetrics = {}) {
-  const heightM = profile.heightCm == null ? NaN : Number(profile.heightCm) / 100;
-  const weight = profile.currentWeightKg == null ? NaN : Number(profile.currentWeightKg);
-  const target = profile.targetWeightKg == null ? NaN : Number(profile.targetWeightKg);
-  const bmi = weight > 0 && heightM > 0 ? Math.round((weight / (heightM * heightM)) * 10) / 10 : null;
-  const weightGapKg = Number.isFinite(weight) && Number.isFinite(target)
-    ? Math.round((target - weight) * 10) / 10
-    : null;
+  const heightM =
+    profile.heightCm == null ? NaN : Number(profile.heightCm) / 100;
+  const weight =
+    profile.currentWeightKg == null ? NaN : Number(profile.currentWeightKg);
+  const target =
+    profile.targetWeightKg == null ? NaN : Number(profile.targetWeightKg);
+  const bmi =
+    weight > 0 && heightM > 0
+      ? Math.round((weight / (heightM * heightM)) * 10) / 10
+      : null;
+  const weightGapKg =
+    Number.isFinite(weight) && Number.isFinite(target)
+      ? Math.round((target - weight) * 10) / 10
+      : null;
   const workouts = profile.physicalActivity?.workoutsPerWeek;
   const duration = profile.physicalActivity?.averageWorkoutMinutes;
-  const workoutMinutesPerWeek = workouts != null && duration != null && Number.isFinite(Number(workouts)) && Number.isFinite(Number(duration))
-    ? Number(workouts) * Number(duration)
-    : null;
+  const workoutMinutesPerWeek =
+    workouts != null &&
+    duration != null &&
+    Number.isFinite(Number(workouts)) &&
+    Number.isFinite(Number(duration))
+      ? Number(workouts) * Number(duration)
+      : null;
 
   return {
     bmi,
     weightChangeKg: weightGapKg,
     averageSteps: profile.physicalActivity?.dailySteps ?? null,
     workoutMinutesPerWeek,
-    sleepScheduleVarianceMinutes: savedMetrics.sleepScheduleVarianceMinutes ?? null,
+    sleepScheduleVarianceMinutes:
+      savedMetrics.sleepScheduleVarianceMinutes ?? null,
     goalAdherencePct: savedMetrics.goalAdherencePct ?? null,
-    overallScore: profile.fitnessConsistencyRating != null && Number.isFinite(Number(profile.fitnessConsistencyRating))
-      ? Math.round(Number(profile.fitnessConsistencyRating) * 10)
-      : (savedMetrics.overallScore ?? null),
+    overallScore:
+      profile.fitnessConsistencyRating != null &&
+      Number.isFinite(Number(profile.fitnessConsistencyRating))
+        ? Math.round(Number(profile.fitnessConsistencyRating) * 10)
+        : (savedMetrics.overallScore ?? null),
     dataDays: savedMetrics.dataDays ?? 0,
     coveragePct: savedMetrics.coveragePct ?? null,
     computedAt: savedMetrics.computedAt ?? null,
@@ -180,12 +503,22 @@ function computeMetrics(profile, savedMetrics = {}) {
 
 router.post("/health-fitness/compare", requireAuth, async (req, res) => {
   try {
-    const savedProfile = await HealthFitness.findOne({ userId: req.user._id }).lean();
+    const savedProfile = await HealthFitness.findOne({
+      userId: req.user._id,
+    }).lean();
     const suppliedProfile = req.body?.profile ?? req.body?.current ?? req.body;
-    const hasSuppliedProfile = suppliedProfile && typeof suppliedProfile === "object" && !Array.isArray(suppliedProfile)
-      && Object.keys(suppliedProfile).some((key) => profileFields[key] !== undefined);
+    const hasSuppliedProfile =
+      suppliedProfile &&
+      typeof suppliedProfile === "object" &&
+      !Array.isArray(suppliedProfile) &&
+      Object.keys(suppliedProfile).some(
+        (key) => profileFields[key] !== undefined,
+      );
     if (!hasSuppliedProfile && !savedProfile) {
-      return res.status(400).json({ message: "Send your Health & Fitness details in the request body or save your profile first." });
+      return res.status(400).json({
+        message:
+          "Send your Health & Fitness details in the request body or save your profile first.",
+      });
     }
 
     const source = hasSuppliedProfile ? suppliedProfile : savedProfile;
@@ -201,7 +534,11 @@ router.post("/health-fitness/compare", requireAuth, async (req, res) => {
 
     return res.json({
       model: result.model,
-      current: { profile: current, metrics: currentMetrics, analysis: result.analysis.current },
+      current: {
+        profile: current,
+        metrics: currentMetrics,
+        analysis: result.analysis.current,
+      },
       future: result.analysis.future,
       scenario: result.analysis.scenario,
       persisted: false,
@@ -214,22 +551,36 @@ router.post("/health-fitness/compare", requireAuth, async (req, res) => {
     if (error.message.includes("OPENROUTER_API_KEY")) {
       return res.status(503).json({ message: error.message });
     }
-    return res.status(502).json({ message: error.message || "The analysis provider could not complete this request." });
+    return res.status(502).json({
+      message:
+        error.message ||
+        "The analysis provider could not complete this request.",
+    });
   }
 });
 
 router.post("/category/:categoryId", requireAuth, async (req, res) => {
-  const category = profileCategories.find((item) => item.id === req.params.categoryId);
-  if (!category) return res.status(404).json({ message: "Unknown profile section." });
+  const category = profileCategories.find(
+    (item) => item.id === req.params.categoryId,
+  );
+  if (!category)
+    return res.status(404).json({ message: "Unknown profile section." });
 
   try {
-    const document = await category.model.findOne({ userId: req.user._id }).lean();
+    const document = await category.model
+      .findOne({ userId: req.user._id })
+      .lean();
     if (!document) {
-      return res.status(404).json({ message: `Save your ${category.label} section before requesting a comparison.` });
+      return res.status(404).json({
+        message: `Save your ${category.label} section before requesting a comparison.`,
+      });
     }
 
     const profile = toPlainProfile(document);
-    const currentScore = Math.max(0, Math.min(100, Math.round(category.score(document) || 0)));
+    const currentScore = Math.max(
+      0,
+      Math.min(100, Math.round(category.score(document) || 0)),
+    );
     const quantities = currentQuantities(category.id, profile);
     const result = await analyzeCategorySuggestions({
       id: category.id,
@@ -239,11 +590,21 @@ router.post("/category/:categoryId", requireAuth, async (req, res) => {
     });
     const changes = result.analysis.changes
       .map((change) => {
-        const actual = quantities.find((quantity) => quantity.metric.toLowerCase() === change.metric.trim().toLowerCase());
-        return actual ? { ...change, currentValue: actual.value, unit: actual.unit } : null;
+        const actual = quantities.find(
+          (quantity) =>
+            quantity.metric.toLowerCase() ===
+            change.metric.trim().toLowerCase(),
+        );
+        return actual
+          ? { ...change, currentValue: actual.value, unit: actual.unit }
+          : null;
       })
       .filter(Boolean);
-    const goals = await ensureSuggestedGoals(req.user._id, category.id, changes);
+    const goals = await ensureSuggestedGoals(
+      req.user._id,
+      category.id,
+      changes,
+    );
 
     return res.json({
       model: result.model,
@@ -251,11 +612,26 @@ router.post("/category/:categoryId", requireAuth, async (req, res) => {
       categoryLabel: category.label,
       current: {
         overallScore: currentScore,
-        categories: [{ id: category.id, label: category.label, score: currentScore, quantities }],
+        categories: [
+          {
+            id: category.id,
+            label: category.label,
+            score: currentScore,
+            quantities,
+          },
+        ],
       },
       future: {
         overallScore: result.analysis.score,
-        categories: [{ id: category.id, label: category.label, score: result.analysis.score, summary: result.analysis.summary, changes }],
+        categories: [
+          {
+            id: category.id,
+            label: category.label,
+            score: result.analysis.score,
+            summary: result.analysis.summary,
+            changes,
+          },
+        ],
       },
       goals: goals.map((goal) => ({
         id: goal._id,
@@ -277,7 +653,11 @@ router.post("/category/:categoryId", requireAuth, async (req, res) => {
     if (error.message.includes("OPENROUTER_API_KEY")) {
       return res.status(503).json({ message: error.message });
     }
-    return res.status(502).json({ message: error.message || "The analysis provider could not complete this request." });
+    return res.status(502).json({
+      message:
+        error.message ||
+        "The analysis provider could not complete this request.",
+    });
   }
 });
 

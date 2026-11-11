@@ -1,17 +1,42 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f5f6fb" /><title>Goals — STACKED</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./css/app-nav.css" /><link rel="stylesheet" href="./css/workspace.css" /><link rel="stylesheet" href="./css/goals-page.css" /><link rel="stylesheet" href="./css/goals-sidebar.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f6fb" />
+    <title>Goals — STACKED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/app-nav.css" />
+    <link rel="stylesheet" href="./css/workspace.css" />
+    <link rel="stylesheet" href="./css/goals-page.css" />
+    <link rel="stylesheet" href="./css/goals-sidebar.css" />
   </head>
   <body class="app-page">
     <header class="app-topbar">
-      <a class="app-brand" href="/dashboard.html"><span class="app-brand-mark"><i></i><i></i><i></i></span>STACKED</a>
-      <nav class="app-links" aria-label="Main navigation"><a href="/tracker.html">Tracker</a><a href="/analysis.html">Insights</a><a href="/goals.html">Goals</a><a href="/profile.html">Profile</a></nav>
-      <div class="app-account"><button class="app-avatar" id="navAvatar" type="button" aria-expanded="false">●</button><button class="app-logout" id="navLogout" type="button" hidden>Log out</button></div>
+      <a class="app-brand" href="/dashboard.html"
+        ><span class="app-brand-mark"><i></i><i></i><i></i></span>STACKED</a
+      >
+      <nav class="app-links" aria-label="Main navigation">
+        <a href="/tracker.html">Tracker</a><a href="/analysis.html">Insights</a
+        ><a href="/goals.html">Goals</a><a href="/profile.html">Profile</a>
+      </nav>
+      <div class="app-account">
+        <button
+          class="app-avatar"
+          id="navAvatar"
+          type="button"
+          aria-expanded="false"
+        >
+          ●</button
+        ><button class="app-logout" id="navLogout" type="button" hidden>
+          Log out
+        </button>
+      </div>
     </header>
     <main class="goals-layout">
       <aside class="goals-sidebar" aria-label="Goals sections">
@@ -22,22 +47,74 @@
         <a href="/tracker.html#dailyTracker">✓ <b>Daily Tracker</b></a>
       </aside>
       <div class="app-main goals-content">
-      <section class="workspace-heading goals-heading" id="goalOverview">
-        <div><span class="page-kicker">YOUR SUGGESTED TARGETS</span><h1 class="page-title">Your Goals</h1><p class="page-subtitle">Goals are created from your AI insights. Track each target in Tracker to build your daily history.</p></div>
-        <a class="workspace-action" href="/analysis.html">Refresh Insights <span>→</span></a>
-      </section>
-      <section class="workspace-stats" id="goalProgress"><article class="workspace-stat"><strong id="goalsTotal">0</strong><span>Active goals</span></article><article class="workspace-stat"><strong id="goalsCompletedToday">0</strong><span>Completed today</span></article><article class="workspace-stat"><strong id="goalsWeeklyRate">—</strong><span>This week</span></article></section>
-      <section class="workspace-panel goals-panel" id="aiTargets">
-        <div class="goals-panel-heading"><div><h2>Targets to build on</h2><p class="panel-intro">Each goal is linked to a quantity suggested for one of your profile areas.</p></div><a class="workspace-action lime" href="/tracker.html">Daily Tracker <span>→</span></a></div>
-        <div class="goal-filters" id="goalFilters" aria-label="Filter goals by profile area"></div>
-        <div class="goals-list" id="goalsList"><div class="empty-state">Loading your goals…</div></div>
-      </section>
-      <section class="goal-streak-banner">
-        <div class="goal-trophy">🏆</div><div><h2 id="goalBannerTitle">Small steps add up.</h2><p id="goalBannerCopy">Check in on your goals from Tracker and your progress will build over time.</p></div><a href="/tracker.html" aria-label="Open tracker">→</a>
-        <div class="goal-mountain-art" role="img" aria-label="Decorative illustration placeholder of a mountain journey"><span>✦</span></div>
-      </section>
+        <section class="workspace-heading goals-heading" id="goalOverview">
+          <div>
+            <span class="page-kicker">YOUR SUGGESTED TARGETS</span>
+            <h1 class="page-title">Your Goals</h1>
+            <p class="page-subtitle">
+              Goals are created from your AI insights. Track each target in
+              Tracker to build your daily history.
+            </p>
+          </div>
+          <a class="workspace-action" href="/analysis.html"
+            >Refresh Insights <span>→</span></a
+          >
+        </section>
+        <section class="workspace-stats" id="goalProgress">
+          <article class="workspace-stat">
+            <strong id="goalsTotal">0</strong><span>Active goals</span>
+          </article>
+          <article class="workspace-stat">
+            <strong id="goalsCompletedToday">0</strong
+            ><span>Completed today</span>
+          </article>
+          <article class="workspace-stat">
+            <strong id="goalsWeeklyRate">—</strong><span>This week</span>
+          </article>
+        </section>
+        <section class="workspace-panel goals-panel" id="aiTargets">
+          <div class="goals-panel-heading">
+            <div>
+              <h2>Targets to build on</h2>
+              <p class="panel-intro">
+                Each goal is linked to a quantity suggested for one of your
+                profile areas.
+              </p>
+            </div>
+            <a class="workspace-action lime" href="/tracker.html"
+              >Daily Tracker <span>→</span></a
+            >
+          </div>
+          <div
+            class="goal-filters"
+            id="goalFilters"
+            aria-label="Filter goals by profile area"
+          ></div>
+          <div class="goals-list" id="goalsList">
+            <div class="empty-state">Loading your goals…</div>
+          </div>
+        </section>
+        <section class="goal-streak-banner">
+          <div class="goal-trophy">🏆</div>
+          <div>
+            <h2 id="goalBannerTitle">Small steps add up.</h2>
+            <p id="goalBannerCopy">
+              Check in on your goals from Tracker and your progress will build
+              over time.
+            </p>
+          </div>
+          <a href="/tracker.html" aria-label="Open tracker">→</a>
+          <div
+            class="goal-mountain-art"
+            role="img"
+            aria-label="Decorative illustration placeholder of a mountain journey"
+          >
+            <span>✦</span>
+          </div>
+        </section>
       </div>
     </main>
-    <script src="./js/app-nav.js"></script><script src="./js/goals.js"></script>
+    <script src="./js/app-nav.js"></script>
+    <script src="./js/goals.js"></script>
   </body>
 </html>

@@ -7,7 +7,9 @@ const categoryNames = {
 
 const categoryOrder = Object.keys(categoryNames);
 const categoryForms = [...document.querySelectorAll("[data-category-form]")];
-const categoryButtons = [...document.querySelectorAll("[data-category-select]")];
+const categoryButtons = [
+  ...document.querySelectorAll("[data-category-select]"),
+];
 const categoryTitle = document.querySelector("#categoryTitle");
 const categoryEyebrow = document.querySelector("#categoryEyebrow");
 const toast = document.querySelector("#toast");
@@ -30,44 +32,77 @@ function getPath(source, path) {
 }
 
 function parseArrayField(type, rawValue) {
-  const lines = rawValue.split("\n").map((line) => line.trim()).filter(Boolean);
+  const lines = rawValue
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
   if (type === "string-list") {
-    return rawValue.split(/[\n,]/).map((item) => item.trim()).filter(Boolean);
+    return rawValue
+      .split(/[\n,]/)
+      .map((item) => item.trim())
+      .filter(Boolean);
   }
   if (type === "skills") {
-    return lines.map((line) => {
-      const [name, level] = line.split("|").map((part) => part.trim());
-      return { name, ...(level ? { level: Number(level) } : {}) };
-    }).filter((item) => item.name);
+    return lines
+      .map((line) => {
+        const [name, level] = line.split("|").map((part) => part.trim());
+        return { name, ...(level ? { level: Number(level) } : {}) };
+      })
+      .filter((item) => item.name);
   }
   if (type === "experiences") {
-    return lines.map((line) => {
-      const parts = line.split("|").map((part) => part.trim()).filter(Boolean);
-      const acceptedTypes = new Set(["project", "hackathon", "internship", "certification", "other"]);
-      const first = (parts[0] || "").toLowerCase();
-      const hasType = acceptedTypes.has(first);
-      const experienceType = hasType ? first : "other";
-      const trailingDate = /^\d{4}-\d{2}-\d{2}$/.test(parts.at(-1) || "");
-      const titleParts = hasType ? parts.slice(1, 2) : (trailingDate ? parts.slice(0, -1) : parts);
-      const title = titleParts.join(" | ");
-      const possibleDate = hasType ? parts[2] : trailingDate ? parts.at(-1) : null;
-      const completedAt = /^\d{4}-\d{2}-\d{2}$/.test(possibleDate || "") ? possibleDate : null;
-      return {
-        type: experienceType,
-        title,
-        ...(title && completedAt ? { completedAt } : {}),
-      };
-    }).filter((item) => item.type && item.title);
+    return lines
+      .map((line) => {
+        const parts = line
+          .split("|")
+          .map((part) => part.trim())
+          .filter(Boolean);
+        const acceptedTypes = new Set([
+          "project",
+          "hackathon",
+          "internship",
+          "certification",
+          "other",
+        ]);
+        const first = (parts[0] || "").toLowerCase();
+        const hasType = acceptedTypes.has(first);
+        const experienceType = hasType ? first : "other";
+        const trailingDate = /^\d{4}-\d{2}-\d{2}$/.test(parts.at(-1) || "");
+        const titleParts = hasType
+          ? parts.slice(1, 2)
+          : trailingDate
+            ? parts.slice(0, -1)
+            : parts;
+        const title = titleParts.join(" | ");
+        const possibleDate = hasType
+          ? parts[2]
+          : trailingDate
+            ? parts.at(-1)
+            : null;
+        const completedAt = /^\d{4}-\d{2}-\d{2}$/.test(possibleDate || "")
+          ? possibleDate
+          : null;
+        return {
+          type: experienceType,
+          title,
+          ...(title && completedAt ? { completedAt } : {}),
+        };
+      })
+      .filter((item) => item.type && item.title);
   }
   if (type === "goals") {
-    return lines.map((line) => {
-      const [title, targetDate, progressPct] = line.split("|").map((part) => part.trim());
-      return {
-        title,
-        ...(targetDate ? { targetDate } : {}),
-        ...(progressPct ? { progressPct: Number(progressPct) } : {}),
-      };
-    }).filter((item) => item.title);
+    return lines
+      .map((line) => {
+        const [title, targetDate, progressPct] = line
+          .split("|")
+          .map((part) => part.trim());
+        return {
+          title,
+          ...(targetDate ? { targetDate } : {}),
+          ...(progressPct ? { progressPct: Number(progressPct) } : {}),
+        };
+      })
+      .filter((item) => item.title);
   }
   return [];
 }
@@ -75,9 +110,24 @@ function parseArrayField(type, rawValue) {
 function serializeArrayField(type, value) {
   if (!Array.isArray(value)) return "";
   if (type === "string-list") return value.join(", ");
-  if (type === "skills") return value.map((item) => `${item.name}${item.level ? ` | ${item.level}` : ""}`).join("\n");
-  if (type === "experiences") return value.map((item) => `${item.type === "other" ? item.title : `${item.type} | ${item.title}`}${item.completedAt ? ` | ${String(item.completedAt).slice(0, 10)}` : ""}`).join("\n");
-  if (type === "goals") return value.map((item) => `${item.title}${item.targetDate ? ` | ${String(item.targetDate).slice(0, 10)}` : ""}${item.progressPct != null ? ` | ${item.progressPct}` : ""}`).join("\n");
+  if (type === "skills")
+    return value
+      .map((item) => `${item.name}${item.level ? ` | ${item.level}` : ""}`)
+      .join("\n");
+  if (type === "experiences")
+    return value
+      .map(
+        (item) =>
+          `${item.type === "other" ? item.title : `${item.type} | ${item.title}`}${item.completedAt ? ` | ${String(item.completedAt).slice(0, 10)}` : ""}`,
+      )
+      .join("\n");
+  if (type === "goals")
+    return value
+      .map(
+        (item) =>
+          `${item.title}${item.targetDate ? ` | ${String(item.targetDate).slice(0, 10)}` : ""}${item.progressPct != null ? ` | ${item.progressPct}` : ""}`,
+      )
+      .join("\n");
   return "";
 }
 
@@ -121,20 +171,25 @@ function showToast(message, isError = false) {
 }
 
 async function analyzeWhenComplete(categoryId) {
-  document.querySelector("#analysisOverlayMessage").textContent = `Reviewing ${categoryNames[categoryId]} and shaping measurable suggestions…`;
+  document.querySelector("#analysisOverlayMessage").textContent =
+    `Reviewing ${categoryNames[categoryId]} and shaping measurable suggestions…`;
   analysisOverlay.hidden = false;
-  const response = await fetch(`/api/analysis/category/${encodeURIComponent(categoryId)}`, {
-    method: "POST",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  });
+  const response = await fetch(
+    `/api/analysis/category/${encodeURIComponent(categoryId)}`,
+    {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    },
+  );
   const result = await response.json();
   if (response.status === 401) {
     window.location.replace("/login.html");
     return false;
   }
-  if (!response.ok) throw new Error(result.message || "Could not create your comparison.");
+  if (!response.ok)
+    throw new Error(result.message || "Could not create your comparison.");
   sessionStorage.setItem("stackedAnalysisResult", JSON.stringify(result));
   sessionStorage.setItem("stackedSubmittedCategory", categoryId);
   localStorage.setItem("lastInsightCategoryId", categoryId);
@@ -162,17 +217,24 @@ function selectCategory(categoryId) {
 }
 
 async function loadCategory(categoryId) {
-  const form = categoryForms.find((item) => item.dataset.categoryForm === categoryId);
+  const form = categoryForms.find(
+    (item) => item.dataset.categoryForm === categoryId,
+  );
   if (!form) return;
   const message = form.querySelector(".save-message");
   message.textContent = "Loading saved answers…";
   try {
-    const response = await fetch(`/api/categories/${categoryId}`, { credentials: "same-origin" });
+    const response = await fetch(`/api/categories/${categoryId}`, {
+      credentials: "same-origin",
+    });
     if (response.status === 401) return window.location.replace("/login.html");
     const result = await response.json();
-    if (!response.ok) throw new Error(result.message || "Could not load this category");
+    if (!response.ok)
+      throw new Error(result.message || "Could not load this category");
     if (result.data) setFormValues(form, result.data);
-    message.textContent = result.data ? "Your saved answers are loaded." : "No answers saved yet.";
+    message.textContent = result.data
+      ? "Your saved answers are loaded."
+      : "No answers saved yet.";
   } catch (error) {
     console.error(error);
     message.textContent = "Could not load saved answers.";
@@ -181,7 +243,9 @@ async function loadCategory(categoryId) {
 
 async function checkSession() {
   try {
-    const response = await fetch("/api/users/status", { credentials: "same-origin" });
+    const response = await fetch("/api/users/status", {
+      credentials: "same-origin",
+    });
     const result = await response.json();
     if (!response.ok || !result.authenticated) {
       window.location.replace("/login.html");
@@ -197,13 +261,16 @@ async function checkSession() {
 }
 
 categoryButtons.forEach((button) => {
-  button.addEventListener("click", () => selectCategory(button.dataset.categorySelect));
+  button.addEventListener("click", () =>
+    selectCategory(button.dataset.categorySelect),
+  );
 });
 
 categoryForms.forEach((form) => {
   const categoryId = form.dataset.categoryForm;
   form.addEventListener("focusin", (event) => {
-    if (event.target.id) localStorage.setItem("selectedCategoryFieldId", event.target.id);
+    if (event.target.id)
+      localStorage.setItem("selectedCategoryFieldId", event.target.id);
     localStorage.setItem("selectedCategoryId", categoryId);
   });
 
@@ -223,9 +290,11 @@ categoryForms.forEach((form) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(collectFormValues(form)),
       });
-      if (response.status === 401) return window.location.replace("/login.html");
+      if (response.status === 401)
+        return window.location.replace("/login.html");
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Could not save this category");
+      if (!response.ok)
+        throw new Error(result.message || "Could not save this category");
       setFormValues(form, result.data);
       message.textContent = "Saved to your profile.";
       await analyzeWhenComplete(categoryId);
@@ -240,10 +309,14 @@ categoryForms.forEach((form) => {
   });
 });
 
-categoryForms.forEach((form) => { form.hidden = true; });
+categoryForms.forEach((form) => {
+  form.hidden = true;
+});
 categoryButtons.forEach((button) => button.classList.remove("active"));
 checkSession().then((authenticated) => {
   if (!authenticated) return;
   const requestedCategory = localStorage.getItem("selectedCategoryId");
-  selectCategory(categoryNames[requestedCategory] ? requestedCategory : categoryOrder[0]);
+  selectCategory(
+    categoryNames[requestedCategory] ? requestedCategory : categoryOrder[0],
+  );
 });

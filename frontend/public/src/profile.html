@@ -1,17 +1,40 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f5f6fb" /><title>Profile — STACKED</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./css/app-nav.css" /><link rel="stylesheet" href="./css/profile-page.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f6fb" />
+    <title>Profile — STACKED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/app-nav.css" />
+    <link rel="stylesheet" href="./css/profile-page.css" />
   </head>
   <body class="app-page">
     <header class="app-topbar">
-      <a class="app-brand" href="/dashboard.html"><span class="app-brand-mark"><i></i><i></i><i></i></span>STACKED</a>
-      <nav class="app-links" aria-label="Main navigation"><a href="/tracker.html">Tracker</a><a href="/analysis.html">Insights</a><a href="/goals.html">Goals</a><a href="/profile.html">Profile</a></nav>
-      <div class="app-account"><button class="app-avatar" id="navAvatar" type="button" aria-expanded="false">●</button><button class="app-logout" id="navLogout" type="button" hidden>Log out</button></div>
+      <a class="app-brand" href="/dashboard.html"
+        ><span class="app-brand-mark"><i></i><i></i><i></i></span>STACKED</a
+      >
+      <nav class="app-links" aria-label="Main navigation">
+        <a href="/tracker.html">Tracker</a><a href="/analysis.html">Insights</a
+        ><a href="/goals.html">Goals</a><a href="/profile.html">Profile</a>
+      </nav>
+      <div class="app-account">
+        <button
+          class="app-avatar"
+          id="navAvatar"
+          type="button"
+          aria-expanded="false"
+        >
+          ●</button
+        ><button class="app-logout" id="navLogout" type="button" hidden>
+          Log out
+        </button>
+      </div>
     </header>
     <main class="profile-page">
       <aside class="profile-sidebar">
@@ -23,33 +46,127 @@
         <a href="#accountSettings">◈ <span>Account settings</span></a>
       </aside>
       <section class="profile-content" id="profileOverview">
-        <div class="profile-intro"><div><span class="page-kicker">YOUR STACKED ACCOUNT</span><h1 class="page-title">Your Profile</h1><p class="page-subtitle">A snapshot of your journey, all in one place.</p></div><a class="profile-edit-link" href="/tracker.html">Edit profile areas ↗</a></div>
+        <div class="profile-intro">
+          <div>
+            <span class="page-kicker">YOUR STACKED ACCOUNT</span>
+            <h1 class="page-title">Your Profile</h1>
+            <p class="page-subtitle">
+              A snapshot of your journey, all in one place.
+            </p>
+          </div>
+          <a class="profile-edit-link" href="/tracker.html"
+            >Edit profile areas ↗</a
+          >
+        </div>
         <div class="profile-summary-grid">
           <article class="identity-card">
-            <div class="profile-portrait" role="img" aria-label="Profile portrait placeholder"><span id="profileInitial">•</span></div>
-            <div class="identity-copy"><h2 id="profileName">Loading profile…</h2><p id="profileEmail">Your account details</p><span class="streak-badge">🔥 <strong id="profileStreak">—</strong> day streak</span></div>
+            <div
+              class="profile-portrait"
+              role="img"
+              aria-label="Profile portrait placeholder"
+            >
+              <span id="profileInitial">•</span>
+            </div>
+            <div class="identity-copy">
+              <h2 id="profileName">Loading profile…</h2>
+              <p id="profileEmail">Your account details</p>
+              <span class="streak-badge"
+                >🔥 <strong id="profileStreak">—</strong> day streak</span
+              >
+            </div>
           </article>
-          <article class="overall-score-card"><div class="profile-score-ring" id="overallScoreRing"><div><strong id="overallScore">—</strong><span>Overall score</span></div></div><p id="overallScoreCaption">Complete a profile area to get started.</p></article>
+          <article class="overall-score-card">
+            <div class="profile-score-ring" id="overallScoreRing">
+              <div>
+                <strong id="overallScore">—</strong><span>Overall score</span>
+              </div>
+            </div>
+            <p id="overallScoreCaption">
+              Complete a profile area to get started.
+            </p>
+          </article>
         </div>
         <section class="profile-stats" aria-label="Progress summary">
-          <article><span class="stat-icon">🔥</span><strong id="statStreak">—</strong><small>Day streak</small></article>
-          <article><span class="stat-icon">✓</span><strong id="statWeekly">—</strong><small>Weekly completion</small></article>
-          <article><span class="stat-icon">✦</span><strong id="statGoals">—</strong><small>Active goals</small></article>
+          <article>
+            <span class="stat-icon">🔥</span><strong id="statStreak">—</strong
+            ><small>Day streak</small>
+          </article>
+          <article>
+            <span class="stat-icon">✓</span><strong id="statWeekly">—</strong
+            ><small>Weekly completion</small>
+          </article>
+          <article>
+            <span class="stat-icon">✦</span><strong id="statGoals">—</strong
+            ><small>Active goals</small>
+          </article>
         </section>
         <section class="profile-section" id="profileAreas">
-          <div class="profile-section-heading"><div><h2>Your Profile Areas</h2><p>Scores and latest saved details from the areas you’ve completed.</p></div><a href="/tracker.html">Update areas →</a></div>
-          <div class="profile-area-grid" id="profileAreaGrid"><div class="profile-empty">Loading your profile areas…</div></div>
+          <div class="profile-section-heading">
+            <div>
+              <h2>Your Profile Areas</h2>
+              <p>
+                Scores and latest saved details from the areas you’ve completed.
+              </p>
+            </div>
+            <a href="/tracker.html">Update areas →</a>
+          </div>
+          <div class="profile-area-grid" id="profileAreaGrid">
+            <div class="profile-empty">Loading your profile areas…</div>
+          </div>
         </section>
         <section class="journey-card" id="journey">
-          <div class="journey-copy"><span class="page-kicker">YOUR JOURNEY</span><h2>Keep stacking small wins.</h2><p>Your weekly check-ins make your progress visible. Visit Tracker to log today’s goals.</p><a href="/tracker.html">Open Tracker →</a></div>
-          <div class="journey-chart"><div class="journey-chart-line"><i></i><i></i><i></i><i></i><i></i></div><div class="journey-chart-labels"><span>This week</span><strong id="journeyWeekly">—</strong></div></div>
+          <div class="journey-copy">
+            <span class="page-kicker">YOUR JOURNEY</span>
+            <h2>Keep stacking small wins.</h2>
+            <p>
+              Your weekly check-ins make your progress visible. Visit Tracker to
+              log today’s goals.
+            </p>
+            <a href="/tracker.html">Open Tracker →</a>
+          </div>
+          <div class="journey-chart">
+            <div class="journey-chart-line">
+              <i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="journey-chart-labels">
+              <span>This week</span><strong id="journeyWeekly">—</strong>
+            </div>
+          </div>
         </section>
         <section class="profile-settings-grid">
-          <article class="settings-card" id="preferences"><h2>Preferences</h2><p>Choose how STACKED keeps you updated.</p><label><span><strong>Notifications</strong><small>Progress reminders</small></span><input type="checkbox" disabled aria-label="Notifications preference not configured" /></label><label><span><strong>Weekly report</strong><small>A summary of your check-ins</small></span><input type="checkbox" disabled aria-label="Weekly report preference not configured" /></label></article>
-          <article class="settings-card" id="accountSettings"><h2>Account Settings</h2><p>Manage your account and saved profile information.</p><a href="/tracker.html">Manage profile areas <span>→</span></a><button type="button" id="profileLogout">Log out <span>→</span></button></article>
+          <article class="settings-card" id="preferences">
+            <h2>Preferences</h2>
+            <p>Choose how STACKED keeps you updated.</p>
+            <label
+              ><span
+                ><strong>Notifications</strong
+                ><small>Progress reminders</small></span
+              ><input
+                type="checkbox"
+                disabled
+                aria-label="Notifications preference not configured" /></label
+            ><label
+              ><span
+                ><strong>Weekly report</strong
+                ><small>A summary of your check-ins</small></span
+              ><input
+                type="checkbox"
+                disabled
+                aria-label="Weekly report preference not configured"
+            /></label>
+          </article>
+          <article class="settings-card" id="accountSettings">
+            <h2>Account Settings</h2>
+            <p>Manage your account and saved profile information.</p>
+            <a href="/tracker.html">Manage profile areas <span>→</span></a
+            ><button type="button" id="profileLogout">
+              Log out <span>→</span>
+            </button>
+          </article>
         </section>
       </section>
     </main>
-    <script src="./js/app-nav.js"></script><script src="./js/profile.js"></script>
+    <script src="./js/app-nav.js"></script>
+    <script src="./js/profile.js"></script>
   </body>
 </html>

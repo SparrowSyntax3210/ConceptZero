@@ -1,1 +1,115 @@
-.tracker-layout{width:min(1450px,calc(100% - 34px));margin:24px auto 45px;display:grid;grid-template-columns:210px minmax(0,1fr);gap:24px;align-items:start}.tracker-content{width:100%;max-width:none;margin:0;padding:0}.tracker-sidebar{position:sticky;top:20px;min-height:calc(100vh - 125px);padding:20px 13px;border:1px solid #e5e7ef;border-radius:22px;background:#ffffffc9;box-shadow:0 12px 40px #2930500a}.tracker-sidebar-title{display:block;margin:1px 10px 19px;color:#8a8e9d;font-size:9px;font-weight:800;letter-spacing:.13em}.tracker-sidebar>a{display:flex;align-items:center;gap:11px;margin:5px 0;padding:12px 11px;border-radius:13px;color:#555a6d;text-decoration:none;font-size:11px;font-weight:600;transition:background .18s,color .18s}.tracker-sidebar>a:hover{background:#f4f6fa}.tracker-sidebar>a.active{background:#eff8d8;color:#334817}.tracker-sidebar>a:first-letter{font-size:15px}.tracker-content .workspace-heading{scroll-margin-top:22px}.tracker-content #weeklySummary,.tracker-content #habitHeatmap,.tracker-content #streaks{scroll-margin-top:22px}.tracker-area-card{cursor:pointer}.tracker-area-card:focus-visible{outline:3px solid #a6d933;outline-offset:3px}.tracker-area-actions .area-add{background:#f0f8df;color:#48651a;border:1px solid #dfedc2}.tracker-area-actions .area-add:hover{background:#e5f4c8;text-decoration:none}@media(max-width:900px){.tracker-layout{grid-template-columns:170px minmax(0,1fr);gap:14px}}@media(max-width:680px){.tracker-layout{width:calc(100% - 20px);margin:12px auto 28px;grid-template-columns:1fr;gap:12px}.tracker-sidebar{position:static;min-height:0;padding:12px;border-radius:17px}.tracker-sidebar-title{margin-bottom:8px}.tracker-sidebar>a{display:inline-flex;margin:2px;padding:9px 10px}.tracker-content{padding:0}.tracker-sidebar>a{font-size:10px}}
+.tracker-layout {
+  width: min(1450px, calc(100% - 34px));
+  margin: 24px auto 45px;
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.tracker-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.tracker-sidebar {
+  position: sticky;
+  top: 20px;
+  min-height: calc(100vh - 125px);
+  padding: 20px 13px;
+  border: 1px solid #e5e7ef;
+  border-radius: 22px;
+  background: #ffffffc9;
+  box-shadow: 0 12px 40px #2930500a;
+}
+.tracker-sidebar-title {
+  display: block;
+  margin: 1px 10px 19px;
+  color: #8a8e9d;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+.tracker-sidebar > a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 5px 0;
+  padding: 12px 11px;
+  border-radius: 13px;
+  color: #555a6d;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  transition:
+    background 0.18s,
+    color 0.18s;
+}
+.tracker-sidebar > a:hover {
+  background: #f4f6fa;
+}
+.tracker-sidebar > a.active {
+  background: #eff8d8;
+  color: #334817;
+}
+.tracker-sidebar > a:first-letter {
+  font-size: 15px;
+}
+.tracker-content .workspace-heading {
+  scroll-margin-top: 22px;
+}
+.tracker-content #weeklySummary,
+.tracker-content #habitHeatmap,
+.tracker-content #streaks {
+  scroll-margin-top: 22px;
+}
+.tracker-area-card {
+  cursor: pointer;
+}
+.tracker-area-card:focus-visible {
+  outline: 3px solid #a6d933;
+  outline-offset: 3px;
+}
+.tracker-area-actions .area-add {
+  background: #f0f8df;
+  color: #48651a;
+  border: 1px solid #dfedc2;
+}
+.tracker-area-actions .area-add:hover {
+  background: #e5f4c8;
+  text-decoration: none;
+}
+@media (max-width: 900px) {
+  .tracker-layout {
+    grid-template-columns: 170px minmax(0, 1fr);
+    gap: 14px;
+  }
+}
+@media (max-width: 680px) {
+  .tracker-layout {
+    width: calc(100% - 20px);
+    margin: 12px auto 28px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .tracker-sidebar {
+    position: static;
+    min-height: 0;
+    padding: 12px;
+    border-radius: 17px;
+  }
+  .tracker-sidebar-title {
+    margin-bottom: 8px;
+  }
+  .tracker-sidebar > a {
+    display: inline-flex;
+    margin: 2px;
+    padding: 9px 10px;
+  }
+  .tracker-content {
+    padding: 0;
+  }
+  .tracker-sidebar > a {
+    font-size: 10px;
+  }
+}

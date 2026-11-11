@@ -70,10 +70,14 @@ loadDashboard();
 
 async function loadCategoryStatus() {
   try {
-    const response = await fetch("/api/categories", { credentials: "same-origin" });
+    const response = await fetch("/api/categories", {
+      credentials: "same-origin",
+    });
     if (!response.ok) return;
     const { categories } = await response.json();
-    const completed = categories.filter((category) => category.completed).length;
+    const completed = categories.filter(
+      (category) => category.completed,
+    ).length;
     completedCategories.textContent = `${completed}/4`;
   } catch (error) {
     console.error("Could not load category completion:", error);
@@ -86,18 +90,30 @@ function localDateKey(date) {
 
 async function loadGoalSnapshot() {
   try {
-    const response = await fetch("/api/goals?includeArchived=true", { credentials: "same-origin" });
+    const response = await fetch("/api/goals?includeArchived=true", {
+      credentials: "same-origin",
+    });
     if (!response.ok) return;
     const { goals = [] } = await response.json();
     const active = goals.filter((goal) => goal.active);
     const today = localDateKey(new Date());
-    const completeToday = active.filter((goal) => goal.logs?.some((entry) => entry.date === today && entry.completed)).length;
+    const completeToday = active.filter((goal) =>
+      goal.logs?.some((entry) => entry.date === today && entry.completed),
+    ).length;
     goalCountElement.textContent = `${active.length} active`;
     todayCountElement.textContent = `${completeToday} completed`;
 
-    const completedDates = new Set(active.flatMap((goal) => (goal.logs || []).filter((entry) => entry.completed).map((entry) => entry.date)));
-    const cursor = new Date(); cursor.setHours(0, 0, 0, 0);
-    if (!completedDates.has(localDateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+    const completedDates = new Set(
+      active.flatMap((goal) =>
+        (goal.logs || [])
+          .filter((entry) => entry.completed)
+          .map((entry) => entry.date),
+      ),
+    );
+    const cursor = new Date();
+    cursor.setHours(0, 0, 0, 0);
+    if (!completedDates.has(localDateKey(cursor)))
+      cursor.setDate(cursor.getDate() - 1);
     let streak = 0;
     while (completedDates.has(localDateKey(cursor))) {
       streak += 1;

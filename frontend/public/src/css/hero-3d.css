@@ -1,1 +1,47 @@
-.hero-model-canvas{position:absolute;z-index:4;left:28%;bottom:1.5%;width:46%;height:91%;opacity:0;pointer-events:none;transition:opacity .7s ease;filter:drop-shadow(0 19px 23px #18203635)}.character-stage.model-ready .hero-model-canvas{opacity:1}.character-stage.model-ready .person-center{visibility:hidden}@media(max-width:1120px){.hero-model-canvas{left:28%;bottom:4%;width:47%;height:82%}}@media(max-width:760px){.hero-model-canvas{left:25%;bottom:2%;width:51%;height:76%}}@media(max-width:390px){.hero-model-canvas{left:23%;bottom:2%;width:54%;height:70%}}@media(prefers-reduced-motion:reduce){.hero-model-canvas{transition:none}}
+.hero-model-canvas {
+  position: absolute;
+  z-index: 4;
+  left: 28%;
+  bottom: 1.5%;
+  width: 46%;
+  height: 91%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+  filter: drop-shadow(0 19px 23px #18203635);
+}
+.character-stage.model-ready .hero-model-canvas {
+  opacity: 1;
+}
+.character-stage.model-ready .person-center {
+  visibility: hidden;
+}
+@media (max-width: 1120px) {
+  .hero-model-canvas {
+    left: 28%;
+    bottom: 4%;
+    width: 47%;
+    height: 82%;
+  }
+}
+@media (max-width: 760px) {
+  .hero-model-canvas {
+    left: 25%;
+    bottom: 2%;
+    width: 51%;
+    height: 76%;
+  }
+}
+@media (max-width: 390px) {
+  .hero-model-canvas {
+    left: 23%;
+    bottom: 2%;
+    width: 54%;
+    height: 70%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-model-canvas {
+    transition: none;
+  }
+}

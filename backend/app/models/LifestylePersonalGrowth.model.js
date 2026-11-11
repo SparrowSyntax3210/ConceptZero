@@ -23,7 +23,14 @@ const lifestylePersonalGrowthSchema = new Schema(
       // Bedtime and wake time are stored once in HealthFitness.sleepRoutine.
       mostProductiveTime: {
         type: String,
-        enum: ["early_morning", "morning", "afternoon", "evening", "night", "varies"],
+        enum: [
+          "early_morning",
+          "morning",
+          "afternoon",
+          "evening",
+          "night",
+          "varies",
+        ],
       },
     },
     timeManagement: {
@@ -41,7 +48,13 @@ const lifestylePersonalGrowthSchema = new Schema(
       monthlyIncome: { type: Number, min: 0 },
       monthlySavings: { type: Number, min: 0 },
       monthlySpending: { type: Number, min: 0 },
-      currencyCode: { type: String, uppercase: true, trim: true, maxlength: 3, default: "INR" },
+      currencyCode: {
+        type: String,
+        uppercase: true,
+        trim: true,
+        maxlength: 3,
+        default: "INR",
+      },
     },
     socialLife: {
       timeWithFriendsFamilyHoursPerWeek: { type: Number, min: 0, max: 168 },
@@ -73,4 +86,7 @@ const lifestylePersonalGrowthSchema = new Schema(
   { timestamps: true },
 );
 
-module.exports = mongoose.model("LifestylePersonalGrowth", lifestylePersonalGrowthSchema);
+module.exports = mongoose.model(
+  "LifestylePersonalGrowth",
+  lifestylePersonalGrowthSchema,
+);

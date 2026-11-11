@@ -8,15 +8,27 @@ const LifestylePersonalGrowth = require("../models/LifestylePersonalGrowth.model
 
 const categories = {
   "health-fitness": { label: "Health & Fitness", model: HealthFitness },
-  "mind-digital": { label: "Mind & Digital Wellbeing", model: MindDigitalWellbeing },
-  "academics-career": { label: "Academics & Career Growth", model: AcademicsCareerGrowth },
-  "lifestyle-growth": { label: "Lifestyle & Personal Growth", model: LifestylePersonalGrowth },
+  "mind-digital": {
+    label: "Mind & Digital Wellbeing",
+    model: MindDigitalWellbeing,
+  },
+  "academics-career": {
+    label: "Academics & Career Growth",
+    model: AcademicsCareerGrowth,
+  },
+  "lifestyle-growth": {
+    label: "Lifestyle & Personal Growth",
+    model: LifestylePersonalGrowth,
+  },
 };
 
 function average(values) {
   const available = values.filter((value) => Number.isFinite(value));
   return available.length
-    ? Math.round((available.reduce((sum, value) => sum + value, 0) / available.length) * 10) / 10
+    ? Math.round(
+        (available.reduce((sum, value) => sum + value, 0) / available.length) *
+          10,
+      ) / 10
     : undefined;
 }
 
@@ -26,10 +38,15 @@ function calculateMetrics(categoryId, data) {
   if (categoryId === "health-fitness") {
     const heightM = Number(data.heightCm) / 100;
     if (data.currentWeightKg > 0 && heightM > 0) {
-      metrics.bmi = Math.round((data.currentWeightKg / (heightM * heightM)) * 10) / 10;
+      metrics.bmi =
+        Math.round((data.currentWeightKg / (heightM * heightM)) * 10) / 10;
     }
-    if (Number.isFinite(data.targetWeightKg) && Number.isFinite(data.currentWeightKg)) {
-      metrics.weightChangeKg = Math.round((data.targetWeightKg - data.currentWeightKg) * 10) / 10;
+    if (
+      Number.isFinite(data.targetWeightKg) &&
+      Number.isFinite(data.currentWeightKg)
+    ) {
+      metrics.weightChangeKg =
+        Math.round((data.targetWeightKg - data.currentWeightKg) * 10) / 10;
     }
     if (Number.isFinite(data.physicalActivity?.dailySteps)) {
       metrics.averageSteps = data.physicalActivity.dailySteps;
@@ -39,7 +56,8 @@ function calculateMetrics(categoryId, data) {
       Number.isFinite(data.physicalActivity?.averageWorkoutMinutes)
     ) {
       metrics.workoutMinutesPerWeek =
-        data.physicalActivity.workoutsPerWeek * data.physicalActivity.averageWorkoutMinutes;
+        data.physicalActivity.workoutsPerWeek *
+        data.physicalActivity.averageWorkoutMinutes;
     }
     if (Number.isFinite(data.fitnessConsistencyRating)) {
       metrics.overallScore = data.fitnessConsistencyRating * 10;
@@ -48,7 +66,8 @@ function calculateMetrics(categoryId, data) {
 
   if (categoryId === "mind-digital") {
     if (Number.isFinite(data.screenTimeMinutesPerDay)) {
-      metrics.averageScreenHours = Math.round((data.screenTimeMinutesPerDay / 60) * 10) / 10;
+      metrics.averageScreenHours =
+        Math.round((data.screenTimeMinutesPerDay / 60) * 10) / 10;
     }
     const entertainmentMinutes =
       (data.digitalUsage?.socialMediaMinutesPerDay || 0) +
@@ -60,7 +79,9 @@ function calculateMetrics(categoryId, data) {
         Math.round((entertainmentMinutes / data.screenTimeMinutesPerDay) * 100),
       );
     }
-    if (Number.isFinite(data.digitalDistractions?.phoneBeforeSleepNightsPerWeek)) {
+    if (
+      Number.isFinite(data.digitalDistractions?.phoneBeforeSleepNightsPerWeek)
+    ) {
       metrics.phoneBeforeSleepRatePct = Math.round(
         (data.digitalDistractions.phoneBeforeSleepNightsPerWeek / 7) * 100,
       );
@@ -73,10 +94,13 @@ function calculateMetrics(categoryId, data) {
       data.moodMentalEnergy?.mentalEnergyRating,
       data.motivationFocus?.motivationRating,
       data.motivationFocus?.distractionManagementRating,
-      Number.isFinite(data.stress?.rating) ? 11 - data.stress.rating : undefined,
+      Number.isFinite(data.stress?.rating)
+        ? 11 - data.stress.rating
+        : undefined,
     ];
     const wellbeingAverage = average(wellbeingInputs);
-    if (wellbeingAverage !== undefined) metrics.focusWellbeingScore = Math.round(wellbeingAverage * 10);
+    if (wellbeingAverage !== undefined)
+      metrics.focusWellbeingScore = Math.round(wellbeingAverage * 10);
   }
 
   if (categoryId === "academics-career") {
@@ -85,18 +109,23 @@ function calculateMetrics(categoryId, data) {
     const target = data.academicGoals?.targetGradeValue;
     const targetScale = data.academicGoals?.targetGradeScale;
     if (Number.isFinite(current) && currentScale > 0) {
-      metrics.normalizedCurrentGradePct = Math.round((current / currentScale) * 1000) / 10;
+      metrics.normalizedCurrentGradePct =
+        Math.round((current / currentScale) * 1000) / 10;
     }
     if (Number.isFinite(target) && targetScale > 0) {
-      metrics.normalizedTargetGradePct = Math.round((target / targetScale) * 1000) / 10;
+      metrics.normalizedTargetGradePct =
+        Math.round((target / targetScale) * 1000) / 10;
     }
     if (
       Number.isFinite(metrics.normalizedCurrentGradePct) &&
       Number.isFinite(metrics.normalizedTargetGradePct)
     ) {
-      metrics.gradeGoalGapPct = Math.round(
-        (metrics.normalizedTargetGradePct - metrics.normalizedCurrentGradePct) * 10,
-      ) / 10;
+      metrics.gradeGoalGapPct =
+        Math.round(
+          (metrics.normalizedTargetGradePct -
+            metrics.normalizedCurrentGradePct) *
+            10,
+        ) / 10;
     }
     if (Number.isFinite(data.studyRoutine?.dailyStudyHours)) {
       metrics.weeklyStudyHours = data.studyRoutine.dailyStudyHours * 7;
@@ -122,23 +151,29 @@ function calculateMetrics(categoryId, data) {
       ...(data.personalGoals?.longTerm || []),
     ].map((goal) => goal.progressPct);
     const averageProgress = average(goalProgress);
-    if (averageProgress !== undefined) metrics.averageGoalProgressPct = averageProgress;
-    metrics.socialHoursPerWeek = data.socialLife?.timeWithFriendsFamilyHoursPerWeek;
-    const income = data.financialHabits?.monthlyIncome || data.financialHabits?.monthlyAllowance;
+    if (averageProgress !== undefined)
+      metrics.averageGoalProgressPct = averageProgress;
+    metrics.socialHoursPerWeek =
+      data.socialLife?.timeWithFriendsFamilyHoursPerWeek;
+    const income =
+      data.financialHabits?.monthlyIncome ||
+      data.financialHabits?.monthlyAllowance;
     if (income > 0 && Number.isFinite(data.financialHabits?.monthlySavings)) {
       metrics.savingsRatePct = Math.round(
         Math.min(100, (data.financialHabits.monthlySavings / income) * 100),
       );
     }
     if (Number.isFinite(data.selfImprovement?.availableMinutesPerWeek)) {
-      metrics.improvementMinutesPerWeek = data.selfImprovement.availableMinutesPerWeek;
+      metrics.improvementMinutesPerWeek =
+        data.selfImprovement.availableMinutesPerWeek;
     }
     const selfRating = average([
       data.personalHabits?.routineConsistency,
       data.personalHabits?.selfDiscipline,
       data.personalHabits?.confidence,
     ]);
-    if (selfRating !== undefined) metrics.overallScore = Math.round(selfRating * 10);
+    if (selfRating !== undefined)
+      metrics.overallScore = Math.round(selfRating * 10);
   }
 
   return metrics;
@@ -185,15 +220,33 @@ router.put("/:categoryId", requireAuth, async (req, res) => {
   if (!category) return res.status(404).json({ message: "Unknown category" });
 
   const input = { ...req.body };
-  for (const protectedField of ["_id", "__v", "userId", "metrics", "createdAt", "updatedAt"]) {
+  for (const protectedField of [
+    "_id",
+    "__v",
+    "userId",
+    "metrics",
+    "createdAt",
+    "updatedAt",
+  ]) {
     delete input[protectedField];
   }
 
   try {
     const data = await category.model.findOneAndUpdate(
       { userId: req.user._id },
-      { $set: { ...input, userId: req.user._id, metrics: calculateMetrics(req.params.categoryId, input) } },
-      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true },
+      {
+        $set: {
+          ...input,
+          userId: req.user._id,
+          metrics: calculateMetrics(req.params.categoryId, input),
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+        setDefaultsOnInsert: true,
+      },
     );
     return res.json({ categoryId: req.params.categoryId, data });
   } catch (error) {

@@ -5,7 +5,10 @@ const navLinks = [...document.querySelectorAll(".app-links a")];
 function markActiveLink() {
   const path = window.location.pathname;
   for (const link of navLinks) {
-    const active = link.pathname === path || ((path === "/dashboard.html" || path === "/forms.html") && link.pathname === "/tracker.html");
+    const active =
+      link.pathname === path ||
+      ((path === "/dashboard.html" || path === "/forms.html") &&
+        link.pathname === "/tracker.html");
     link.classList.toggle("active", active);
     if (active) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
@@ -14,7 +17,9 @@ function markActiveLink() {
 
 async function loadNavUser() {
   try {
-    const response = await fetch("/api/users/status", { credentials: "same-origin" });
+    const response = await fetch("/api/users/status", {
+      credentials: "same-origin",
+    });
     const result = await response.json();
     if (!response.ok || !result.authenticated || !result.user) {
       window.location.replace("/login.html");
@@ -36,7 +41,10 @@ navAvatar.addEventListener("click", () => {
 navLogout.addEventListener("click", async () => {
   navLogout.disabled = true;
   try {
-    const response = await fetch("/api/users/logout", { method: "POST", credentials: "same-origin" });
+    const response = await fetch("/api/users/logout", {
+      method: "POST",
+      credentials: "same-origin",
+    });
     if (!response.ok) throw new Error("Could not log out.");
     window.location.replace("/");
   } catch (error) {

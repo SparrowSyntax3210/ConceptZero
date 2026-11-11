@@ -11,7 +11,8 @@ function getCookie(req, name) {
 
 async function requireAuth(req, res, next) {
   const token = getCookie(req, "stacked_session");
-  if (!token) return res.status(401).json({ message: "Authentication required" });
+  if (!token)
+    return res.status(401).json({ message: "Authentication required" });
 
   try {
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
@@ -20,7 +21,8 @@ async function requireAuth(req, res, next) {
       sessionExpiresAt: { $gt: new Date() },
     }).select("_id username email");
 
-    if (!user) return res.status(401).json({ message: "Your session has expired" });
+    if (!user)
+      return res.status(401).json({ message: "Your session has expired" });
     req.user = user;
     return next();
   } catch (error) {

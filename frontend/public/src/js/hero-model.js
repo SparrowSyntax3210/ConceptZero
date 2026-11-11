@@ -12,7 +12,11 @@ async function initializeHeroModel() {
     camera.position.set(0, 1.65, 5.5);
     camera.lookAt(0, 1.22, 0);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -29,7 +33,9 @@ async function initializeHeroModel() {
     const loader = new FBXLoader();
     loader.setResourcePath("./assets/textures/");
     const textureLoader = new THREE.TextureLoader();
-    const avatarTexture = await textureLoader.loadAsync("./assets/textures/MikeAlger_Texture.jpeg");
+    const avatarTexture = await textureLoader.loadAsync(
+      "./assets/textures/MikeAlger_Texture.jpeg",
+    );
     avatarTexture.colorSpace = THREE.SRGBColorSpace;
     avatarTexture.flipY = false;
     avatarTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -41,7 +47,9 @@ async function initializeHeroModel() {
       if (node.isMesh) {
         node.castShadow = true;
         node.receiveShadow = true;
-        const materials = Array.isArray(node.material) ? node.material : [node.material];
+        const materials = Array.isArray(node.material)
+          ? node.material
+          : [node.material];
         for (const material of materials) {
           if (!material) continue;
           if (!material.map) material.map = avatarTexture;
@@ -53,7 +61,8 @@ async function initializeHeroModel() {
     // Relax the T-pose into a composed, arms-at-the-sides stance.
     const bones = new Map();
     model.traverse((node) => {
-      if (node.isBone) bones.set(node.name.replace(/[^a-z]/gi, "").toLowerCase(), node);
+      if (node.isBone)
+        bones.set(node.name.replace(/[^a-z]/gi, "").toLowerCase(), node);
     });
     const leftArm = bones.get("leftarm");
     const rightArm = bones.get("rightarm");
@@ -70,7 +79,11 @@ async function initializeHeroModel() {
     const targetHeight = 2.45;
     const scale = targetHeight / Math.max(originalSize.y, 0.001);
     model.scale.setScalar(scale);
-    model.position.set(-center.x * scale, -originalBounds.min.y * scale, -center.z * scale);
+    model.position.set(
+      -center.x * scale,
+      -originalBounds.min.y * scale,
+      -center.z * scale,
+    );
     model.rotation.y = -0.08;
     scene.add(model);
 
@@ -86,15 +99,21 @@ async function initializeHeroModel() {
     resize();
 
     stage.classList.add("model-ready");
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const clock = new THREE.Clock();
     const renderFrame = () => {
-      if (!reduceMotion) model.rotation.y = -0.08 + Math.sin(clock.elapsedTime * 0.38) * 0.025;
+      if (!reduceMotion)
+        model.rotation.y = -0.08 + Math.sin(clock.elapsedTime * 0.38) * 0.025;
       renderer.render(scene, camera);
       requestAnimationFrame(renderFrame);
     };
     renderFrame();
   } catch (error) {
-    console.warn("3D hero model could not load; using the portrait fallback.", error);
+    console.warn(
+      "3D hero model could not load; using the portrait fallback.",
+      error,
+    );
   }
 }

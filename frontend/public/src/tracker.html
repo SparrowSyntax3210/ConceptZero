@@ -1,17 +1,42 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f5f6fb" /><title>Tracker — STACKED</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./css/app-nav.css" /><link rel="stylesheet" href="./css/workspace.css" /><link rel="stylesheet" href="./css/tracker-areas.css" /><link rel="stylesheet" href="./css/tracker-page.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f6fb" />
+    <title>Tracker — STACKED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/app-nav.css" />
+    <link rel="stylesheet" href="./css/workspace.css" />
+    <link rel="stylesheet" href="./css/tracker-areas.css" />
+    <link rel="stylesheet" href="./css/tracker-page.css" />
   </head>
   <body class="app-page">
     <header class="app-topbar">
-      <a class="app-brand" href="/dashboard.html"><span class="app-brand-mark"><i></i><i></i><i></i></span>STACKED</a>
-      <nav class="app-links" aria-label="Main navigation"><a href="/tracker.html">Tracker</a><a href="/analysis.html">Insights</a><a href="/goals.html">Goals</a><a href="/profile.html">Profile</a></nav>
-      <div class="app-account"><button class="app-avatar" id="navAvatar" type="button" aria-expanded="false">●</button><button class="app-logout" id="navLogout" type="button" hidden>Log out</button></div>
+      <a class="app-brand" href="/dashboard.html"
+        ><span class="app-brand-mark"><i></i><i></i><i></i></span>STACKED</a
+      >
+      <nav class="app-links" aria-label="Main navigation">
+        <a href="/tracker.html">Tracker</a><a href="/analysis.html">Insights</a
+        ><a href="/goals.html">Goals</a><a href="/profile.html">Profile</a>
+      </nav>
+      <div class="app-account">
+        <button
+          class="app-avatar"
+          id="navAvatar"
+          type="button"
+          aria-expanded="false"
+        >
+          ●</button
+        ><button class="app-logout" id="navLogout" type="button" hidden>
+          Log out
+        </button>
+      </div>
     </header>
     <main class="tracker-layout">
       <aside class="tracker-sidebar" aria-label="Tracker sections">
@@ -22,38 +47,105 @@
         <a href="#streaks">♧ <span>Streaks</span></a>
       </aside>
       <div class="app-main tracker-content">
-      <section class="workspace-heading" id="dailyTracker">
-        <div><span class="page-kicker">YOUR DAILY CHECK-IN</span><h1 class="page-title">Your Habits</h1><p class="page-subtitle">Track the small actions that move your goals forward.</p></div>
-        <a class="workspace-action" href="/goals.html">Manage goals <span>→</span></a>
-      </section>
-      <section class="tracker-areas" aria-label="Track goals by profile area" id="trackerAreas"></section>
-      <section class="workspace-stats" id="weeklySummary" aria-label="Habit summary">
-        <article class="workspace-stat"><strong id="todayCount">0/0</strong><span>Completed today</span></article>
-        <article class="workspace-stat" id="streaks"><strong id="streakCount">0 days</strong><span>Current streak</span></article>
-        <article class="workspace-stat"><strong id="activeCount">0</strong><span>Active goals</span></article>
-      </section>
-      <section class="workspace-panel" id="habitHeatmap" style="margin-bottom:15px">
-        <h2>Your consistency</h2><p class="panel-intro">Each square shows how many active goals you checked off that day.</p>
-        <div class="heatmap-wrap"><div class="heatmap" id="heatmap" aria-label="Daily goal completion heatmap"></div></div>
-        <div class="heat-legend">Less <i></i><i></i><i></i><i></i><i></i> More</div>
-      </section>
-      <section class="tracker-grid">
-        <article class="workspace-panel">
-          <div class="workspace-heading" style="margin-bottom:14px">
-            <div><h2>Daily goals</h2><p class="panel-intro" id="selectedDateLabel">Today</p></div>
-            <div class="week-nav"><button id="previousDay" type="button" aria-label="Previous day">←</button><strong id="selectedDateShort"></strong><button id="nextDay" type="button" aria-label="Next day">→</button></div>
+        <section class="workspace-heading" id="dailyTracker">
+          <div>
+            <span class="page-kicker">YOUR DAILY CHECK-IN</span>
+            <h1 class="page-title">Your Habits</h1>
+            <p class="page-subtitle">
+              Track the small actions that move your goals forward.
+            </p>
           </div>
-          <div class="tracker-filters" id="trackerFilters" aria-label="Filter check-ins by area"></div>
-          <div class="tracker-goal-list" id="todayGoals"><div class="empty-state">Loading your goals…</div></div>
-          <p class="tracker-note">Check a goal when you complete it. The heatmap counts completed goals for each day.</p>
-        </article>
-        <aside class="workspace-panel">
-          <h2>Keep your progress visible</h2><p class="panel-intro">Your insight targets become measurable goals. Check in here each day to build your completion history.</p>
-          <a class="workspace-action lime" href="/analysis.html">View insights <span>→</span></a>
-        </aside>
-      </section>
+          <a class="workspace-action" href="/goals.html"
+            >Manage goals <span>→</span></a
+          >
+        </section>
+        <section
+          class="tracker-areas"
+          aria-label="Track goals by profile area"
+          id="trackerAreas"
+        ></section>
+        <section
+          class="workspace-stats"
+          id="weeklySummary"
+          aria-label="Habit summary"
+        >
+          <article class="workspace-stat">
+            <strong id="todayCount">0/0</strong><span>Completed today</span>
+          </article>
+          <article class="workspace-stat" id="streaks">
+            <strong id="streakCount">0 days</strong><span>Current streak</span>
+          </article>
+          <article class="workspace-stat">
+            <strong id="activeCount">0</strong><span>Active goals</span>
+          </article>
+        </section>
+        <section
+          class="workspace-panel"
+          id="habitHeatmap"
+          style="margin-bottom: 15px"
+        >
+          <h2>Your consistency</h2>
+          <p class="panel-intro">
+            Each square shows how many active goals you checked off that day.
+          </p>
+          <div class="heatmap-wrap">
+            <div
+              class="heatmap"
+              id="heatmap"
+              aria-label="Daily goal completion heatmap"
+            ></div>
+          </div>
+          <div class="heat-legend">
+            Less <i></i><i></i><i></i><i></i><i></i> More
+          </div>
+        </section>
+        <section class="tracker-grid">
+          <article class="workspace-panel">
+            <div class="workspace-heading" style="margin-bottom: 14px">
+              <div>
+                <h2>Daily goals</h2>
+                <p class="panel-intro" id="selectedDateLabel">Today</p>
+              </div>
+              <div class="week-nav">
+                <button
+                  id="previousDay"
+                  type="button"
+                  aria-label="Previous day"
+                >
+                  ←</button
+                ><strong id="selectedDateShort"></strong
+                ><button id="nextDay" type="button" aria-label="Next day">
+                  →
+                </button>
+              </div>
+            </div>
+            <div
+              class="tracker-filters"
+              id="trackerFilters"
+              aria-label="Filter check-ins by area"
+            ></div>
+            <div class="tracker-goal-list" id="todayGoals">
+              <div class="empty-state">Loading your goals…</div>
+            </div>
+            <p class="tracker-note">
+              Check a goal when you complete it. The heatmap counts completed
+              goals for each day.
+            </p>
+          </article>
+          <aside class="workspace-panel">
+            <h2>Keep your progress visible</h2>
+            <p class="panel-intro">
+              Your insight targets become measurable goals. Check in here each
+              day to build your completion history.
+            </p>
+            <a class="workspace-action lime" href="/analysis.html"
+              >View insights <span>→</span></a
+            >
+          </aside>
+        </section>
       </div>
     </main>
-    <script src="./js/app-nav.js"></script><script src="./js/tracker.js"></script>
+    <script src="./js/app-nav.js"></script>
+    <script src="./js/tracker.js"></script>
   </body>
 </html>

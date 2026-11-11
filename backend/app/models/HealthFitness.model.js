@@ -15,7 +15,12 @@ const healthFitnessSchema = new mongoose.Schema(
     targetWeightKg: { type: Number, min: 20, max: 500 },
     fitnessGoal: {
       type: String,
-      enum: ["weight_loss", "muscle_building", "general_fitness", "stay_healthy"],
+      enum: [
+        "weight_loss",
+        "muscle_building",
+        "general_fitness",
+        "stay_healthy",
+      ],
     },
     physicalActivity: {
       dailySteps: { type: Number, min: 0, max: 100000 },

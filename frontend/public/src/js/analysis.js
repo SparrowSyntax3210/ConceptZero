@@ -7,12 +7,22 @@ const categories = [
 ];
 
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (character) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        character
+      ],
+  );
 }
 
 function number(value) {
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(parsed) : "—";
+  return Number.isFinite(parsed)
+    ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(
+        parsed,
+      )
+    : "—";
 }
 
 function scoreLabel(score) {
@@ -22,24 +32,44 @@ function scoreLabel(score) {
 }
 
 function quantities(items = []) {
-  if (!items.length) return '<div class="quantity-row"><span>No saved quantities yet</span><strong>—</strong></div>';
-  return items.map((item) => `<div class="quantity-row"><span>${escapeHtml(item.metric)}</span><strong>${number(item.value)} ${escapeHtml(item.unit)}</strong></div>`).join("");
+  if (!items.length)
+    return '<div class="quantity-row"><span>No saved quantities yet</span><strong>—</strong></div>';
+  return items
+    .map(
+      (item) =>
+        `<div class="quantity-row"><span>${escapeHtml(item.metric)}</span><strong>${number(item.value)} ${escapeHtml(item.unit)}</strong></div>`,
+    )
+    .join("");
 }
 
 function recommendations(items = []) {
-  if (!items.length) return '<div class="change-item"><span>No measurable target available for this section yet.</span><strong>—</strong></div>';
-  return items.map((item) => `<div class="change-item"><span>${escapeHtml(item.metric)}</span><strong>${number(item.currentValue)} → ${number(item.targetValue)} ${escapeHtml(item.unit)}</strong><small>${escapeHtml(item.reason)}</small></div>`).join("");
+  if (!items.length)
+    return '<div class="change-item"><span>No measurable target available for this section yet.</span><strong>—</strong></div>';
+  return items
+    .map(
+      (item) =>
+        `<div class="change-item"><span>${escapeHtml(item.metric)}</span><strong>${number(item.currentValue)} → ${number(item.targetValue)} ${escapeHtml(item.unit)}</strong><small>${escapeHtml(item.reason)}</small></div>`,
+    )
+    .join("");
 }
 
 function render(data, available) {
   const current = data.current?.categories?.[0];
   const future = data.future?.categories?.[0];
-  if (!current || !future) throw new Error("This section has no comparison data yet.");
+  if (!current || !future)
+    throw new Error("This section has no comparison data yet.");
   const score = Math.max(0, Math.min(100, Number(current.score) || 0));
   const futureScore = Math.max(0, Math.min(100, Number(future.score) || 0));
-  const insights = (data.keyInsights || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const insights = (data.keyInsights || [])
+    .map((item) => `<li>${escapeHtml(item)}</li>`)
+    .join("");
   const limits = (data.limits || []).map(escapeHtml).join(" • ");
-  const tabs = available.map((category) => `<button type="button" class="insight-side-link ${category.id === data.categoryId ? "active" : ""}" data-insight-category="${category.id}"><span>${escapeHtml(category.label)}</span><small>View analysis →</small></button>`).join("");
+  const tabs = available
+    .map(
+      (category) =>
+        `<button type="button" class="insight-side-link ${category.id === data.categoryId ? "active" : ""}" data-insight-category="${category.id}"><span>${escapeHtml(category.label)}</span><small>View analysis →</small></button>`,
+    )
+    .join("");
   const goalCount = data.goals?.length || 0;
 
   root.innerHTML = `<div class="insights-shell">
@@ -77,19 +107,32 @@ function render(data, available) {
     <div class="comparison-footer"><a href="/tracker.html">Go to your tracker&nbsp; →</a></div></div></div>`;
 
   root.querySelectorAll("[data-insight-category]").forEach((button) => {
-    button.addEventListener("click", () => loadInsight(button.dataset.insightCategory, available));
+    button.addEventListener("click", () =>
+      loadInsight(button.dataset.insightCategory, available),
+    );
   });
-  root.querySelector("[data-insight-overview]")?.addEventListener("click", () => loadInsight(available[0].id, available));
+  root
+    .querySelector("[data-insight-overview]")
+    ?.addEventListener("click", () => loadInsight(available[0].id, available));
 }
 
 async function loadInsight(categoryId, available) {
   localStorage.setItem("lastInsightCategoryId", categoryId);
   root.innerHTML = `<section class="comparison-loading"><span class="analysis-loader"><i></i><i></i><i></i></span><p>Refreshing ${escapeHtml(categories.find(([id]) => id === categoryId)?.[1] || "your insight")}…</p></section>`;
   try {
-    const response = await fetch(`/api/analysis/category/${encodeURIComponent(categoryId)}`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" });
+    const response = await fetch(
+      `/api/analysis/category/${encodeURIComponent(categoryId)}`,
+      {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      },
+    );
     const result = await response.json();
     if (response.status === 401) return window.location.replace("/login.html");
-    if (!response.ok) throw new Error(result.message || "Could not load this insight.");
+    if (!response.ok)
+      throw new Error(result.message || "Could not load this insight.");
     render(result, available);
   } catch (error) {
     root.innerHTML = `<section class="comparison-error"><h1>Insight unavailable</h1><p>${escapeHtml(error.message)}</p><a href="/forms.html">Update your profile</a></section>`;
@@ -97,15 +140,25 @@ async function loadInsight(categoryId, available) {
 }
 
 async function startInsights() {
-  root.innerHTML = '<section class="comparison-loading"><span class="analysis-loader"><i></i><i></i><i></i></span><p>Loading your insights…</p></section>';
+  root.innerHTML =
+    '<section class="comparison-loading"><span class="analysis-loader"><i></i><i></i><i></i></span><p>Loading your insights…</p></section>';
   try {
-    const statusResponse = await fetch("/api/categories", { credentials: "same-origin" });
+    const statusResponse = await fetch("/api/categories", {
+      credentials: "same-origin",
+    });
     const status = await statusResponse.json();
-    if (statusResponse.status === 401) return window.location.replace("/login.html");
-    if (!statusResponse.ok) throw new Error(status.message || "Could not load your profile sections.");
-    const available = (status.categories || []).filter((item) => item.completed).map((item) => ({ id: item.id, label: item.label }));
+    if (statusResponse.status === 401)
+      return window.location.replace("/login.html");
+    if (!statusResponse.ok)
+      throw new Error(
+        status.message || "Could not load your profile sections.",
+      );
+    const available = (status.categories || [])
+      .filter((item) => item.completed)
+      .map((item) => ({ id: item.id, label: item.label }));
     if (!available.length) {
-      root.innerHTML = '<section class="comparison-error"><h1>Your insights start with a check-in.</h1><p>Save any one profile section to see its current quantities and suggested targets.</p><a href="/forms.html">Complete a profile section →</a></section>';
+      root.innerHTML =
+        '<section class="comparison-error"><h1>Your insights start with a check-in.</h1><p>Save any one profile section to see its current quantities and suggested targets.</p><a href="/forms.html">Complete a profile section →</a></section>';
       return;
     }
 
@@ -116,15 +169,26 @@ async function startInsights() {
     const cached = sessionStorage.getItem("stackedAnalysisResult");
     sessionStorage.removeItem("stackedSubmittedCategory");
     sessionStorage.removeItem("stackedAnalysisResult");
-    const requestedCategory = new URLSearchParams(window.location.search).get("category");
-    if (cached && oneTimeCategory && !requestedCategory && oneTimeCategory === JSON.parse(cached).categoryId && available.some((item) => item.id === oneTimeCategory)) {
+    const requestedCategory = new URLSearchParams(window.location.search).get(
+      "category",
+    );
+    if (
+      cached &&
+      oneTimeCategory &&
+      !requestedCategory &&
+      oneTimeCategory === JSON.parse(cached).categoryId &&
+      available.some((item) => item.id === oneTimeCategory)
+    ) {
       localStorage.setItem("lastInsightCategoryId", oneTimeCategory);
       render(JSON.parse(cached), available);
       return;
     }
 
-    const preferred = requestedCategory || localStorage.getItem("lastInsightCategoryId");
-    const categoryId = available.some((item) => item.id === preferred) ? preferred : available[0].id;
+    const preferred =
+      requestedCategory || localStorage.getItem("lastInsightCategoryId");
+    const categoryId = available.some((item) => item.id === preferred)
+      ? preferred
+      : available[0].id;
     await loadInsight(categoryId, available);
   } catch (error) {
     root.innerHTML = `<section class="comparison-error"><h1>Insights unavailable</h1><p>${escapeHtml(error.message)}</p><a href="/tracker.html">Go to Tracker</a></section>`;
