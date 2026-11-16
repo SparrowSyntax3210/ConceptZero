@@ -63,6 +63,117 @@ function initScrollAnimations() {
   const { gsap, ScrollTrigger } = window;
   gsap.registerPlugin(ScrollTrigger);
 
+  gsap.fromTo(
+    [
+      ".topbar .brand",
+      ".topbar nav a",
+      ".topbar .account-control > *",
+      ".copy-block > *",
+      ".stage .side-character",
+      ".stage .center-fallback",
+      ".stage .state-pill",
+      ".stage .hero-asset",
+      ".hero > .mini-note",
+      ".hero-bottom-asset",
+    ].join(","),
+    { autoAlpha: 0, y: 18 },
+    {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.75,
+      stagger: 0.045,
+      ease: "power3.out",
+      delay: 0.12,
+      immediateRender: false,
+    },
+  );
+
+  gsap.to(".orbit", {
+    opacity: 0.45,
+    duration: 3.2,
+    repeat: -1,
+    yoyo: true,
+    ease: "sine.inOut",
+  });
+
+  const hero = document.querySelector(".hero");
+  if (hero) {
+    const heroContent = hero.querySelectorAll(
+      ".wordmark, .copy-block, .stage, .mini-note, .hero-bottom-asset, .bot, .bot-note, .edge-orbit, .scroll-cue",
+    );
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: hero,
+        start: "top top",
+        end: () => `+=${Math.round(window.innerHeight * 1.05)}`,
+        pin: true,
+        pinSpacing: true,
+        scrub: 0.7,
+        invalidateOnRefresh: true,
+        anticipatePin: 1,
+      },
+    }).to(heroContent, {
+      autoAlpha: 0,
+      y: -34,
+      scale: 0.985,
+      stagger: 0.015,
+      ease: "none",
+      duration: 0.76,
+    }).to(hero, { autoAlpha: 0, ease: "none", duration: 0.24 }, 0.76);
+  }
+
+  const habitSection = document.querySelector(".habit-section");
+  const differenceSection = document.querySelector(".difference-section");
+  if (habitSection && differenceSection) {
+    const createHabitTransition = () => {
+      gsap.set(habitSection, { transformOrigin: "center top" });
+      gsap.set(differenceSection, { transformOrigin: "center center" });
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: habitSection,
+          start: "top top",
+          end: () => `+=${Math.round(window.innerHeight * 1.25)}`,
+          pin: true,
+          pinSpacing: true,
+          scrub: 0.8,
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
+        },
+      })
+        .fromTo(
+          differenceSection,
+          {
+            autoAlpha: 0,
+            scale: 0.78,
+            y: 0,
+            borderRadius: 42,
+          },
+          {
+            autoAlpha: 1,
+            scale: 1,
+            y: () => {
+              const margin = parseFloat(
+                getComputedStyle(habitSection).marginBottom,
+              ) || 0;
+              return -(habitSection.offsetHeight + margin);
+            },
+            borderRadius: 0,
+            ease: "none",
+            duration: 1,
+          },
+          0,
+        )
+        .to(
+          habitSection,
+          { autoAlpha: 0, scale: 0.975, ease: "none", duration: 0.42 },
+          0.58,
+        );
+    };
+    gsap
+      .matchMedia()
+      .add("(min-width: 721px) and (prefers-reduced-motion: no-preference)", createHabitTransition);
+  }
+
   gsap.utils.toArray(".landing-section").forEach((section) => {
     const copy = section.querySelectorAll(
       ".section-intro > *, .insight-banner-copy > *, .closing-copy > *",

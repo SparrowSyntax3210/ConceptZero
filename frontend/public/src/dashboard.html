@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="./css/dashboard-cards.css" />
     <link rel="stylesheet" href="./css/dashboard-home.css" />
     <link rel="stylesheet" href="./css/hero-3d.css" />
+    <link rel="stylesheet" href="./css/home-experience.css" />
   </head>
   <body>
     <div class="dashboard-shell">
@@ -30,11 +31,11 @@
           ><span class="brand-mark"><i></i><i></i><i></i></span>STACKED</a
         >
         <nav aria-label="Main navigation">
-          <a class="active" href="/tracker.html" aria-current="page">Tracker</a
-          ><a href="/analysis.html">Insights</a><a href="/goals.html">Goals</a
-          ><a href="/letters.html">Letters</a><a href="/profile.html">Profile</a>
+          <a class="active" href="#home" aria-current="page">The Method</a
+          ><a href="#habits">Habits</a><a href="/analysis.html">Insights</a><a href="#journeyTitle">About</a><a href="#privacy">Privacy</a>
         </nav>
         <div class="account-control">
+          <a class="header-cta" href="/tracker.html">Get Started <span>→</span></a>
           <button
             class="avatar"
             id="accountButton"
@@ -185,57 +186,22 @@
           >
         </section>
 
-        <section class="home-overview" aria-labelledby="overviewTitle">
-          <div class="overview-heading">
-            <div>
-              <span class="section-kicker">A LITTLE MORE CLARITY</span>
-              <h2 id="overviewTitle">Your life, in four focus areas.</h2>
-            </div>
-            <p>
-              Start with a snapshot. Keep showing up. Let your progress tell the
-              story.
-            </p>
-          </div>
-          <div class="overview-grid">
-            <a href="/tracker.html" class="overview-card"
-              ><span class="overview-icon">⌁</span><small>01 · TRACKER</small>
-              <h3>Make today count.</h3>
-              <p>
-                Check in on the goals you set and see your consistency build,
-                one day at a time.
-              </p>
-              <span class="overview-link">Open tracker →</span></a
-            >
-            <a href="/analysis.html" class="overview-card"
-              ><span class="overview-icon">◌</span><small>02 · INSIGHTS</small>
-              <h3>See the bigger picture.</h3>
-              <p>
-                Understand your current habits and get practical targets for the
-                areas you choose.
-              </p>
-              <span class="overview-link">Explore insights →</span></a
-            >
-            <a href="/goals.html" class="overview-card"
-              ><span class="overview-icon">✦</span><small>03 · GOALS</small>
-              <h3>Turn plans into action.</h3>
-              <p>
-                Save measurable targets and make them part of your daily or
-                weekly routine.
-              </p>
-              <span class="overview-link">View goals →</span></a
-            >
-            <a href="/forms.html" class="overview-card"
-              ><span class="overview-icon">◎</span><small>04 · PROFILE</small>
-              <h3>Start with your story.</h3>
-              <p>
-                Share as much as you’re comfortable with across health,
-                wellbeing, learning, and lifestyle.
-              </p>
-              <span class="overview-link">Edit profile →</span></a
-            >
+        <section class="home-habits" id="habits" aria-labelledby="habitsTitle">
+          <div class="home-section-intro"><span class="home-kicker">EXPLORE YOUR HABITS</span><h2 id="habitsTitle">Your everyday <em>habits</em> shape more than your day.</h2><p>From sleep to productivity, each habit contributes to the bigger picture.</p><a class="home-outline-link" href="/tracker.html">Explore all habits <span>→</span></a></div>
+          <div class="home-habit-cards">
+            <a class="home-habit-card sleep-card" href="/tracker.html"><img src="./assets/cards1.png" alt="Restful sleep and recovery"><span class="habit-card-caption"><small>REST & RECOVERY</small><strong>Sleep & recovery</strong><em>Rest better, live longer.</em></span></a>
+            <a class="home-habit-card health-card" href="/tracker.html"><img src="./assets/cards2.png" alt="Strength training for physical health"><span class="habit-card-caption"><small>ENERGY & STRENGTH</small><strong>Physical health</strong><em>Move stronger.</em></span></a>
+            <a class="home-habit-card work-card" href="/tracker.html"><img src="./assets/cards3.png" alt="Focused work and learning"><span class="habit-card-caption"><small>ATTENTION & LEARNING</small><strong>Productivity</strong><em>Do more with focus.</em></span></a>
+            <a class="home-habit-card digital-card" href="/tracker.html"><img src="./assets/cards4.png" alt="Digital wellbeing and screen time"><span class="habit-card-caption"><small>INTENTIONAL TECHNOLOGY</small><strong>Digital wellbeing</strong><em>Be present.</em></span></a>
           </div>
         </section>
+        <section class="home-comparison" aria-labelledby="differenceTitle"><div class="home-section-intro"><span class="home-kicker">SEE THE DIFFERENCE</span><h2 id="differenceTitle">See how small changes create <em>big results.</em></h2><p>Compare your current routine with a healthier, more balanced you.</p><a class="home-lime-link" href="/analysis.html">Try the comparison <span>→</span></a></div><div class="comparison-preview"><div class="preview-tabs"><span class="selected">● Current routine</span><span>◉ Improved routine</span></div><div class="preview-col"><strong>Today</strong><span>Sleep <b>5h 30m</b></span><span>Productivity <b>60%</b></span><span>Workouts <b>0×/week</b></span><span>Screen time <b>6h/day</b></span></div><div class="preview-arrow">→</div><div class="preview-col improved"><strong>A possible next step</strong><span>Sleep <b>8h+</b></span><span>Productivity <b>90%</b></span><span>Workouts <b>4×/week</b></span><span>Screen time <b>2h/day</b></span></div><small class="preview-note">Example only · your own comparison uses your saved profile.</small></div><div class="runner-image"><img src="./assets/main-right.png" alt="An athlete running outdoors toward a stronger routine"><div class="runner-score"><span>🏆</span><span><small>OVERALL SCORE</small><strong>87% <em>↗</em></strong></span></div></div></section>
+        <section class="home-journey" aria-labelledby="journeyTitle"><span class="home-kicker">HOW STACKED WORKS</span><h2 id="journeyTitle">A simple journey to a more <em>focused</em> you.</h2><div class="journey-steps"><a href="/forms.html"><b>1</b><span>♟</span><strong>Build your profile</strong><small>Tell us about your lifestyle and goals.</small></a><i>→</i><a href="/tracker.html"><b>2</b><span>▦</span><strong>Track your day</strong><small>Log habits, get insights.</small></a><i>→</i><a href="/analysis.html"><b>3</b><span>▥</span><strong>Understand patterns</strong><small>See what’s working (and what’s not).</small></a><i>→</i><a href="/goals.html"><b>4</b><span>🏆</span><strong>Grow with intention</strong><small>Turn insights into lasting change.</small></a></div></section>
+        <section class="home-insights-band"><div class="band-copy"><span class="home-kicker">INSIGHTS AT A GLANCE</span><h2>Turn patterns into <em>progress.</em></h2><p>Get personalized insights to build better habits, from sleep cycles to productivity trends.</p><a href="/analysis.html">Explore insights <span>→</span></a></div><div class="band-visual"><div class="band-sidebar"><strong>▥ STACKED</strong><span>⌂ Home</span><span>◌ Insights</span><span>✦ Habits</span><span>♟ Profile</span></div><div class="band-chart"><div class="band-period"><span>7D</span><i>30D</i><i>90D</i></div><strong>Weekly consistency</strong><b>92% <small>↗ 6%</small></b><div class="chart-bars"><i style="height:29%"></i><i style="height:45%"></i><i style="height:39%"></i><i style="height:60%"></i><i style="height:56%"></i><i style="height:78%"></i><i style="height:71%"></i></div><div class="chart-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div><div class="band-stats"><span>☾ <b>7.4h</b><small>Avg sleep</small></span><span>✣ <b>3.9×</b><small>Workouts</small></span><span>✦ <b>87%</b><small>Focus score</small></span></div></div></section>
+        <section class="home-community"><div><span class="home-kicker">REAL PEOPLE. REAL PROGRESS.</span><h2>Join a community that <em>grows</em> together.</h2></div><blockquote><b>“</b>STACKED helped me finally stick to a routine. My energy has never been better.<small>Ananya S. · <i>★★★★★</i></small></blockquote><blockquote><b>“</b>Simple, powerful and incredibly motivating.<small>Rohan M. · <i>★★★★★</i></small></blockquote><blockquote><b>“</b>A total game changer for my productivity.<small>Diya K. · <i>★★★★★</i></small></blockquote></section>
+        <section class="home-final-cta"><div><span class="home-kicker">YOUR NEXT CHAPTER</span><h2>Your next version starts <em>today.</em></h2><p>Track. Improve. Grow.</p></div><a href="/tracker.html">Get started free <span>→</span></a><img src="./assets/man on hill.png" alt="A person standing on a mountain at sunrise" /></section>
       </main>
+      <footer class="home-footer"><a class="dashboard-brand" href="/dashboard.html"><span class="brand-mark"><i></i><i></i><i></i></span>STACKED</a><nav><a href="/dashboard.html">The Method</a><a href="#habits">Habits</a><a href="/analysis.html">Insights</a><a href="#journeyTitle">About</a><a href="#privacy">Privacy</a></nav><span>Built for a healthier, more focused you. <b>♥</b></span></footer>
     </div>
     <script type="importmap">
       {
@@ -245,7 +211,10 @@
         }
       }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="./js/dashboard.js"></script>
+    <script src="./js/home-motion.js"></script>
     <script type="module" src="./js/hero-model.js"></script>
   </body>
 </html>

@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="./css/landing-assets.css" />
     <link rel="stylesheet" href="./css/landing-static.css" />
     <link rel="stylesheet" href="./css/landing-depth.css" />
+    <link rel="stylesheet" href="./css/home-reference.css" />
   </head>
   <body>
     <main class="page-shell">
@@ -33,7 +34,7 @@
         <nav aria-label="Main navigation">
           <a class="active" href="#method">The Method</a
           ><a href="#habits">Habits</a><a href="#insights">Insights</a
-          ><a href="#approach">Our Approach</a>
+          ><a href="#approach">About</a><a href="#privacy">Privacy</a>
         </nav>
         <div class="account-control">
           <a class="header-cta" href="/tracker.html"
@@ -152,6 +153,7 @@
               <small>REST & RECOVERY</small>
               <h3>Sleep</h3>
               <p>Rest that moves you forward.</p>
+              <span class="story-hover-note">Build a steadier sleep rhythm <b>↗</b></span>
             </div></a
           >
           <a href="/tracker.html" class="story-card story-health"
@@ -165,6 +167,7 @@
               <small>ENERGY & STRENGTH</small>
               <h3>Physical health</h3>
               <p>Build strength through consistency.</p>
+              <span class="story-hover-note">Make movement part of your day <b>↗</b></span>
             </div></a
           >
           <a href="/tracker.html" class="story-card story-focus"
@@ -175,6 +178,7 @@
               <small>ATTENTION & LEARNING</small>
               <h3>Productivity</h3>
               <p>Make room for focused work.</p>
+              <span class="story-hover-note">Protect time for focused work <b>↗</b></span>
             </div></a
           >
           <a href="/tracker.html" class="story-card story-digital"
@@ -188,6 +192,7 @@
               <small>INTENTIONAL TECHNOLOGY</small>
               <h3>Digital wellbeing</h3>
               <p>Take back your attention.</p>
+              <span class="story-hover-note">Give your attention room to breathe <b>↗</b></span>
             </div></a
           >
         </div>
@@ -198,41 +203,44 @@
         aria-labelledby="differenceTitle"
         data-reveal
       >
-        <div class="section-intro">
-          <span class="section-kicker">SMALL CHANGES, REAL MOMENTUM</span>
-          <h2 id="differenceTitle">
-            See the difference<br />your habits can <em>make.</em>
-          </h2>
-          <p>
-            A better routine can lead to better sleep, more energy, and a
-            healthier, happier you.
-          </p>
-          <a class="outline-link" href="/analysis.html"
-            >See your insights <span>→</span></a
-          >
-        </div>
-        <div class="path-comparison">
-          <article class="path-card path-better">
+        <div class="difference-canvas">
+          <div class="difference-title-card">
+            <span class="section-kicker">SMALL CHANGES, REAL MOMENTUM</span>
+            <h2 id="differenceTitle">See the difference.</h2>
+            <a href="/analysis.html">Explore your insights <span>→</span></a>
+          </div>
+          <article class="path-card path-better" tabindex="0" aria-label="Current you. Focus to see a possible improved routine.">
             <div class="path-image">
               <img
                 src="./assets/left1.png"
                 alt="Athlete building a consistent movement routine"
-              /><strong>A better routine</strong>
+              /><strong>Current you</strong>
             </div>
-            <div class="path-metrics">
+            <div class="path-metrics path-detail-window">
+              <span class="path-detail-kicker">A BETTER ROUTINE</span>
+              <h3>Small habits add up.</h3>
+              <p class="path-detail-copy">With a little consistency, everyday choices can support more energy and focus.</p>
               <p><i>↗</i><span>Sleep</span><b>8h+</b></p>
               <p><i>↗</i><span>Productivity</span><b>90%</b></p>
               <p><i>↗</i><span>Movement</span><b>4×/week</b></p>
             </div>
           </article>
-          <article class="path-card path-same">
+          <div class="difference-sidecopy">
+            <span class="section-kicker">YOUR NEXT CHAPTER</span>
+            <h3>Habits can <em>make</em> a difference.</h3>
+            <p>Compare today’s rhythm with the small changes you choose to practice.</p>
+          </div>
+          <article class="path-card path-same" tabindex="0" aria-label="Same routine. Focus to see current habit examples.">
             <div class="path-image">
               <img
                 src="./assets/dashboard.png"
                 alt="Person reflecting on routines and wellbeing"
-              /><strong>The same routine</strong>
+              /><strong>Same routine</strong>
             </div>
-            <div class="path-metrics">
+            <div class="path-metrics path-detail-window">
+              <span class="path-detail-kicker">IF NOTHING CHANGES</span>
+              <h3>Your pace, as it is.</h3>
+              <p class="path-detail-copy">Current patterns are a starting point for reflection, not a fixed future.</p>
               <p><i>−</i><span>Sleep</span><b>5h</b></p>
               <p><i>−</i><span>Productivity</span><b>45%</b></p>
               <p><i>−</i><span>Movement</span><b>0×/week</b></p>
@@ -439,7 +447,7 @@
         </div>
       </section>
 
-      <footer class="landing-footer">
+      <footer class="landing-footer" id="privacy">
         <a class="brand brand-image" href="#top"
           ><img src="./assets/logo.png" alt="STACKED home"
         /></a>
