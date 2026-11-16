@@ -52,6 +52,59 @@ async function updateLandingStats() {
 
 updateLandingStats();
 
+function initIntroAnimation() {
+  const curtain = document.querySelector(".intro-curtain");
+  if (!curtain) return;
+  const removeCurtain = () => {
+    document.body.classList.remove("intro-active");
+    curtain.remove();
+  };
+
+  if (
+    !window.gsap ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    removeCurtain();
+    return;
+  }
+
+  document.body.classList.add("intro-active");
+  const { gsap } = window;
+  const leftBeam = curtain.querySelector(".intro-panel-left .intro-beam");
+  const rightBeam = curtain.querySelector(".intro-panel-right .intro-beam");
+  const timeline = gsap.timeline({
+    defaults: { ease: "power2.inOut" },
+    onComplete: () => {
+      removeCurtain();
+      window.ScrollTrigger?.refresh();
+    },
+  });
+
+  timeline
+    .fromTo(
+      ".intro-brand",
+      { autoAlpha: 0, scale: 0.86, filter: "blur(12px)" },
+      { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.55, ease: "power3.out" },
+    )
+    .fromTo(
+      ".intro-tagline",
+      { autoAlpha: 0, y: 10 },
+      { autoAlpha: 1, y: 0, duration: 0.32, ease: "power2.out" },
+      "-=0.2",
+    )
+    .to([leftBeam, rightBeam], { autoAlpha: 0.9, duration: 0.12 }, 0.52)
+    .to(leftBeam, { x: "125vw", duration: 0.78, ease: "power2.inOut" }, 0.56)
+    .to(rightBeam, { x: "-125vw", duration: 0.78, ease: "power2.inOut" }, 0.56)
+    .to(".intro-brand", { textShadow: "0 0 42px #e7ffc8, 0 0 120px #c5f51a", duration: 0.2 }, 0.95)
+    .to(".intro-tagline", { autoAlpha: 0, duration: 0.18 }, 1.12)
+    .to(".intro-brand", { autoAlpha: 0, scale: 1.08, duration: 0.3 }, 1.22)
+    .to(".intro-panel-left", { xPercent: -105, duration: 0.9, ease: "power4.inOut" }, 1.32)
+    .to(".intro-panel-right", { xPercent: 105, duration: 0.9, ease: "power4.inOut" }, 1.32);
+  timeline.timeScale(0.42);
+}
+
+initIntroAnimation();
+
 document.querySelectorAll('.topbar nav a[href^="#"]').forEach((link) => {
   link.addEventListener("click", () => {
     document.querySelectorAll(".topbar nav a").forEach((item) => item.classList.toggle("active", item === link));
@@ -124,15 +177,26 @@ function initScrollAnimations() {
 
   const habitSection = document.querySelector(".habit-section");
   const differenceSection = document.querySelector(".difference-section");
+  const approachSection = document.querySelector(".approach-section");
   if (habitSection && differenceSection) {
     const createHabitTransition = () => {
+      const getTransitionShift = () => {
+        const margin = parseFloat(getComputedStyle(habitSection).marginBottom) || 0;
+        return -(habitSection.offsetHeight + margin);
+      };
+      const syncApproachPosition = () => {
+        if (approachSection) approachSection.style.marginTop = `${getTransitionShift()}px`;
+      };
+
+      syncApproachPosition();
+      ScrollTrigger.addEventListener("refreshInit", syncApproachPosition);
       gsap.set(habitSection, { transformOrigin: "center top" });
       gsap.set(differenceSection, { transformOrigin: "center center" });
       gsap.timeline({
         scrollTrigger: {
           trigger: habitSection,
           start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * 1.25)}`,
+          end: () => `+=${Math.round(window.innerHeight * 0.65)}`,
           pin: true,
           pinSpacing: true,
           scrub: 0.8,
@@ -151,12 +215,7 @@ function initScrollAnimations() {
           {
             autoAlpha: 1,
             scale: 1,
-            y: () => {
-              const margin = parseFloat(
-                getComputedStyle(habitSection).marginBottom,
-              ) || 0;
-              return -(habitSection.offsetHeight + margin);
-            },
+            y: getTransitionShift,
             borderRadius: 0,
             ease: "none",
             duration: 1,
@@ -168,6 +227,11 @@ function initScrollAnimations() {
           { autoAlpha: 0, scale: 0.975, ease: "none", duration: 0.42 },
           0.58,
         );
+
+      return () => {
+        ScrollTrigger.removeEventListener("refreshInit", syncApproachPosition);
+        if (approachSection) approachSection.style.marginTop = "";
+      };
     };
     gsap
       .matchMedia()
@@ -179,7 +243,7 @@ function initScrollAnimations() {
       ".section-intro > *, .insight-banner-copy > *, .closing-copy > *",
     );
     const visuals = section.querySelectorAll(
-      ".story-card, .path-card, .step-card, .insight-chart-card, .goal-preview-list article, .goals-character, .summit-art",
+      ".story-card, .path-card, .insight-chart-card, .goal-preview-list article, .goals-character, .summit-art",
     );
     const timeline = gsap.timeline({
       scrollTrigger: {
@@ -203,6 +267,65 @@ function initScrollAnimations() {
         { autoAlpha: 1, y: 0, scale: 1, duration: 0.78, stagger: 0.11, ease: "power3.out", immediateRender: false },
         copy.length ? "-=0.2" : 0,
       );
+    }
+
+    if (section.classList.contains("approach-section")) {
+      const journeyCards = section.querySelectorAll(".step-card");
+      if (journeyCards.length) {
+        const journeyMotion = gsap.matchMedia();
+        journeyMotion.add(
+          "(min-width: 721px) and (prefers-reduced-motion: no-preference)",
+          () => {
+            const timeline = gsap.timeline({
+              scrollTrigger: {
+                trigger: section,
+                start: "top top",
+                end: () => `+=${Math.round(window.innerHeight * 1.35)}`,
+                pin: true,
+                pinSpacing: true,
+                scrub: 0.9,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
+              },
+            });
+            timeline.fromTo(
+              journeyCards,
+              {
+                autoAlpha: 0,
+                x: (index) =>
+                  (index % 2 === 0 ? -1 : 1) * window.innerWidth * 0.9,
+                y: (index) => (index % 2 === 0 ? 54 : -54),
+                scale: 0.82,
+                rotation: (index) => (index % 2 === 0 ? -7 : 7),
+              },
+              {
+                autoAlpha: 1,
+                x: 0,
+                y: 0,
+                scale: 1,
+                rotation: 0,
+                duration: 1,
+                stagger: 0.17,
+                ease: "power2.out",
+              },
+            );
+          },
+        );
+        journeyMotion.add("(max-width: 720px) and (prefers-reduced-motion: no-preference)", () => {
+          gsap.fromTo(
+            journeyCards,
+            { autoAlpha: 0, y: 32 },
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.65,
+              stagger: 0.12,
+              ease: "power2.out",
+              scrollTrigger: { trigger: section, start: "top 76%", once: true },
+            },
+          );
+        });
+      }
     }
   });
 
