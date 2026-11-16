@@ -47,7 +47,7 @@ router.post("/register", async (req, res) => {
   try {
     const user = await User.create({ username, email, password });
     await startSession(user, req, res);
-    return res.redirect(303, "/dashboard.html");
+    return res.redirect(303, "/");
   } catch (error) {
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern || {})[0] || "account";
@@ -72,7 +72,7 @@ router.post("/login", async (req, res) => {
     if (!user) return res.status(401).send("Invalid email or password");
 
     await startSession(user, req, res);
-    return res.redirect(303, "/dashboard.html");
+    return res.redirect(303, "/");
   } catch (error) {
     console.error("Error logging in:", error);
     return res.status(500).send("Error logging in");

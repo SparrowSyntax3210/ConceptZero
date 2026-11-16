@@ -1,0 +1,400 @@
+:root {
+  color-scheme: dark;
+  --tracker-bg: #07120e;
+  --tracker-panel: #101e17;
+  --tracker-panel-raised: #17271d;
+  --tracker-lime: #c5f51a;
+  --tracker-text: #f4f7ef;
+  --tracker-muted: #aab7a9;
+  --tracker-line: #d4f39a24;
+}
+
+.app-page {
+  min-height: 100vh;
+  color: var(--tracker-text);
+  background:
+    radial-gradient(ellipse at 76% 8%, #344b263b 0, transparent 34%),
+    radial-gradient(ellipse at 12% 48%, #19352145 0, transparent 42%),
+    linear-gradient(145deg, #07120e 0%, #0b1711 52%, #101c14 100%);
+}
+
+.app-topbar {
+  border-bottom-color: #d4f39a20;
+  background: #07120eeF;
+  box-shadow: 0 8px 32px #0003;
+}
+
+.app-brand,
+.app-links a:hover,
+.app-links a.active {
+  color: var(--tracker-text);
+}
+
+.app-brand-mark i {
+  background: var(--tracker-lime);
+  box-shadow: 0 0 12px #c5f51a45;
+}
+
+.app-links a {
+  color: var(--tracker-muted);
+  transition: color .22s ease;
+}
+
+.app-links a.active:after {
+  background: var(--tracker-lime);
+  box-shadow: 0 0 12px #c5f51a75;
+}
+
+.app-avatar {
+  border-color: #d4f39a35;
+  background: #14241a;
+  color: var(--tracker-text);
+  box-shadow: 0 0 20px #c5f51a12;
+}
+
+.app-logout {
+  border-color: var(--tracker-line);
+  background: #14221a;
+  color: var(--tracker-text);
+}
+
+.tracker-layout {
+  width: min(1540px, calc(100% - 42px));
+  margin-top: 26px;
+  grid-template-columns: 205px minmax(0, 1fr);
+  gap: 20px;
+}
+
+.tracker-sidebar {
+  border-color: var(--tracker-line);
+  background:
+    linear-gradient(180deg, #13231bdc, #09150ff2),
+    radial-gradient(ellipse at 50% 100%, #8abf2c38, transparent 46%);
+  box-shadow: 0 22px 55px #0004, inset 0 1px #ffffff08;
+  backdrop-filter: blur(16px);
+}
+
+.tracker-sidebar-title {
+  color: #a9c283;
+}
+
+.tracker-sidebar > a {
+  color: #c0cbbd;
+  transition: background .25s ease, color .25s ease, transform .25s ease, box-shadow .25s ease;
+}
+
+.tracker-sidebar > a:hover {
+  transform: translateX(3px);
+  background: #c5f51a12;
+  color: #fff;
+}
+
+.tracker-sidebar > a.active {
+  background: linear-gradient(100deg, #c5f51a3b, #c5f51a12);
+  color: #eaffb2;
+  box-shadow: inset 3px 0 var(--tracker-lime), 0 0 22px #c5f51a12;
+}
+
+.tracker-content .page-kicker {
+  color: var(--tracker-lime);
+}
+
+.tracker-content .page-title {
+  color: #f6f8f2;
+  font-size: clamp(34px, 4vw, 48px);
+}
+
+.tracker-content .page-subtitle,
+.tracker-content .panel-intro,
+.tracker-content .tracker-note {
+  color: var(--tracker-muted);
+}
+
+.workspace-action {
+  border: 1px solid #c5f51a55;
+  background: linear-gradient(135deg, #c5f51a, #a7d921);
+  color: #17210e;
+  box-shadow: 0 8px 24px #9fd52b22;
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+
+.workspace-action:hover,
+.workspace-action:focus-visible {
+  transform: translateY(-3px);
+  filter: brightness(1.06);
+  box-shadow: 0 13px 30px #9fd52b38;
+}
+
+.workspace-action.lime {
+  background: #c5f51a;
+  color: #17210e;
+}
+
+.tracker-areas {
+  gap: 14px;
+}
+
+.tracker-area-card,
+.workspace-stat,
+.workspace-panel {
+  border-color: var(--tracker-line);
+  background: linear-gradient(145deg, #17271eeF, #0e1a13f5);
+  color: var(--tracker-text);
+  box-shadow: 0 16px 38px #0003, inset 0 1px #ffffff08;
+  backdrop-filter: blur(12px);
+}
+
+.tracker-area-card {
+  min-height: 226px;
+  padding: 13px;
+  transition: transform .35s cubic-bezier(.2,.75,.2,1), border-color .3s ease, box-shadow .35s ease, background .35s ease;
+}
+
+.tracker-area-card:hover,
+.tracker-area-card:focus-within {
+  z-index: 2;
+  transform: translateY(-7px) scale(1.018);
+  border-color: #c5f51a78;
+  background: linear-gradient(145deg, #203426, #111e16);
+  box-shadow: 0 24px 46px #0006, 0 0 26px #c5f51a18;
+}
+
+.tracker-area-art,
+.tracker-area-card:nth-child(2) .tracker-area-art,
+.tracker-area-card:nth-child(3) .tracker-area-art,
+.tracker-area-card:nth-child(4) .tracker-area-art {
+  background:
+    radial-gradient(circle at 76% 25%, #c5f51a35, transparent 38%),
+    linear-gradient(145deg, #263b2b, #101a14);
+}
+
+.tracker-area-art:before,
+.tracker-area-art:after {
+  border-color: #c5f51a45;
+}
+
+.tracker-area-art span {
+  border-color: #d8ff9a35;
+  background: #c5f51a1c;
+  color: #d9ff89;
+  box-shadow: 0 0 28px #c5f51a20;
+}
+
+.tracker-area-head small,
+.tracker-area-card p {
+  color: var(--tracker-muted);
+}
+
+.tracker-area-count {
+  background: #ffffff0d;
+  color: #d6e2d2;
+}
+
+.tracker-area-card h2,
+.workspace-panel h2 {
+  color: #f4f7ef;
+}
+
+.tracker-area-actions a {
+  color: #d8fa9c;
+}
+
+.tracker-area-actions .area-add {
+  border-color: #c5f51a42;
+  background: #c5f51a1a;
+  color: #ddffa0;
+  transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.tracker-area-actions .area-add:hover {
+  transform: translateY(-2px);
+  background: var(--tracker-lime);
+  color: #17210e;
+}
+
+.workspace-stats {
+  gap: 14px;
+  margin: 22px 0;
+}
+
+.workspace-stat {
+  transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+
+.workspace-stat:hover {
+  transform: translateY(-4px);
+  border-color: #c5f51a65;
+  box-shadow: 0 20px 40px #0005, 0 0 24px #c5f51a14;
+}
+
+.workspace-stat strong {
+  color: var(--tracker-lime);
+}
+
+.workspace-stat span {
+  color: var(--tracker-muted);
+}
+
+.workspace-panel {
+  border-radius: 21px;
+}
+
+.workspace-panel > h2 {
+  margin-bottom: 8px;
+}
+
+.heat-cell,
+.heat-legend i {
+  background: #ffffff12;
+}
+
+.heat-cell[data-level="1"],
+.heat-legend i:nth-of-type(2) {
+  background: #45652d;
+}
+
+.heat-cell[data-level="2"],
+.heat-legend i:nth-of-type(3) {
+  background: #719c32;
+}
+
+.heat-cell[data-level="3"],
+.heat-legend i:nth-of-type(4) {
+  background: #9bcf32;
+}
+
+.heat-cell[data-level="4"],
+.heat-legend i:nth-of-type(5) {
+  background: #c5f51a;
+  box-shadow: 0 0 10px #c5f51a45;
+}
+
+.heat-legend {
+  color: var(--tracker-muted);
+}
+
+.tracker-goal {
+  border-color: #d4f39a24;
+  background: linear-gradient(110deg, #1c2c21, #111d16);
+  color: var(--tracker-text);
+  transition: transform .28s ease, border-color .28s ease, background .28s ease, box-shadow .28s ease;
+}
+
+.tracker-goal:hover {
+  transform: translateX(4px);
+  border-color: #c5f51a65;
+  background: #203327;
+  box-shadow: 0 10px 25px #0003;
+}
+
+.tracker-goal h3 {
+  color: #f4f7ef;
+}
+
+.tracker-goal p {
+  color: var(--tracker-muted);
+}
+
+.tracker-goal .actual-value,
+.goal-form input,
+.goal-form select,
+.week-nav button,
+.tracker-filter {
+  border-color: #d4f39a2a;
+  background: #0b1711;
+  color: #f4f7ef;
+}
+
+.goal-form label {
+  color: #c9d3c4;
+}
+
+.tracker-filter {
+  transition: border-color .2s ease, background .2s ease, color .2s ease;
+}
+
+.tracker-filter:hover {
+  border-color: #c5f51a60;
+  color: #eaffb2;
+}
+
+.tracker-filter.active {
+  border-color: #c5f51a75;
+  background: #c5f51a20;
+  color: #ddff9a;
+}
+
+.week-nav button {
+  color: var(--tracker-lime);
+  transition: transform .2s ease, background .2s ease;
+}
+
+.week-nav button:hover {
+  transform: scale(1.08);
+  background: #c5f51a1c;
+}
+
+.week-nav strong {
+  color: #eff5e9;
+}
+
+.empty-state {
+  border-color: #d4f39a35;
+  color: var(--tracker-muted);
+}
+
+.empty-state a,
+.form-feedback a {
+  color: var(--tracker-lime);
+}
+
+.form-feedback,
+.tracker-note {
+  color: var(--tracker-muted);
+}
+
+@media (max-width: 900px) {
+  .tracker-layout {
+    width: min(calc(100% - 30px), 760px);
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 14px;
+  }
+  .tracker-areas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .app-topbar {
+    background: #07120ef5;
+  }
+  .tracker-layout {
+    width: calc(100% - 22px);
+  }
+  .tracker-sidebar {
+    border-radius: 17px;
+    background: linear-gradient(110deg, #17271e, #0e1a13);
+  }
+  .tracker-sidebar > a.active {
+    box-shadow: inset 0 -2px var(--tracker-lime), 0 0 18px #c5f51a13;
+  }
+}
+
+@media (max-width: 500px) {
+  .tracker-area-card {
+    min-height: 202px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracker-sidebar > a,
+  .workspace-action,
+  .tracker-area-card,
+  .tracker-area-actions .area-add,
+  .workspace-stat,
+  .tracker-goal,
+  .tracker-filter,
+  .week-nav button {
+    transition: none !important;
+  }
+}
