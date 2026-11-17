@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f5f6fb" />
+    <meta name="theme-color" content="#07120e" />
     <title>Tracker — STACKED</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,7 +24,8 @@
       >
       <nav class="app-links" aria-label="Main navigation">
         <a href="/tracker.html">Tracker</a><a href="/analysis.html">Insights</a
-        ><a href="/goals.html">Goals</a><a href="/letters.html">Letters</a><a href="/profile.html">Profile</a>
+        ><a href="/goals.html">Goals</a><a href="/letters.html">Letters</a
+        ><a href="/profile.html">Profile</a>
       </nav>
       <div class="app-account">
         <button
@@ -40,85 +41,31 @@
       </div>
     </header>
     <main class="tracker-layout">
-      <aside class="tracker-sidebar" aria-label="Tracker sections">
-        <span class="tracker-sidebar-title">TRACKER</span>
-        <a class="active" href="#dailyTracker">▦ <span>Daily Tracker</span></a>
-        <a href="#habitHeatmap">▧ <span>Habit Heatmap</span></a>
-        <a href="#weeklySummary">◷ <span>Weekly Summary</span></a>
-        <a href="#streaks">♧ <span>Streaks</span></a>
-      </aside>
       <div class="app-main tracker-content">
         <section class="workspace-heading" id="dailyTracker">
           <div>
             <span class="page-kicker">YOUR DAILY CHECK-IN</span>
-            <h1 class="page-title">Your Habits</h1>
-            <p class="page-subtitle">
-              Track the small actions that move your goals forward.
-            </p>
+            <h1 class="page-title">Your Daily Habits</h1>
+            <p class="page-subtitle">Small steps. Big changes.</p>
           </div>
-          <a class="workspace-action" href="/goals.html"
-            >Manage goals <span>→</span></a
-          >
-        </section>
-        <section
-          class="tracker-areas"
-          aria-label="Track goals by profile area"
-          id="trackerAreas"
-        ></section>
-        <section
-          class="workspace-stats"
-          id="weeklySummary"
-          aria-label="Habit summary"
-        >
-          <article class="workspace-stat">
-            <strong id="todayCount">0/0</strong><span>Completed today</span>
-          </article>
-          <article class="workspace-stat" id="streaks">
-            <strong id="streakCount">0 days</strong><span>Current streak</span>
-          </article>
-          <article class="workspace-stat">
-            <strong id="activeCount">0</strong><span>Active goals</span>
-          </article>
-        </section>
-        <section
-          class="workspace-panel"
-          id="habitHeatmap"
-          style="margin-bottom: 15px"
-        >
-          <h2>Your consistency</h2>
-          <p class="panel-intro">
-            Each square shows how many active goals you checked off that day.
-          </p>
-          <div class="heatmap-wrap">
-            <div
-              class="heatmap"
-              id="heatmap"
-              aria-label="Daily goal completion heatmap"
-            ></div>
-          </div>
-          <div class="heat-legend">
-            Less <i></i><i></i><i></i><i></i><i></i> More
+          <div class="tracker-date-nav" aria-label="Choose a day">
+            <button id="previousDay" type="button" aria-label="Previous day">←</button>
+            <strong id="selectedDateShort"></strong>
+            <button id="nextDay" type="button" aria-label="Next day">→</button>
           </div>
         </section>
-        <section class="tracker-grid">
-          <article class="workspace-panel">
-            <div class="workspace-heading" style="margin-bottom: 14px">
+        <section class="tracker-dashboard-grid">
+          <article class="workspace-panel tracker-goals-panel">
+            <div class="tracker-panel-heading">
               <div>
                 <h2>Daily goals</h2>
-                <p class="panel-intro" id="selectedDateLabel">Today</p>
+                <p class="panel-intro" id="selectedDateLabel">Today’s check-in</p>
               </div>
-              <div class="week-nav">
-                <button
-                  id="previousDay"
-                  type="button"
-                  aria-label="Previous day"
-                >
-                  ←</button
-                ><strong id="selectedDateShort"></strong
-                ><button id="nextDay" type="button" aria-label="Next day">
-                  →
-                </button>
-              </div>
+              <a class="tracker-manage-link" href="/goals.html">Manage goals <span>→</span></a>
+            </div>
+            <div class="tracker-month-heatmap" id="habitHeatmap" aria-label="Daily goal completion this month">
+              <span class="tracker-month-label" id="monthHeatmapLabel"></span>
+              <div class="tracker-month-dots" id="monthHeatmap"></div>
             </div>
             <div
               class="tracker-filters"
@@ -133,16 +80,33 @@
               goals for each day.
             </p>
           </article>
-          <aside class="workspace-panel">
-            <h2>Keep your progress visible</h2>
-            <p class="panel-intro">
-              Your insight targets become measurable goals. Check in here each
-              day to build your completion history.
-            </p>
-            <a class="workspace-action lime" href="/analysis.html"
-              >View insights <span>→</span></a
-            >
-          </aside>
+          <div class="tracker-analytics-column">
+            <article class="workspace-panel tracker-progress-panel" aria-labelledby="trackerProgressTitle">
+              <div class="tracker-panel-heading">
+                <div>
+                  <h2 id="trackerProgressTitle">Weekly progress</h2>
+                  <p class="panel-intro" id="progressSummary">Your check-ins this week</p>
+                </div>
+                <a class="tracker-insights-link" href="/analysis.html">Insights ↗</a>
+              </div>
+              <div class="tracker-progress-chart">
+                <svg viewBox="0 0 700 190" role="img" aria-label="Daily goal completion progress over the last seven days">
+                  <defs>
+                    <linearGradient id="trackerLineFill" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0" stop-color="#c5f51a" stop-opacity=".28" />
+                      <stop offset="1" stop-color="#c5f51a" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path class="tracker-chart-gridline" d="M24 30H680 M24 85H680 M24 140H680" />
+                  <path id="trackerProgressArea" class="tracker-chart-area" d="" />
+                  <path id="trackerProgressLine" class="tracker-chart-line" d="" />
+                  <g id="trackerProgressPoints"></g>
+                </svg>
+              </div>
+              <div class="tracker-chart-labels" id="trackerChartLabels"></div>
+              <div class="tracker-progress-legend"><i></i> Goal completion</div>
+            </article>
+          </div>
         </section>
       </div>
     </main>

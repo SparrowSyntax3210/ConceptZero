@@ -563,6 +563,7 @@ router.post("/health-fitness/compare", requireAuth, async (req, res) => {
 
 router.post("/letter", requireAuth, async (req, res) => {
   try {
+    const timeframeMonths = Number(req.body?.timeframeMonths) === 6 ? 6 : 3;
     const documents = await Promise.all(
       profileCategories.map(({ model }) =>
         model.findOne({ userId: req.user._id }).lean(),
@@ -592,10 +593,57 @@ router.post("/letter", requireAuth, async (req, res) => {
       });
     }
 
-    const result = await writeFutureSelfLetter({ sections });
+    const goals = await Goal.find({ userId: req.user._id }).lean();
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    const windowStart = new Date(today);
+    windowStart.setDate(windowStart.getDate() - 29);
+    windowStart.setHours(0, 0, 0, 0);
+    const dateKey = (value) => {
+      if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+        return value.slice(0, 10);
+      }
+      const date = value ? new Date(value) : null;
+      if (!date || Number.isNaN(date.getTime())) return null;
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    };
+    const recentCompletions = goals.flatMap((goal) =>
+      (goal.logs || []).flatMap((log) => {
+        if (log.completed === false) return [];
+        const day = dateKey(log.date || log.completedAt);
+        if (!day || day < dateKey(windowStart) || day > dateKey(now)) return [];
+        return [{ day }];
+      }),
+    );
+    const activityDays = new Set(recentCompletions.map(({ day }) => day));
+    const activeGoals = goals.filter((goal) => goal.active !== false);
+    const expectedCheckIns = activeGoals.reduce((total, goal) => {
+      const createdAt = goal.createdAt ? new Date(goal.createdAt) : windowStart;
+      const goalStart = new Date(Math.max(windowStart.getTime(), createdAt.getTime()));
+      goalStart.setHours(0, 0, 0, 0);
+      const activeDays = Math.max(1, Math.floor((today - goalStart) / 86400000) + 1);
+      return total + (goal.frequency === "weekly" ? Math.ceil(activeDays / 7) : activeDays);
+    }, 0);
+    const activitySummary = {
+      windowDays: 30,
+      completedActivities: recentCompletions.length,
+      activeGoals: activeGoals.length,
+      activeDays: activityDays.size,
+      consistencyPercent: expectedCheckIns > 0 && recentCompletions.length > 0
+        ? Math.min(100, Math.round((recentCompletions.length / expectedCheckIns) * 100))
+        : null,
+      consistencyNote: recentCompletions.length
+        ? "Consistency is estimated from completed goal check-ins compared with active goal frequency over the last 30 days."
+        : "No completed goal check-ins were recorded in the last 30 days, so consistency cannot be estimated yet.",
+    };
+
+    const result = await writeFutureSelfLetter({ timeframeMonths, sections, activitySummary });
     return res.json({
       model: result.model,
       letter: result.analysis,
+      timeframeMonths,
+      activitySummary,
       profileAreas: sections.map(({ id, label }) => ({ id, label })),
       disclaimer:
         "A hopeful reflection based on your current check-in, not a prediction of what will happen.",

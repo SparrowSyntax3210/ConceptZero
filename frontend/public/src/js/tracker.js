@@ -1,5 +1,4 @@
 const goalsRoot = document.querySelector("#todayGoals");
-const areasRoot = document.querySelector("#trackerAreas");
 const filtersRoot = document.querySelector("#trackerFilters");
 const trackerCategories = [
   {
@@ -72,12 +71,6 @@ function updateDateLabels() {
 function renderToday() {
   const active = goals.filter((goal) => goal.active);
   const key = dateKey(selectedDate);
-  const completedCount = active.filter((goal) =>
-    goal.logs?.some((log) => log.date === key && log.completed),
-  ).length;
-  document.querySelector("#todayCount").textContent =
-    `${completedCount}/${active.length}`;
-  document.querySelector("#activeCount").textContent = String(active.length);
   const visibleGoals =
     activeFilter === "all"
       ? active
@@ -101,55 +94,8 @@ function renderToday() {
     );
   });
   updateDateLabels();
-  renderAreaCards();
   renderHeatmap();
-  renderStreak();
-}
-
-function renderAreaCards() {
-  areasRoot.innerHTML = trackerCategories
-    .map((category) => {
-      const areaGoals = goals.filter(
-        (goal) => goal.active && goal.categoryId === category.id,
-      );
-      const done = areaGoals.filter((goal) =>
-        goal.logs?.some(
-          (log) => log.date === dateKey(selectedDate) && log.completed,
-        ),
-      ).length;
-      return `<article class="tracker-area-card" data-open-profile="${category.id}" tabindex="0" role="link" aria-label="Open ${escapeHtml(category.label)} details form">
-      <div class="tracker-area-art" role="img" aria-label="Illustration placeholder for ${escapeHtml(category.label)}"><span aria-hidden="true">${category.icon}</span></div>
-      <div class="tracker-area-head"><small>${category.short} · ${areaGoals.length} GOALS</small><span class="tracker-area-count">${done}/${areaGoals.length} today</span></div>
-      <h2>${category.label}</h2><p>${category.copy}</p>
-      <div class="tracker-area-actions"><a href="/forms.html" data-profile-category="${category.id}">Update details ↗</a><a class="area-add" href="/analysis.html?category=${category.id}">View insights →</a></div>
-    </article>`;
-    })
-    .join("");
-  areasRoot
-    .querySelectorAll("[data-profile-category]")
-    .forEach((link) =>
-      link.addEventListener("click", () =>
-        localStorage.setItem(
-          "selectedCategoryId",
-          link.dataset.profileCategory,
-        ),
-      ),
-    );
-  areasRoot.querySelectorAll("[data-open-profile]").forEach((card) => {
-    const open = () => {
-      localStorage.setItem("selectedCategoryId", card.dataset.openProfile);
-      window.location.assign("/forms.html");
-    };
-    card.addEventListener("click", (event) => {
-      if (!event.target.closest("a,button")) open();
-    });
-    card.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        open();
-      }
-    });
-  });
+  renderProgressLine();
 }
 
 function renderFilters() {
@@ -215,63 +161,118 @@ async function saveCheckin(goalId, completed) {
 }
 
 function renderHeatmap() {
+  const heatmap = document.querySelector("#monthHeatmap");
+  const monthLabel = document.querySelector("#monthHeatmapLabel");
+  if (!heatmap || !monthLabel) return;
+
+  const year = selectedDate.getFullYear();
+  const month = selectedDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const start = new Date(today);
-  start.setDate(today.getDate() - today.getDay() - (26 * 7 - 1));
-  const cells = [];
-  for (let week = 0; week < 26; week += 1) {
-    for (let day = 0; day < 7; day += 1) {
-      const date = new Date(start);
-      date.setDate(start.getDate() + week * 7 + day);
-      if (date > today) continue;
-      const key = dateKey(date);
-      const eligible = goals.filter((goal) => {
-        const created = dateKey(new Date(goal.createdAt));
-        const archived = goal.archivedAt
-          ? dateKey(new Date(goal.archivedAt))
-          : null;
-        return created <= key && (!archived || archived >= key);
-      });
-      const count = eligible.filter((goal) =>
-        goal.logs?.some((log) => log.date === key && log.completed),
-      ).length;
-      const ratio = eligible.length ? count / eligible.length : 0;
-      const level =
-        count === 0
-          ? 0
-          : ratio < 0.25
-            ? 1
-            : ratio < 0.5
-              ? 2
-              : ratio < 0.75
-                ? 3
-                : 4;
-      cells.push(
-        `<span class="heat-cell" data-level="${level}" title="${escapeHtml(date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }))}: ${count}/${eligible.length} goals completed" aria-label="${key}: ${count} of ${eligible.length} goals"></span>`,
-      );
-    }
-  }
-  document.querySelector("#heatmap").innerHTML = cells.join("");
+  const selectedKey = dateKey(selectedDate);
+  monthLabel.textContent = selectedDate.toLocaleDateString(undefined, {
+    month: "short",
+    year: "numeric",
+  });
+
+  heatmap.innerHTML = Array.from({ length: daysInMonth }, (_, index) => {
+    const date = new Date(year, month, index + 1);
+    const key = dateKey(date);
+    const future = date > today;
+    const { completed, total } = future
+      ? { completed: 0, total: 0 }
+      : getGoalCompletion(date);
+    const ratio = total ? completed / total : 0;
+    const level =
+      completed === 0
+        ? 0
+        : ratio < 0.25
+          ? 1
+          : ratio < 0.5
+            ? 2
+            : ratio < 0.75
+              ? 3
+              : 4;
+    const label = date.toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+    return `<button class="tracker-month-dot" type="button" data-month-date="${key}" data-level="${level}" ${key === selectedKey ? 'aria-current="date"' : ""} ${future ? "disabled" : ""} title="${escapeHtml(label)}: ${completed}/${total} goals completed" aria-label="${escapeHtml(label)}: ${completed} of ${total} goals completed">${index + 1}</button>`;
+  }).join("");
+
+  heatmap.querySelectorAll("[data-month-date]").forEach((dot) =>
+    dot.addEventListener("click", () => {
+      const [dotYear, dotMonth, dotDay] = dot.dataset.monthDate
+        .split("-")
+        .map(Number);
+      selectedDate = new Date(dotYear, dotMonth - 1, dotDay);
+      renderToday();
+    }),
+  );
 }
 
-function renderStreak() {
-  const active = goals.filter((goal) => goal.active);
-  const dates = new Set(
-    active.flatMap((goal) =>
-      (goal.logs || []).filter((log) => log.completed).map((log) => log.date),
-    ),
+function getGoalCompletion(date) {
+  const key = dateKey(date);
+  const eligible = goals.filter((goal) => {
+    const created = dateKey(new Date(goal.createdAt));
+    const archived = goal.archivedAt ? dateKey(new Date(goal.archivedAt)) : null;
+    return created <= key && (!archived || archived >= key);
+  });
+  const completed = eligible.filter((goal) =>
+    goal.logs?.some((log) => log.date === key && log.completed),
+  ).length;
+  return { completed, total: eligible.length };
+}
+
+function renderProgressLine() {
+  const line = document.querySelector("#trackerProgressLine");
+  const area = document.querySelector("#trackerProgressArea");
+  const points = document.querySelector("#trackerProgressPoints");
+  const labels = document.querySelector("#trackerChartLabels");
+  if (!line || !area || !points || !labels) return;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (6 - index));
+    const { completed, total } = getGoalCompletion(date);
+    return {
+      date,
+      completed,
+      total,
+      percent: total ? Math.round((completed / total) * 100) : 0,
+    };
+  });
+  const xAt = (index) => 28 + index * (644 / 6);
+  const yAt = (percent) => 158 - percent * 1.25;
+  const path = days
+    .map((day, index) => `${index ? "L" : "M"}${xAt(index)} ${yAt(day.percent)}`)
+    .join(" ");
+  line.setAttribute("d", path);
+  area.setAttribute(
+    "d",
+    `${path} L${xAt(days.length - 1)} 160 L${xAt(0)} 160 Z`,
   );
-  const cursor = new Date();
-  cursor.setHours(0, 0, 0, 0);
-  if (!dates.has(dateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
-  let streak = 0;
-  while (dates.has(dateKey(cursor))) {
-    streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-  document.querySelector("#streakCount").textContent =
-    `${streak} ${streak === 1 ? "day" : "days"}`;
+  points.innerHTML = days
+    .map(
+      (day, index) =>
+        `<circle cx="${xAt(index)}" cy="${yAt(day.percent)}" r="5"><title>${escapeHtml(day.date.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }))}: ${day.percent}% (${day.completed}/${day.total})</title></circle>`,
+    )
+    .join("");
+  labels.innerHTML = days
+    .map(
+      (day) =>
+        `<span>${escapeHtml(day.date.toLocaleDateString(undefined, { weekday: "short" }))}</span>`,
+    )
+    .join("");
+  const weeklyAverage = Math.round(
+    days.reduce((sum, day) => sum + day.percent, 0) / days.length,
+  );
+  document.querySelector("#progressSummary").textContent =
+    `${weeklyAverage}% average goal completion · last 7 days`;
 }
 
 document.querySelector("#previousDay").addEventListener("click", () => {
@@ -284,14 +285,6 @@ document.querySelector("#nextDay").addEventListener("click", () => {
   if (selectedDate < today) selectedDate.setDate(selectedDate.getDate() + 1);
   renderToday();
 });
-
-document.querySelectorAll(".tracker-sidebar a[href^='#']").forEach((link) =>
-  link.addEventListener("click", () => {
-    document
-      .querySelectorAll(".tracker-sidebar a")
-      .forEach((item) => item.classList.toggle("active", item === link));
-  }),
-);
 
 async function loadGoals() {
   try {

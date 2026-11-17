@@ -116,6 +116,16 @@ function graphPath(points, property) {
   }).join(" ");
 }
 
+function summaryPointers(value, fallback) {
+  const sentences = String(value || fallback)
+    .split(/(?<=[.!?])\s+(?=[A-Z0-9])|\n+|;\s*/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+  return `<ul class="path-pointers">${sentences
+    .map((sentence) => `<li>${escapeHtml(sentence)}</li>`)
+    .join("")}</ul>`;
+}
+
 function renderOverview(data, available) {
   const trajectory = Array.isArray(data.trajectory) ? data.trajectory : [];
   if (trajectory.length < 2) throw new Error("The overview response did not include enough graph points.");
@@ -128,22 +138,36 @@ function renderOverview(data, available) {
   const insightItems = (data.keyInsights || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   const assumptions = (data.assumptions || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   const guidelines = (data.guidelinePath?.guidelines || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const analyzedAreas = data.sections?.length || 0;
+  const horizon = Number(data.timeHorizonWeeks) || 8;
 
   root.innerHTML = `<div class="insights-shell">
     ${overviewSidebar(available)}
     <div class="insights-content overview-content">
-      <section class="comparison-heading reveal"><span class="eyebrow">YOUR PERSONAL INSIGHTS</span><h1>Two paths. <span>One you.</span></h1><p>See how your current patterns may compare with practical, personalized guidelines over ${Number(data.timeHorizonWeeks) || 8} weeks.</p><div class="insight-period">Based on ${data.sections?.length || 0} completed profile area${data.sections?.length === 1 ? "" : "s"}</div></section>
-      <section class="scenario-module" aria-labelledby="scenarioTitle">
-        <div class="scenario-heading"><div><span class="page-kicker">A DIRECTIONAL SCENARIO</span><h2 id="scenarioTitle">How your progress could unfold</h2><p>Illustrative score index from your saved baseline. It is not a measured forecast.</p></div><span class="confidence-badge">${escapeHtml(data.confidence || "low")} confidence</span></div>
-        <div class="scenario-legend"><span><i class="legend-current"></i>Current patterns continue</span><span><i class="legend-guideline"></i>Follow the guidelines</span><small>Illustrative index · 0–100</small></div>
-        <div class="scenario-chart" role="img" aria-label="Scenario chart comparing current patterns and following personalized guidelines over eight weeks">
-          <div class="chart-y-labels"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div>
-          <svg viewBox="0 0 600 190" preserveAspectRatio="none" aria-hidden="true"><path class="chart-gridline" d="M44 18H582 M44 57H582 M44 96H582 M44 135H582 M44 174H582"/><path class="scenario-line current-line" d="${currentLine}"/><path class="scenario-line guideline-line" d="${guidelineLine}"/>${currentDots}${guidelineDots}</svg>
+      <section class="comparison-heading reveal"><span class="eyebrow">YOUR PERSONAL INSIGHTS</span><h1>Your progress</h1><p>See how your habits may develop over ${horizon} weeks, and what could change when you follow your guidelines.</p><div class="insight-period">Based on ${analyzedAreas} completed profile area${analyzedAreas === 1 ? "" : "s"}</div></section>
+      <section class="overview-main-grid" aria-label="Progress overview and key insights">
+        <div class="overview-left-column">
+          <section class="overview-stats" aria-label="Insight summary">
+            <article class="overview-stat"><span class="overview-stat-icon">◎</span><div><small>Profile areas</small><strong>${analyzedAreas}</strong><span>included in this view</span></div></article>
+            <article class="overview-stat"><span class="overview-stat-icon">◉</span><div><small>Current baseline</small><strong>${number(data.baselineScore)}</strong><span>illustrative index</span></div></article>
+            <article class="overview-stat overview-stat-guided"><span class="overview-stat-icon">↗</span><div><small>With guidelines</small><strong>${number(data.guidelinePath?.projectedScore)}</strong><span>possible index at ${horizon} weeks</span></div></article>
+          </section>
+          <aside class="overview-key-insights"><div class="key-insights-heading"><span class="page-kicker">PATTERNS TO NOTICE</span><h2>Key insights</h2></div>${insightItems ? `<ul>${insightItems}</ul>` : "<p>Save more profile details to get a more useful comparison.</p>"}</aside>
         </div>
-        <div class="chart-x-labels">${weekLabels}</div>
-        <div class="scenario-paths"><article class="scenario-path current-path"><span class="path-label">IF CURRENT PATTERNS CONTINUE</span><h3>${escapeHtml(data.currentPath?.summary || "Your current baseline may hold steady.")}</h3><p>${data.baselineScore == null ? "—" : `${number(data.baselineScore)} index points`} now <span aria-hidden="true">→</span> ${number(data.currentPath?.projectedScore)} illustrative points at week ${Number(data.timeHorizonWeeks) || 8}</p></article><article class="scenario-path guided-path"><span class="path-label">IF YOU FOLLOW THESE GUIDELINES</span><h3>${escapeHtml(data.guidelinePath?.summary || "Small, consistent actions may support progress.")}</h3><p>${data.baselineScore == null ? "—" : `${number(data.baselineScore)} index points`} now <span aria-hidden="true">→</span> ${number(data.guidelinePath?.projectedScore)} illustrative points at week ${Number(data.timeHorizonWeeks) || 8}</p></article></div>
+        <div class="overview-primary-column">
+          <section class="scenario-module" aria-labelledby="scenarioTitle">
+            <div class="scenario-heading"><div><span class="page-kicker">A DIRECTIONAL SCENARIO</span><h2 id="scenarioTitle">Your progress overview</h2><p>Illustrative score index from your saved baseline. It is not a measured forecast.</p></div><span class="confidence-badge">${escapeHtml(data.confidence || "low")} confidence</span></div>
+            <div class="scenario-legend"><span><i class="legend-guideline"></i>With guidelines</span><span><i class="legend-current"></i>Current patterns</span><small>Illustrative index · 0–100</small></div>
+            <div class="scenario-chart" role="img" aria-label="Scenario chart comparing current patterns and following personalized guidelines over ${horizon} weeks">
+              <div class="chart-y-labels"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div>
+              <svg viewBox="0 0 600 190" preserveAspectRatio="none" aria-hidden="true"><path class="chart-gridline" d="M44 18H582 M44 57H582 M44 96H582 M44 135H582 M44 174H582"/><path class="scenario-line current-line" d="${currentLine}"/><path class="scenario-line guideline-line" d="${guidelineLine}"/>${currentDots}${guidelineDots}</svg>
+            </div>
+            <div class="chart-x-labels">${weekLabels}</div>
+            <div class="scenario-paths"><article class="scenario-path current-path"><span class="path-label">IF CURRENT PATTERNS CONTINUE</span>${summaryPointers(data.currentPath?.summary, "Your current baseline may hold steady.")}<p class="path-projection">${data.baselineScore == null ? "—" : `${number(data.baselineScore)} index points`} now <span aria-hidden="true">→</span> ${number(data.currentPath?.projectedScore)} illustrative points at week ${horizon}</p></article><article class="scenario-path guided-path"><span class="path-label">IF YOU FOLLOW THESE GUIDELINES</span>${summaryPointers(data.guidelinePath?.summary, "Small, consistent actions may support progress.")}<p class="path-projection">${data.baselineScore == null ? "—" : `${number(data.baselineScore)} index points`} now <span aria-hidden="true">→</span> ${number(data.guidelinePath?.projectedScore)} illustrative points at week ${horizon}</p></article></div>
+          </section>
+          <section class="overview-detail-grid"><article class="overview-detail-card guideline-card"><span class="page-kicker">PRACTICAL NEXT STEPS</span><h2>Your guidelines</h2>${guidelines ? `<ul>${guidelines}</ul>` : "<p>No guidelines were returned for this profile yet.</p>"}<a href="/goals.html">Review your AI goals →</a></article></section>
+        </div>
       </section>
-      <section class="overview-detail-grid"><article class="overview-detail-card guideline-card"><span class="page-kicker">PRACTICAL NEXT STEPS</span><h2>Your guidelines</h2>${guidelines ? `<ul>${guidelines}</ul>` : "<p>No guidelines were returned for this profile yet.</p>"}<a href="/goals.html">Review your AI goals →</a></article><article class="overview-detail-card"><span class="page-kicker">WHAT STANDS OUT</span><h2>Key insights</h2>${insightItems ? `<ul>${insightItems}</ul>` : "<p>Save more profile details to get a more useful comparison.</p>"}</article></section>
       ${assumptions ? `<details class="scenario-assumptions"><summary>Assumptions and limitations</summary><ul>${assumptions}</ul></details>` : ""}
       <p class="comparison-note scenario-disclaimer">${escapeHtml(data.disclaimer || "These illustrative scenarios are estimates from a single check-in. Actual outcomes vary and are not guaranteed.")}</p>
       <div class="comparison-footer"><a href="/tracker.html">Go to your tracker&nbsp; →</a></div>

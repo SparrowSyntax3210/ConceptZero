@@ -47,6 +47,8 @@ navLogout.addEventListener("click", async () => {
     if (!response.ok) throw new Error("Could not log out.");
     sessionStorage.removeItem("stackedInsightsViewsV1");
     sessionStorage.removeItem("stackedFutureSelfLetterV1");
+    sessionStorage.removeItem("stackedFutureSelfLetterV2:3");
+    sessionStorage.removeItem("stackedFutureSelfLetterV2:6");
     sessionStorage.removeItem("stackedAnalysisResult");
     sessionStorage.removeItem("stackedSubmittedCategory");
     window.location.replace("/");

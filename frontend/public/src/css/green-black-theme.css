@@ -1,0 +1,440 @@
+:root {
+  color-scheme: dark;
+  --app-green-black: #07120e;
+  --app-green-panel: #101e17;
+  --app-green-raised: #17271d;
+  --app-lime: #c5f51a;
+  --app-text: #f4f7ef;
+  --app-muted: #aab7a9;
+  --app-border: #d4f39a24;
+}
+
+.app-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 76% 5%, #344b263b 0, transparent 33%),
+    radial-gradient(ellipse at 14% 56%, #19352145 0, transparent 42%),
+    linear-gradient(145deg, #07120e 0%, #0b1711 52%, #101c14 100%);
+  color: var(--app-text);
+}
+
+.app-topbar {
+  border-bottom-color: var(--app-border);
+  background: #07120eef;
+  box-shadow: 0 8px 32px #0003;
+}
+
+.app-brand,
+.app-links a:hover,
+.app-links a.active {
+  color: var(--app-text);
+}
+
+.app-brand-mark i {
+  background: var(--app-lime);
+  box-shadow: 0 0 12px #c5f51a45;
+}
+
+.app-links a {
+  color: var(--app-muted);
+}
+
+.app-links a.active:after {
+  background: var(--app-lime);
+  box-shadow: 0 0 12px #c5f51a75;
+}
+
+.app-avatar {
+  border-color: #d4f39a35;
+  background: #14241a;
+  color: var(--app-text);
+}
+
+.app-logout {
+  border-color: var(--app-border);
+  background: #14221a;
+  color: var(--app-text);
+}
+
+.page-title,
+.workspace-panel h2,
+.goals-panel-heading h2,
+.profile-section-heading h2,
+.settings-card h2,
+.identity-copy h2 {
+  color: var(--app-text);
+}
+
+.page-kicker {
+  color: var(--app-lime);
+}
+
+.page-subtitle,
+.panel-intro {
+  color: var(--app-muted);
+}
+
+.workspace-action {
+  border: 1px solid #c5f51a45;
+  background: var(--app-lime);
+  color: #17210e;
+  box-shadow: 0 8px 24px #9fd52b22;
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+
+.workspace-action:hover,
+.workspace-action:focus-visible {
+  transform: translateY(-3px);
+  filter: brightness(1.06);
+  box-shadow: 0 13px 30px #9fd52b38;
+}
+
+.workspace-action.lime {
+  background: var(--app-lime);
+  color: #17210e;
+}
+
+.workspace-stat,
+.workspace-panel,
+.goals-sidebar,
+.identity-card,
+.overall-score-card,
+.profile-stats > article,
+.settings-card,
+.profile-area-card,
+.profile-empty {
+  border-color: var(--app-border);
+  background: linear-gradient(145deg, #17271eef, #0e1a13f5);
+  color: var(--app-text);
+  box-shadow: 0 16px 38px #0003, inset 0 1px #ffffff08;
+  backdrop-filter: blur(12px);
+}
+
+.workspace-stat strong,
+.profile-stats strong,
+.profile-area-card .area-score {
+  color: var(--app-lime);
+}
+
+.workspace-stat span,
+.profile-stats small,
+.profile-area-card p,
+.settings-card > p,
+.settings-card label small {
+  color: var(--app-muted);
+}
+
+.goals-sidebar > span,
+.profile-sidebar-title {
+  color: #a9c283;
+}
+
+.goals-sidebar > a,
+.profile-sidebar > a {
+  color: #c0cbbd;
+  transition: background .22s ease, color .22s ease, transform .22s ease, box-shadow .22s ease;
+}
+
+.goals-sidebar > a:hover,
+.profile-sidebar > a:hover {
+  transform: translateX(3px);
+  background: #c5f51a12;
+  color: #fff;
+}
+
+.goals-sidebar > a.active,
+.profile-sidebar > a.active {
+  background: linear-gradient(100deg, #c5f51a38, #c5f51a13);
+  color: #eaffb2;
+  box-shadow: inset 3px 0 var(--app-lime), 0 0 22px #c5f51a12;
+}
+
+.goal-row {
+  border-color: var(--app-border);
+  background: linear-gradient(110deg, #1c2c21, #111d16);
+  color: var(--app-text);
+  box-shadow: 0 10px 25px #0003;
+  transition: transform .28s ease, border-color .28s ease, background .28s ease, box-shadow .28s ease;
+}
+
+.goal-row:hover {
+  transform: translateY(-3px);
+  border-color: #c5f51a65;
+  background: linear-gradient(110deg, #243729, #142219);
+  box-shadow: 0 18px 36px #0005, 0 0 22px #c5f51a12;
+}
+
+.goal-row-title h3,
+.goal-row-title > strong {
+  color: #f4f7ef;
+}
+
+.goal-row-title p,
+.goal-row-meta {
+  color: var(--app-muted);
+}
+
+.goal-art,
+.goal-row:nth-child(4n + 2) .goal-art,
+.goal-row:nth-child(4n + 3) .goal-art,
+.goal-row:nth-child(4n) .goal-art {
+  background: radial-gradient(circle at 75% 20%, #c5f51a3d, transparent 42%), linear-gradient(145deg, #263b2b, #101a14);
+  color: #dfff9a;
+}
+
+.goal-progress-track {
+  background: #ffffff14;
+}
+
+.goal-progress-track i {
+  background: linear-gradient(90deg, #d9ff6c, var(--app-lime));
+  box-shadow: 0 0 10px #c5f51a45;
+}
+
+.goal-reason,
+.goals-sidebar a:hover,
+.profile-edit-link,
+.profile-section-heading > a,
+.profile-area-card a {
+  color: #d8fa9c;
+}
+
+.goal-menu {
+  border-color: var(--app-border);
+  background: #14231a;
+  color: #d8e5d2;
+}
+
+.goal-filter {
+  border-color: var(--app-border);
+  background: #0e1a13;
+  color: #bcc8b8;
+}
+
+.goal-filter.active {
+  border-color: #c5f51a75;
+  background: #c5f51a20;
+  color: #ddff9a;
+}
+
+.goal-streak-banner,
+.journey-card {
+  border-color: var(--app-border);
+  background: radial-gradient(ellipse at 85% 100%, #40552c55, transparent 46%), linear-gradient(110deg, #0d1912, #19271d 62%, #101a14);
+  color: var(--app-text);
+  box-shadow: 0 16px 38px #0004;
+}
+
+.goal-trophy,
+.stat-icon,
+.profile-area-icon {
+  border: 1px solid #c5f51a35;
+  background: #c5f51a1b;
+  color: var(--app-lime);
+}
+
+.goal-streak-banner h2,
+.journey-copy h2 {
+  color: #f4f7ef;
+}
+
+.goal-streak-banner p,
+.journey-copy p,
+.journey-chart-labels {
+  color: var(--app-muted);
+}
+
+.goal-streak-banner > a,
+.journey-copy a,
+.settings-card > a,
+.settings-card > button {
+  color: var(--app-lime);
+}
+
+.goal-mountain-art {
+  background: linear-gradient(145deg, transparent 35%, #b2da4a 36% 51%, #597438 52% 64%, #c5f51a 65%);
+  opacity: .3;
+}
+
+.profile-page {
+  color: var(--app-text);
+}
+
+.profile-sidebar {
+  border-right-color: var(--app-border);
+}
+
+.profile-portrait {
+  border-color: #c5f51a38;
+  background: radial-gradient(circle at 40% 30%, #314631, #0d1811 75%);
+  color: #eaffb2;
+}
+
+.identity-copy p,
+.overall-score-card > p {
+  color: var(--app-muted);
+}
+
+.streak-badge {
+  border: 1px solid #f1b84438;
+  background: #f1b84414;
+  color: #e8c66e;
+}
+
+.streak-badge strong {
+  color: #f5dc91;
+}
+
+.profile-score-ring {
+  background: conic-gradient(var(--app-lime) calc(var(--score) * 1%), #ffffff18 0);
+  box-shadow: 0 0 25px #c5f51a18;
+}
+
+.profile-score-ring:before {
+  background: #14221a;
+}
+
+.profile-score-ring span {
+  color: var(--app-muted);
+}
+
+.profile-area-card.incomplete {
+  background: linear-gradient(145deg, #1b2b20, #101a14);
+}
+
+.profile-area-card .area-score em {
+  color: #9eac9c;
+}
+
+.journey-chart-line:before {
+  background: linear-gradient(100deg, #719c32, var(--app-lime));
+  box-shadow: 0 0 12px #c5f51a35;
+}
+
+.journey-chart-line i {
+  border-color: var(--app-lime);
+  background: #122019;
+  box-shadow: 0 0 9px #c5f51a40;
+}
+
+.journey-chart-labels strong {
+  color: var(--app-lime);
+}
+
+.settings-card label,
+.settings-card > a,
+.settings-card > button {
+  border-top-color: var(--app-border);
+}
+
+.settings-card label strong {
+  color: #edf4e8;
+}
+
+.settings-card input[type="checkbox"] {
+  accent-color: var(--app-lime);
+}
+
+.profile-section-heading p {
+  color: var(--app-muted);
+}
+
+.letter-page {
+  color: var(--app-text);
+}
+
+.letter-eyebrow,
+.letter-intro h1 span {
+  color: var(--app-lime);
+}
+
+.letter-intro > p,
+.letter-grounding {
+  color: var(--app-muted);
+}
+
+.letter-card {
+  border-color: var(--app-border);
+  background: radial-gradient(ellipse at 100% 0%, #c5f51a12, transparent 38%), linear-gradient(145deg, #17271e, #0d1912 72%, #142219);
+  box-shadow: 0 28px 80px #0005, inset 0 1px #ffffff0b;
+}
+
+.letter-card:before {
+  background: #b3e94220;
+}
+
+.letter-paper-mark {
+  border-color: #c5f51a35;
+  background: #c5f51a16;
+  color: var(--app-lime);
+}
+
+.letter-subject,
+.letter-future-label {
+  color: #aab7a9;
+}
+
+.letter-greeting,
+.letter-signoff {
+  color: #f4f7ef;
+}
+
+.letter-body {
+  color: #c9d5c5;
+}
+
+.letter-actions button,
+.letter-error button {
+  background: var(--app-lime);
+  color: #17210e;
+  box-shadow: 0 8px 24px #9fd52b22;
+  transition: transform .24s ease, filter .24s ease, box-shadow .24s ease;
+}
+
+.letter-actions button:hover,
+.letter-error button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  background: var(--app-lime);
+  box-shadow: 0 13px 30px #9fd52b38;
+}
+
+.letter-loading,
+.letter-error {
+  border-color: var(--app-border);
+  background: linear-gradient(145deg, #17271eef, #0e1a13f5);
+  color: var(--app-muted);
+}
+
+.letter-error h2 {
+  color: var(--app-text);
+}
+
+.letter-spinner {
+  border-color: #ffffff20;
+  border-top-color: var(--app-lime);
+}
+
+@media (max-width: 920px) {
+  .profile-sidebar {
+    border-bottom-color: var(--app-border);
+  }
+}
+
+@media (max-width: 680px) {
+  .goals-sidebar > a.active,
+  .profile-sidebar > a.active {
+    box-shadow: inset 0 -2px var(--app-lime), 0 0 18px #c5f51a13;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goals-sidebar > a,
+  .profile-sidebar > a,
+  .workspace-action,
+  .goal-row,
+  .letter-actions button,
+  .letter-error button {
+    transition: none !important;
+  }
+}
