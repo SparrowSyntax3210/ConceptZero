@@ -195,7 +195,7 @@
 .goals-sidebar a:hover,
 .profile-edit-link,
 .profile-section-heading > a,
-.profile-area-card a {
+.profile-area-card .profile-area-action {
   color: #d8fa9c;
 }
 

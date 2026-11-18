@@ -107,10 +107,13 @@ function renderProfile(data) {
     .map((area) => {
       const scoreValue = formatStat(area.score, area.score == null ? "" : "%");
       const status = area.completed ? areaDetail(area) : "Not filled yet";
+      const formUrl = `/forms.html?category=${encodeURIComponent(area.id)}`;
       return `<article class="profile-area-card ${area.completed ? "" : "incomplete"}">
-      <span class="profile-area-icon" role="img" aria-label="${esc(area.label)} icon placeholder">${areaIcons[area.id] || "✦"}</span>
-      <h3>${esc(area.label)}</h3><div class="area-score">${scoreValue}<em>${area.score == null ? "" : " score"}</em></div>
-      <p>${esc(status)}</p><a href="/tracker.html">${area.completed ? "View tracker" : "Add details"} →</a>
+      <a class="profile-area-card-link" href="${formUrl}" aria-label="${area.completed ? "Edit" : "Add"} ${esc(area.label)} details">
+        <span class="profile-area-icon" role="img" aria-label="${esc(area.label)} icon placeholder">${areaIcons[area.id] || "✦"}</span>
+        <h3>${esc(area.label)}</h3><div class="area-score">${scoreValue}<em>${area.score == null ? "" : " score"}</em></div>
+        <p>${esc(status)}</p><span class="profile-area-action">${area.completed ? "Edit details" : "Add details"} →</span>
+      </a>
     </article>`;
     })
     .join("");

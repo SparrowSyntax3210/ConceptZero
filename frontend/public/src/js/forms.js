@@ -315,7 +315,21 @@ categoryForms.forEach((form) => {
 categoryButtons.forEach((button) => button.classList.remove("active"));
 checkSession().then((authenticated) => {
   if (!authenticated) return;
-  const requestedCategory = localStorage.getItem("selectedCategoryId");
+  const params = new URLSearchParams(window.location.search);
+  const queryCategory = params.get("category");
+  const requestedCategory = categoryNames[queryCategory]
+    ? queryCategory
+    : localStorage.getItem("selectedCategoryId");
+  if (categoryNames[queryCategory]) {
+    localStorage.setItem("selectedCategoryId", queryCategory);
+    params.delete("category");
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+    );
+  }
   selectCategory(
     categoryNames[requestedCategory] ? requestedCategory : categoryOrder[0],
   );
