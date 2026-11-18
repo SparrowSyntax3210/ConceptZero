@@ -94,6 +94,23 @@
   padding: 21px;
   border-radius: 22px;
 }
+.insights-content .future-card h2 {
+  max-width: 22ch;
+  margin-bottom: 8px;
+  font-size: clamp(23px, 2.1vw, 31px);
+  line-height: 1.12;
+}
+.insights-content .future-summary {
+  max-width: 62ch;
+  margin: 0 0 8px;
+  color: #d0dacb;
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.insights-content .future-card .card-subtitle {
+  margin-top: 0;
+}
 .insights-content .score-and-quantities {
   grid-template-columns: 115px minmax(0, 1fr);
   gap: 12px;
@@ -156,6 +173,13 @@
   }
   .insights-content .comparison-card {
     min-height: 0;
+  }
+  .insights-content .future-card h2 {
+    max-width: none;
+    font-size: 25px;
+  }
+  .insights-content .future-summary {
+    font-size: 13px;
   }
   .insights-content .score-and-quantities {
     grid-template-columns: 115px minmax(0, 1fr);

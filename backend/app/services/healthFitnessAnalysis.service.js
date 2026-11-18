@@ -83,7 +83,7 @@ const categorySuggestionFormat = {
         timeHorizon: { type: "string" },
         confidence: { type: "string", enum: ["low", "moderate", "high"] },
         score: { type: "number", minimum: 0, maximum: 100 },
-        summary: { type: "string" },
+        summary: { type: "string", maxLength: 150 },
         changes: {
           type: "array",
           items: {
@@ -101,12 +101,12 @@ const categorySuggestionFormat = {
               currentValue: { type: "number" },
               targetValue: { type: "number" },
               unit: { type: "string" },
-              reason: { type: "string" },
+              reason: { type: "string", maxLength: 150 },
             },
           },
         },
-        keyInsights: { type: "array", items: { type: "string" } },
-        limits: { type: "array", items: { type: "string" } },
+        keyInsights: { type: "array", maxItems: 3, items: { type: "string", maxLength: 110 } },
+        limits: { type: "array", maxItems: 3, items: { type: "string", maxLength: 110 } },
       },
     },
   },
@@ -117,7 +117,7 @@ async function analyzeCategorySuggestions(category) {
     {
       role: "system",
       content:
-        "You are a supportive personal growth coach. Analyze only the single STACKED profile category provided. Return practical, conservative suggested target quantities for the next 8 weeks. Only suggest metrics with adjustable=true, copy each selected metric label exactly, and only return a change when it has a numeric current value. Do not suggest changing fixed facts, grades, self-reported satisfaction, mood, stress, or confidence ratings. Use the current quantity and unit exactly as supplied; do not invent a current measurement or guarantee an outcome. Return a section-specific score from 0 to 100 as an estimate based only on this section's supplied data. Include at most three measurable changes. If this section has too little data for suggestions, return an empty changes array and state what is missing in summary or keyInsights. Do not refer to other profile sections. Do not diagnose or give medical advice. Return only the requested JSON.",
+        "You are a supportive personal growth coach. Analyze only the single STACKED profile category provided. Return practical, conservative suggested target quantities for the next 8 weeks. Only suggest metrics with adjustable=true, copy each selected metric label exactly, and only return a change when it has a numeric current value. Do not suggest changing fixed facts, grades, self-reported satisfaction, mood, stress, or confidence ratings. Use the current quantity and unit exactly as supplied; do not invent a current measurement or guarantee an outcome. Return a section-specific score from 0 to 100 as an estimate based only on this section's supplied data. Include at most three measurable changes. Make summary one concise sentence (max 20 words), not a report of every field. Keep each key insight and change reason short and scannable (one sentence, max 16 words). If this section has too little data for suggestions, return an empty changes array and state what is missing in summary or keyInsights. Do not refer to other profile sections. Do not diagnose or give medical advice. Return only the requested JSON.",
     },
     { role: "user", content: JSON.stringify(category) },
   ];
@@ -209,7 +209,7 @@ async function analyzeOverviewProjection(input) {
     {
       role: "system",
       content:
-        "You are STACKED's cautious personal-growth analyst. Use only the supplied scores and numeric quantities. Return compact JSON with exactly 5 short-term points (weeks 0,2,4,6,8) and 8 longTermTrajectory points (months 0,3,6,12,24,36,48,60). At month/week 0 both scores equal baselineScore. Every long-term point must contain a different concise currentSummary and guidelineSummary (max 12 words each) specific to that month. Give each path a distinct score at each visible checkpoint; keep changes small, conservative, and flattening over time. Never extrapolate short-term gains linearly or invent large changes. Use modest one-point changes when evidence is sparse and make uncertainty clear. Do not diagnose, give medical advice, or promise results. Provide at most 2 short guidelines, 2 key insights, and 1 assumption. Return only the JSON.",
+        "You are STACKED's cautious personal-growth analyst. Use only the supplied scores and numeric quantities. Return compact JSON with exactly 5 short-term points (weeks 0,2,4,6,8) and 8 longTermTrajectory points (months 0,3,6,12,24,36,48,60). At month/week 0 both scores equal baselineScore. Scores are illustrative wellbeing indices, not measured forecasts. Estimate each path independently from the evidence: keep a score unchanged when there is no credible reason for movement; plateaus are normal. Do not force every checkpoint to have a different score, do not add one point merely to make values unique, and do not create smooth monotonic improvement/decline. Use small, non-linear, conservative changes only when supported; guideline path may improve gradually but can plateau, and current path may stay stable or vary modestly. Avoid false precision and make uncertainty clear. At each long-term checkpoint, write a distinct, gentle day-to-day reflection (max 12 words each) about how routines might feel, using conditional language such as may/could. Ground it in supplied profile and guidelines; do not claim to know the person's actual feelings. Keep distant checkpoints especially general. Do not diagnose, give medical advice, or promise results. Provide at most 2 short guidelines, 2 key insights, and 1 assumption. Return only the JSON.",
     },
     { role: "user", content: JSON.stringify(input) },
   ];

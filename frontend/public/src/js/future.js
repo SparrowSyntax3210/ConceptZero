@@ -22,6 +22,7 @@ let projectionData = null;
 let renderer;
 let controls;
 let model;
+let timelineBaseRotationY = 0;
 let animationFrame;
 
 function setupTimeline() {
@@ -80,7 +81,23 @@ function updateCheckpoint(index) {
     window.gsap.fromTo(".score-block strong, .projected-badge strong", { scale: 0.92, opacity: 0.7 }, {
       scale: 1, opacity: 1, duration: 0.38, stagger: 0.035, ease: "back.out(1.7)", overwrite: true,
     });
-    if (model) window.gsap.to(model.rotation, { y: model.rotation.y + Math.PI * 0.12, duration: 0.7, ease: "power2.out", overwrite: "auto" });
+    rotateModelToCheckpoint(index);
+  }
+}
+
+function rotateModelToCheckpoint(index, duration = 0.7) {
+  if (!model) return;
+  const progress = Math.max(0, Math.min(checkpoints.length - 1, index)) / (checkpoints.length - 1);
+  const targetRotation = timelineBaseRotationY + progress * Math.PI * 2;
+  if (window.gsap && !reduceMotion) {
+    window.gsap.to(model.rotation, {
+      y: targetRotation,
+      duration,
+      ease: "power2.inOut",
+      overwrite: "auto",
+    });
+  } else {
+    model.rotation.y = targetRotation;
   }
 }
 
@@ -218,8 +235,10 @@ async function loadCharacter() {
     const scale = 4.2 / Math.max(size.y, 0.001);
     model.scale.setScalar(scale);
     model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+    timelineBaseRotationY = model.rotation.y;
     model.userData.baseY = model.position.y;
     scene.add(model);
+    rotateModelToCheckpoint(Number(range.value), 0.9);
     loader.hidden = true;
     controls = new OrbitControls(camera, canvas);
     controls.target.set(0, 2.0, 0);

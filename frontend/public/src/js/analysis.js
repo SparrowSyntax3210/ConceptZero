@@ -228,6 +228,12 @@ function render(data, available) {
     throw new Error("This section has no comparison data yet.");
   const score = Math.max(0, Math.min(100, Number(current.score) || 0));
   const futureScore = Math.max(0, Math.min(100, Number(future.score) || 0));
+  const futureSummary = String(future.summary || "A more intentional direction.")
+    .replace(/\s+/g, " ")
+    .trim();
+  const compactFutureSummary = futureSummary.length > 150
+    ? `${futureSummary.slice(0, 147).replace(/\s+\S*$/, "")}…`
+    : futureSummary;
   const insights = (data.keyInsights || [])
     .map((item) => `<li>${escapeHtml(item)}</li>`)
     .join("");
@@ -262,7 +268,8 @@ function render(data, available) {
       <figure class="middle-figure" aria-hidden="true"><div class="figure-halo"></div><img src="./assets/dashboard.png" alt="" /></figure>
       <article class="comparison-card future-card reveal">
         <div class="card-kicker"><span class="kicker-dot">✦</span>With Our Suggestions</div>
-        <h2>${escapeHtml(future.summary || "A more intentional direction.")}</h2>
+        <h2>A more intentional direction</h2>
+        <p class="future-summary">${escapeHtml(compactFutureSummary)}</p>
         <p class="card-subtitle">Suggested score ${futureScore}% · ${escapeHtml(data.confidence || "low")} confidence · ${escapeHtml(data.timeHorizon || "8 weeks")}</p>
         <div class="score-and-quantities">
           <div class="score-ring" style="--score:${futureScore}" role="img" aria-label="${futureScore}% suggested score"><div class="score-copy"><strong>${futureScore}%</strong><span>Suggested score</span></div></div>

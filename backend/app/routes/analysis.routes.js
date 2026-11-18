@@ -788,30 +788,6 @@ router.post("/overview", requireAuth, async (req, res) => {
         guidelineSummary: point.guidelineSummary.trim(),
       };
     });
-    // Keep every visible timeline stop numerically distinct. When the model
-    // repeats a rounded score, nudge it by the smallest available point so
-    // the selected checkpoint always has a visible score change.
-    for (const key of ["currentScore", "guidelineScore"]) {
-      const usedScores = new Set();
-      longTermTrajectory.slice(1).forEach((point) => {
-        let score = point[key];
-        if (usedScores.has(score)) {
-          for (let offset = 1; offset <= 100; offset += 1) {
-            const candidates = [score + offset, score - offset];
-            const replacement = candidates.find(
-              (candidate) =>
-                candidate >= 0 && candidate <= 100 && !usedScores.has(candidate),
-            );
-            if (replacement !== undefined) {
-              score = replacement;
-              point[key] = replacement;
-              break;
-            }
-          }
-        }
-        usedScores.add(score);
-      });
-    }
     const currentEnd = trajectory[trajectory.length - 1].currentScore;
     const guidelineEnd = trajectory[trajectory.length - 1].guidelineScore;
 
