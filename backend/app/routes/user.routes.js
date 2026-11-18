@@ -64,12 +64,20 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const email = (req.body?.email || "").trim().toLowerCase();
-  const password = req.body?.password;
+  // Email is the login identifier. Username is only a display name and is
+  // deliberately not used for account lookup.
+  const email = String(req.body?.email || "").trim().toLowerCase();
+  const password = String(req.body?.password || "");
+
+  if (!email || !password) {
+    return res.status(400).send("Enter your email address and password.");
+  }
 
   try {
-    const user = await User.findOne({ email, password });
-    if (!user) return res.status(401).send("Invalid email or password");
+    const user = await User.findOne({ email });
+    if (!user || user.password !== password) {
+      return res.status(401).send("Invalid email or password.");
+    }
 
     await startSession(user, req, res);
     return res.redirect(303, "/");

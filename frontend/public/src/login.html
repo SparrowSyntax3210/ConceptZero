@@ -309,6 +309,22 @@
         margin-bottom: 27px;
       }
 
+      .auth-error {
+        display: none;
+        margin: -10px 0 20px;
+        padding: 10px 12px;
+        border-left: 3px solid #dc2626;
+        border-radius: 0 8px 8px 0;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .auth-error.is-visible {
+        display: block;
+      }
+
       .tab {
         flex: 1;
         border: none;
@@ -689,6 +705,8 @@
             </button>
           </div>
 
+          <p class="auth-error" id="authError" role="alert" aria-live="polite"></p>
+
           <!-- LOGIN FORM -->
           <form action="/api/users/login" method="POST" id="loginForm">
             <div class="form-group">
@@ -856,9 +874,63 @@
         const heading = document.getElementById("heading");
         const subheading = document.getElementById("subheading");
         const footerText = document.getElementById("footerText");
+        const authError = document.getElementById("authError");
+
+        function showAuthError(message) {
+          authError.textContent = message;
+          authError.classList.add("is-visible");
+        }
+
+        function clearAuthError() {
+          authError.textContent = "";
+          authError.classList.remove("is-visible");
+        }
+
+        [loginForm, registerForm].forEach((form) => {
+          form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            clearAuthError();
+
+            const submitButton = form.querySelector('[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.textContent = "Please wait…";
+
+            try {
+              const response = await fetch(form.action, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                  "Accept": "text/plain",
+                },
+                body: new URLSearchParams(new FormData(form)),
+              });
+
+              if (response.redirected) {
+                window.location.assign(response.url || "/");
+                return;
+              }
+
+              const responseText = (await response.text()).trim();
+              const isHtml = /<!doctype html|<html[\s>]/i.test(responseText);
+              showAuthError(
+                isHtml || !responseText
+                  ? "We couldn’t sign you in right now. Please check your details and try again."
+                  : responseText,
+              );
+            } catch (error) {
+              showAuthError("Unable to connect. Check your connection and try again.");
+            } finally {
+              submitButton.disabled = false;
+              submitButton.innerHTML = originalButtonText;
+            }
+          });
+        });
 
         function switchForm(mode) {
           const isLogin = mode === "login";
+          clearAuthError();
 
           // Show / hide forms
           loginForm.hidden = !isLogin;
