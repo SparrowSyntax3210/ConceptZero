@@ -4,8 +4,9 @@ const connectDB = require("./app/db/db");
 async function startServer() {
   try {
     await connectDB();
-    app.listen(3000, () => {
-      console.log("Server is running on port 3000");
+    const port = Number(process.env.PORT) || 3000;
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`Server is listening on port ${port}`);
     });
   } catch (error) {
     console.error("Server startup failed:", error.message);

@@ -170,7 +170,7 @@ function renderOverview(data, available) {
       </section>
       ${assumptions ? `<details class="scenario-assumptions"><summary>Assumptions and limitations</summary><ul>${assumptions}</ul></details>` : ""}
       <p class="comparison-note scenario-disclaimer">${escapeHtml(data.disclaimer || "These illustrative scenarios are estimates from a single check-in. Actual outcomes vary and are not guaranteed.")}</p>
-      <div class="comparison-footer"><a href="/tracker.html">Go to your tracker&nbsp; →</a></div>
+      <div class="comparison-footer"><a href="/tracker.html">Go to your tracker&nbsp; →</a><a href="/future.html">Explore your future&nbsp; →</a></div>
     </div>
   </div>`;
 
@@ -272,7 +272,7 @@ function render(data, available) {
       </article>
     </section>
     <p class="comparison-note">${limits || "Suggestions are measurable planning targets, not guaranteed outcomes."} · Confidence: ${escapeHtml(data.confidence || "low")}.</p>
-    <div class="comparison-footer"><a href="/tracker.html">Go to your tracker&nbsp; →</a></div></div></div>`;
+    <div class="comparison-footer"><a href="/tracker.html">Go to your tracker&nbsp; →</a><a href="/future.html">Explore your future&nbsp; →</a></div></div></div>`;
 
   root.querySelectorAll("[data-insight-category]").forEach((button) => {
     button.addEventListener("click", () =>

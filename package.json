@@ -1,4 +1,11 @@
 {
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
+  },
+  "engines": {
+    "node": ">=22 <23"
+  },
   "dependencies": {
     "dotenv": "^18.0.10",
     "express": "^5.3.0",

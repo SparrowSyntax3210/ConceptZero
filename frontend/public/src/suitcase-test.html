@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07120e" />
+    <title>Suitcase Interaction Test — STACKED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/suitcase-test.css" />
+    <script type="importmap">
+      {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+    </script>
+  </head>
+  <body>
+    <main class="suitcase-page">
+      <a class="suitcase-brand" href="/" aria-label="STACKED home"><span class="brand-bars"><i></i><i></i><i></i></span>STACKED <small>INTERACTION TEST</small></a>
+      <div class="corner-light corner-light-left" aria-hidden="true"></div>
+      <div class="corner-light corner-light-right" aria-hidden="true"></div>
+      <section class="suitcase-intro">
+        <span class="eyebrow">A CASE FOR WHAT'S NEXT</span>
+        <h1>Your next chapter,<br /><em>packed with possibility.</em></h1>
+        <p>Open the case to see the comparison experience take shape.</p>
+      </section>
+      <section class="suitcase-stage" id="suitcaseStage" aria-label="Interactive vintage suitcase">
+        <div class="stage-glow" aria-hidden="true"></div>
+        <div class="floor-ring floor-ring-one" aria-hidden="true"></div>
+        <div class="floor-ring floor-ring-two" aria-hidden="true"></div>
+        <div class="suitcase-loader" id="suitcaseLoader"><span></span>Loading your suitcase…</div>
+        <div class="suitcase-error" id="suitcaseError" hidden>The 3D suitcase could not load. Check the model path and try again.</div>
+        <canvas id="suitcaseCanvas" aria-label="3D vintage suitcase. Activate the button to open or close it."></canvas>
+        <div class="interaction-hint" id="interactionHint">Click the suitcase or use the button</div>
+        <button class="open-suitcase" id="openSuitcase" type="button" disabled><span aria-hidden="true">↗</span> Open the suitcase</button>
+      </section>
+      <p class="suitcase-footnote">Prototype stage · Click to open and close · STACKED</p>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script type="module" src="./js/suitcase-test.js"></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: conceptzero-stacked-api
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22
+      - key: OPENROUTER_MODEL
+        value: qwen/qwen3.5-9b
+      - key: MONGODB_URI
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
