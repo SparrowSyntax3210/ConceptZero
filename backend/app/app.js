@@ -17,13 +17,17 @@ app.use("/api/categories", require("./routes/category.routes"));
 app.use("/api/analysis", require("./routes/analysis.routes"));
 app.use("/api/goals", require("./routes/goal.routes"));
 
-app.get("/health", (_req, res) => {
+const healthCheck = (_req, res) => {
   const databaseReady = mongoose.connection.readyState === 1;
   return res.status(databaseReady ? 200 : 503).json({
     status: databaseReady ? "ok" : "starting",
     database: databaseReady ? "connected" : "disconnected",
   });
-});
+};
+app.get("/health", healthCheck);
+// This alias lets the Vercel frontend probe the Render service through the
+// existing /api/* rewrite before issuing its normal API requests.
+app.get("/api/health", healthCheck);
 
 app.get("/test", (req, res) => {
   res.send("Hello World");

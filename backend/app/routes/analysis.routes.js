@@ -695,7 +695,21 @@ router.post("/overview", requireAuth, async (req, res) => {
       sections.reduce((sum, section) => sum + section.currentScore, 0) /
         sections.length,
     );
-    const result = await analyzeOverviewProjection({ baselineScore, sections });
+    // Give the model only the compact facts needed for a projection. Full
+    // profile documents contain optional text fields that bloat prompts and
+    // make structured responses more likely to be truncated.
+    const analysisSections = sections.map(
+      ({ id, label, currentScore, quantities }) => ({
+        id,
+        label,
+        currentScore,
+        quantities,
+      }),
+    );
+    const result = await analyzeOverviewProjection({
+      baselineScore,
+      sections: analysisSections,
+    });
     const expectedWeeks = [0, 2, 4, 6, 8];
     const pointsByWeek = new Map(
       (result.analysis.trajectory || []).map((point) => [
@@ -733,12 +747,78 @@ router.post("/overview", requireAuth, async (req, res) => {
         guidelineScore: week === 0 ? baselineScore : Math.round(guidelineScore),
       };
     });
+    const expectedMonths = [0, 3, 6, 12, 24, 36, 48, 60];
+    const pointsByMonth = new Map(
+      (result.analysis.longTermTrajectory || []).map((point) => [
+        Number(point.month),
+        point,
+      ]),
+    );
+    if (
+      expectedMonths.some((month) => {
+        const point = pointsByMonth.get(month);
+        return (
+          !point ||
+          !Number.isFinite(Number(point.currentScore)) ||
+          !Number.isFinite(Number(point.guidelineScore)) ||
+          typeof point.currentSummary !== "string" ||
+          !point.currentSummary.trim() ||
+          typeof point.guidelineSummary !== "string" ||
+          !point.guidelineSummary.trim()
+        );
+      })
+    ) {
+      throw new Error(
+        "The overview model returned an incomplete long-range projection. Please retry.",
+      );
+    }
+    const longTermTrajectory = expectedMonths.map((month) => {
+      const point = pointsByMonth.get(month);
+      return {
+        month,
+        currentScore:
+          month === 0
+            ? baselineScore
+            : Math.round(Math.max(0, Math.min(100, Number(point.currentScore)))),
+        guidelineScore:
+          month === 0
+            ? baselineScore
+            : Math.round(Math.max(0, Math.min(100, Number(point.guidelineScore)))),
+        currentSummary: point.currentSummary.trim(),
+        guidelineSummary: point.guidelineSummary.trim(),
+      };
+    });
+    // Keep every visible timeline stop numerically distinct. When the model
+    // repeats a rounded score, nudge it by the smallest available point so
+    // the selected checkpoint always has a visible score change.
+    for (const key of ["currentScore", "guidelineScore"]) {
+      const usedScores = new Set();
+      longTermTrajectory.slice(1).forEach((point) => {
+        let score = point[key];
+        if (usedScores.has(score)) {
+          for (let offset = 1; offset <= 100; offset += 1) {
+            const candidates = [score + offset, score - offset];
+            const replacement = candidates.find(
+              (candidate) =>
+                candidate >= 0 && candidate <= 100 && !usedScores.has(candidate),
+            );
+            if (replacement !== undefined) {
+              score = replacement;
+              point[key] = replacement;
+              break;
+            }
+          }
+        }
+        usedScores.add(score);
+      });
+    }
     const currentEnd = trajectory[trajectory.length - 1].currentScore;
     const guidelineEnd = trajectory[trajectory.length - 1].guidelineScore;
 
     return res.json({
       model: result.model,
       timeHorizonWeeks: 8,
+      timeHorizonMonths: 60,
       baselineScore,
       sections: sections.map(({ id, label, currentScore }) => ({
         id,
@@ -759,6 +839,7 @@ router.post("/overview", requireAuth, async (req, res) => {
         guidelines: result.analysis.guidelines || [],
       },
       trajectory,
+      longTermTrajectory,
       confidence: result.analysis.confidence,
       keyInsights: result.analysis.keyInsights || [],
       assumptions: result.analysis.assumptions || [],

@@ -4,6 +4,7 @@ async function createChatCompletion({
   messages,
   responseFormat,
   temperature = 0.25,
+  maxTokens = 1600,
 }) {
   const apiKey =
     process.env.OPENROUTER_API_KEY ||
@@ -44,7 +45,7 @@ async function createChatCompletion({
   let activeMessages = messages;
   let activeFormat = responseFormat;
   try {
-    ({ response, result } = await sendRequest(messages, responseFormat));
+    ({ response, result } = await sendRequest(messages, responseFormat, maxTokens));
   } catch (error) {
     if (error.name === "TimeoutError" || error.name === "AbortError") {
       throw new Error("OpenRouter request timed out. Please try again.");
@@ -76,6 +77,7 @@ async function createChatCompletion({
       ({ response, result } = await sendRequest(
         activeMessages,
         activeFormat,
+        maxTokens,
       ));
     } catch (error) {
       if (error.name === "TimeoutError" || error.name === "AbortError") {
@@ -103,7 +105,11 @@ async function createChatCompletion({
     // Structured projections may need more room than ordinary category
     // summaries. Retry once with a larger completion budget before failing.
     try {
-      ({ response, result } = await sendRequest(activeMessages, activeFormat, 3600));
+      ({ response, result } = await sendRequest(
+        activeMessages,
+        activeFormat,
+        Math.max(3600, maxTokens * 2),
+      ));
     } catch (error) {
       if (error.name === "TimeoutError" || error.name === "AbortError") {
         throw new Error("OpenRouter request timed out. Please try again.");
@@ -153,7 +159,11 @@ async function createChatCompletion({
       retryFormat = { type: "json_object" };
     }
     try {
-      ({ response, result } = await sendRequest(retryMessages, retryFormat, 3600));
+      ({ response, result } = await sendRequest(
+        retryMessages,
+        retryFormat,
+        Math.max(3600, maxTokens * 2),
+      ));
     } catch (error) {
       if (error.name === "TimeoutError" || error.name === "AbortError") {
         throw new Error("OpenRouter request timed out. Please try again.");

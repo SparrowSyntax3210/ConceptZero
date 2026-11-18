@@ -141,14 +141,15 @@ const overviewProjectionFormat = {
         "currentSummary",
         "guidelineSummary",
         "trajectory",
+        "longTermTrajectory",
         "guidelines",
         "keyInsights",
         "assumptions",
       ],
       properties: {
         confidence: { type: "string", enum: ["low", "moderate", "high"] },
-        currentSummary: { type: "string" },
-        guidelineSummary: { type: "string" },
+        currentSummary: { type: "string", maxLength: 150 },
+        guidelineSummary: { type: "string", maxLength: 150 },
         trajectory: {
           type: "array",
           items: {
@@ -162,9 +163,42 @@ const overviewProjectionFormat = {
             },
           },
         },
-        guidelines: { type: "array", items: { type: "string" } },
-        keyInsights: { type: "array", items: { type: "string" } },
-        assumptions: { type: "array", items: { type: "string" } },
+        longTermTrajectory: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: [
+              "month",
+              "currentScore",
+              "guidelineScore",
+              "currentSummary",
+              "guidelineSummary",
+            ],
+            properties: {
+              month: { type: "integer", minimum: 0, maximum: 60 },
+              currentScore: { type: "number", minimum: 0, maximum: 100 },
+              guidelineScore: { type: "number", minimum: 0, maximum: 100 },
+              currentSummary: { type: "string", maxLength: 150 },
+              guidelineSummary: { type: "string", maxLength: 150 },
+            },
+          },
+        },
+        guidelines: {
+          type: "array",
+          maxItems: 3,
+          items: { type: "string", maxLength: 110 },
+        },
+        keyInsights: {
+          type: "array",
+          maxItems: 3,
+          items: { type: "string", maxLength: 110 },
+        },
+        assumptions: {
+          type: "array",
+          maxItems: 2,
+          items: { type: "string", maxLength: 110 },
+        },
       },
     },
   },
@@ -175,7 +209,7 @@ async function analyzeOverviewProjection(input) {
     {
       role: "system",
       content:
-        "You are STACKED's cautious personal-growth analyst. Compare two illustrative 8-week scenarios using only the supplied completed profile areas, quantities, scores, and baselineScore. Scenario one asks what may happen if the person's current patterns continue. Scenario two asks what may happen if they follow the practical guidelines you suggest. Distinguish user-reported facts from estimates. Do not diagnose, give medical advice, promise outcomes, or imply these values are measured forecasts. Keep changes modest and uncertainty explicit. Return exactly five trajectory points for weeks 0, 2, 4, 6, and 8; week 0 must equal baselineScore for both paths. A guided path may improve only where the supplied data supports a practical change. The current path may remain flat if there is no basis to infer direction. Do not penalize a person without evidence. Make guidelines specific, low-risk, and optional. State that results depend on consistency and other factors. Return only the requested JSON.",
+        "You are STACKED's cautious personal-growth analyst. Use only the supplied scores and numeric quantities. Return compact JSON with exactly 5 short-term points (weeks 0,2,4,6,8) and 8 longTermTrajectory points (months 0,3,6,12,24,36,48,60). At month/week 0 both scores equal baselineScore. Every long-term point must contain a different concise currentSummary and guidelineSummary (max 12 words each) specific to that month. Give each path a distinct score at each visible checkpoint; keep changes small, conservative, and flattening over time. Never extrapolate short-term gains linearly or invent large changes. Use modest one-point changes when evidence is sparse and make uncertainty clear. Do not diagnose, give medical advice, or promise results. Provide at most 2 short guidelines, 2 key insights, and 1 assumption. Return only the JSON.",
     },
     { role: "user", content: JSON.stringify(input) },
   ];
@@ -183,6 +217,7 @@ async function analyzeOverviewProjection(input) {
     messages,
     responseFormat: overviewProjectionFormat,
     temperature: 0.15,
+    maxTokens: 2400,
   });
 }
 

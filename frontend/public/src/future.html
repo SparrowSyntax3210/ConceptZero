@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07120e" />
+    <title>Your Future Path — STACKED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/app-nav.css" />
+    <link rel="stylesheet" href="./css/future.css" />
+    <script type="importmap">
+      {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+    </script>
+  </head>
+  <body class="future-page">
+    <header class="app-topbar">
+      <a class="app-brand" href="/"><span class="app-brand-mark"><i></i><i></i><i></i></span>STACKED</a>
+      <nav class="app-links" aria-label="Main navigation">
+        <a href="/tracker.html">Tracker</a><a href="/analysis.html">Insights</a>
+        <a href="/goals.html">Goals</a><a href="/letters.html">Letters</a>
+        <a class="active" href="/future.html" aria-current="page">Future</a>
+        <a href="/profile.html">Profile</a>
+      </nav>
+      <div class="app-account">
+        <button class="app-avatar" id="navAvatar" type="button" aria-expanded="false">●</button>
+        <button class="app-logout" id="navLogout" type="button" hidden>Log out</button>
+      </div>
+    </header>
+
+    <main class="future-main">
+      <header class="future-heading">
+        <span class="future-kicker">YOUR FUTURE, IN VIEW</span>
+        <h1>Small choices. <em>Longer horizons.</em></h1>
+        <p>Drag the timeline. See both paths change over time.</p>
+      </header>
+
+      <section class="future-stage" id="futureStage" aria-label="Interactive future comparison">
+        <div class="stage-orbit orbit-one" aria-hidden="true"></div>
+        <div class="stage-orbit orbit-two" aria-hidden="true"></div>
+        <div class="stage-horizon" aria-hidden="true"></div>
+        <div class="future-side current-side">
+          <div class="path-label"><span class="path-dot current-dot"></span>IF NOTHING CHANGES</div>
+          <h2>Current path</h2>
+          <p id="currentSummary">Your existing routine is the starting point.</p>
+          <div class="score-block"><strong id="currentScore">—</strong><span>/ 100<br />wellbeing index</span></div>
+          <div class="metric-list" id="currentMetrics"><div class="metric-placeholder">Loading your profile…</div></div>
+        </div>
+
+        <div class="model-column">
+          <div class="model-glow" aria-hidden="true"></div>
+          <div class="model-loader" id="modelLoader"><i></i>Loading your 3D model…</div>
+          <div class="model-error" id="modelError" hidden>The character model could not load. You can still explore the timeline.</div>
+          <canvas id="characterCanvas" aria-label="Interactive 3D character. Drag to rotate 360 degrees." tabindex="0"></canvas>
+          <div class="model-caption"><span>YOUR JOURNEY</span><small>Drag to rotate 360°</small></div>
+          <div class="projected-badge"><span>PROJECTED INDEX</span><strong id="modelScore">—</strong><small id="modelHorizon">At 3 months</small></div>
+        </div>
+
+        <div class="future-side suggested-side">
+          <div class="path-label"><span class="path-dot suggested-dot"></span>IF YOU FOLLOW YOUR GUIDELINES</div>
+          <h2 id="suggestedTitle">Suggested path</h2>
+          <p id="suggestedSummary">Personalized estimates will appear here.</p>
+          <div class="score-block"><strong id="suggestedScore">—</strong><span>/ 100<br />illustrative index</span></div>
+          <div class="metric-list" id="suggestedMetrics"><div class="metric-placeholder">Preparing your outlook…</div></div>
+        </div>
+
+        <div class="timeline-card" id="timelineCard">
+          <div class="timeline-heading">
+            <div><span class="future-kicker">CHOOSE YOUR CHECKPOINT</span><h2 id="timelineTitle">Your path at 3 months</h2></div>
+            <span class="timeline-current" id="timelineCurrent">CURRENT · 3 MONTHS</span>
+          </div>
+          <svg class="timeline-chart" viewBox="0 0 1000 96" preserveAspectRatio="none" role="img" aria-label="Illustrative current and suggested path scores over time">
+            <path class="chart-grid" d="M0 20H1000M0 48H1000M0 76H1000" />
+            <path id="currentTrajectory" class="chart-line chart-line-current" d="M0 72L1000 72" />
+            <path id="guidelineTrajectory" class="chart-line chart-line-guideline" d="M0 72L1000 28" />
+            <line id="chartCursor" class="chart-cursor" x1="43" y1="9" x2="43" y2="85" />
+            <circle id="chartCurrentDot" class="chart-dot chart-dot-current" cx="43" cy="72" r="5" />
+            <circle id="chartGuidelineDot" class="chart-dot chart-dot-guideline" cx="43" cy="72" r="5" />
+          </svg>
+          <div class="chart-legend"><span><i class="legend-current"></i>Current patterns</span><span><i class="legend-guideline"></i>With guidelines</span></div>
+          <div class="range-wrap">
+            <div class="range-labels" id="rangeLabels" aria-hidden="true"></div>
+            <input id="horizonRange" type="range" min="0" max="6" step="1" value="0" aria-label="Choose a future checkpoint" aria-valuetext="3 months" disabled />
+            <div class="range-progress" id="rangeProgress" aria-hidden="true"></div>
+            <div class="range-markers" id="rangeMarkers" aria-hidden="true"></div>
+          </div>
+          <div class="timeline-bottom">
+            <p id="timelineNote">Drag the marker to see how the illustrative outlook changes over time.</p>
+            <a href="/analysis.html">View your insights <span>↗</span></a>
+          </div>
+        </div>
+      </section>
+      <p class="projection-note" id="projectionNote">Projections are illustrative planning scenarios based on your saved profile and AI generated guidance. They are not guarantees or medical advice.</p>
+      <div class="future-status" id="futureStatus" role="status" aria-live="polite"></div>
+    </main>
+
+    <script src="./js/backend-wake.js"></script>
+    <script src="./js/app-nav.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script type="module" src="./js/future.js"></script>
+  </body>
+</html>
