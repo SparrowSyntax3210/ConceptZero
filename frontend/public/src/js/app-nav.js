@@ -19,8 +19,11 @@ async function loadNavUser() {
     const response = await fetch("/api/users/status", {
       credentials: "same-origin",
     });
-    const result = await response.json();
-    if (!response.ok || !result.authenticated || !result.user) {
+    const result = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(result?.message || "Account service is temporarily unavailable.");
+    }
+    if (!result?.authenticated || !result.user) {
       window.location.replace("/login.html");
       return;
     }
@@ -28,7 +31,7 @@ async function loadNavUser() {
     navAvatar.textContent = result.user.username.charAt(0).toUpperCase();
     navAvatar.setAttribute("aria-label", `Account for ${result.user.username}`);
   } catch (error) {
-    console.error("Could not load account menu:", error);
+    console.warn("Could not load account menu:", error.message);
   }
 }
 
