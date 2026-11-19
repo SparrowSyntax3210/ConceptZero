@@ -1,13 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
-const path = require("path");
 const userRoutes = require("./routes/user.routes");
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "../../frontend/public/src")));
 
 // Render uses /health to check whether the web process is listening.
 app.get("/health", (_req, res) => {
