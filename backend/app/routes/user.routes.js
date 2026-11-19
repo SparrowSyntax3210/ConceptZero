@@ -1,153 +1,167 @@
-const crypto = require("crypto");
 const express = require("express");
-const router = express.Router();
+const crypto = require("crypto");
 const User = require("../models/user.model");
 
-const SESSION_COOKIE = "stacked_session";
-const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
+const router = express.Router();
 
-function getSessionToken(req) {
-  const cookies = (req.headers.cookie || "").split(";");
-  const entry = cookies.find((cookie) =>
-    cookie.trim().startsWith(`${SESSION_COOKIE}=`),
-  );
-  return entry ? entry.trim().slice(SESSION_COOKIE.length + 1) : null;
+const COOKIE_NAME = "stacked_session";
+const SESSION_TIME = 7 * 24 * 60 * 60;
+
+// Get token from cookie
+function getToken(req) {
+  const cookies = req.headers.cookie || "";
+  const token = cookies
+    .split(";")
+    .find((c) => c.trim().startsWith(COOKIE_NAME + "="));
+
+  return token ? token.trim().split("=")[1] : null;
 }
 
+// Hash token
 function hashToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-function setSessionCookie(req, res, token) {
-  const secure =
-    req.secure || process.env.NODE_ENV === "production" ? "; Secure" : "";
-  res.setHeader(
-    "Set-Cookie",
-    `${SESSION_COOKIE}=${token}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; HttpOnly; SameSite=Lax${secure}`,
-  );
-}
-
-async function startSession(user, req, res) {
+// Create session and cookie
+async function createSession(user, req, res) {
   const token = crypto.randomBytes(32).toString("hex");
+
   user.sessionTokenHash = hashToken(token);
-  user.sessionExpiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000);
+  user.sessionExpiresAt = new Date(Date.now() + SESSION_TIME * 1000);
+
   await user.save();
-  setSessionCookie(req, res, token);
+
+  res.cookie(COOKIE_NAME, token, {
+    maxAge: SESSION_TIME * 1000,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
 }
 
+// Register
 router.post("/register", async (req, res) => {
-  const username = (req.body?.username || req.body?.name || "").trim();
-  const email = (req.body?.email || "").trim().toLowerCase();
-  const password = req.body?.password;
-
-  if (!username || !email || !password) {
-    return res.status(400).send("Name, email, and password are required.");
-  }
-
   try {
-    const user = await User.create({ username, email, password });
-    await startSession(user, req, res);
-    return res.redirect(303, "/");
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).send("Please fill all fields");
+    }
+
+    const user = await User.create({
+      username,
+      email: email.toLowerCase(),
+      password,
+    });
+
+    await createSession(user, req, res);
+
+    res.redirect("/");
   } catch (error) {
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern || {})[0] || "account";
-      return res
-        .status(409)
-        .send(`An account with this ${field} already exists.`);
-    }
-    if (error.name === "ValidationError") {
-      return res.status(400).send(error.message);
-    }
-    console.error("Error registering user:", error);
-    return res.status(500).send("Error registering user");
+    res.status(500).send("Error registering user");
   }
 });
 
+// Login
 router.post("/login", async (req, res) => {
-  // Email is the login identifier. Username is only a display name and is
-  // deliberately not used for account lookup.
-  const email = String(req.body?.email || "").trim().toLowerCase();
-  const password = String(req.body?.password || "");
-
-  if (!email || !password) {
-    return res.status(400).send("Enter your email address and password.");
-  }
-
   try {
-    const user = await User.findOne({ email });
+    const { email, password } = req.body;
+
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    });
+
     if (!user || user.password !== password) {
-      return res.status(401).send("Invalid email or password.");
+      return res.status(401).send("Invalid email or password");
     }
 
-    await startSession(user, req, res);
-    return res.redirect(303, "/");
+    await createSession(user, req, res);
+
+    res.redirect("/");
   } catch (error) {
-    console.error("Error logging in:", error);
-    return res.status(500).send("Error logging in");
+    res.status(500).send("Error logging in");
   }
 });
 
+// Check login status
 router.get("/status", async (req, res) => {
-  const token = getSessionToken(req);
-  if (!token) return res.json({ authenticated: false, user: null });
-
   try {
+    const token = getToken(req);
+
+    if (!token) {
+      return res.json({ authenticated: false });
+    }
+
     const user = await User.findOne({
       sessionTokenHash: hashToken(token),
       sessionExpiresAt: { $gt: new Date() },
     }).select("_id username email");
 
-    if (!user) return res.json({ authenticated: false, user: null });
-    return res.json({
+    if (!user) {
+      return res.json({ authenticated: false });
+    }
+
+    res.json({
       authenticated: true,
-      user: { id: user._id, username: user.username, email: user.email },
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
     });
   } catch (error) {
-    console.error("Error checking login status:", error);
-    return res.status(500).json({ message: "Could not check login status" });
+    res.status(500).send("Error checking login status");
   }
 });
 
+// Logout
 router.post("/logout", async (req, res) => {
-  const token = getSessionToken(req);
-  if (token) {
-    try {
+  try {
+    const token = getToken(req);
+
+    if (token) {
       await User.updateOne(
         { sessionTokenHash: hashToken(token) },
         { $unset: { sessionTokenHash: 1, sessionExpiresAt: 1 } },
       );
-    } catch (error) {
-      console.error("Error logging out:", error);
-      return res.status(500).send("Error logging out");
     }
-  }
 
-  res.setHeader(
-    "Set-Cookie",
-    `${SESSION_COOKIE}=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax${
-      req.secure || process.env.NODE_ENV === "production" ? "; Secure" : ""
-    }`,
-  );
-  return res.sendStatus(204);
+    res.clearCookie(COOKIE_NAME, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
+
+    res.send("Logged out successfully");
+  } catch (error) {
+    res.status(500).send("Error logging out");
+  }
 });
 
+// Forgot password
 router.post("/forgot-password", async (req, res) => {
-  const email = (req.body?.email || "").trim().toLowerCase();
-  const newPassword = req.body?.newPassword;
-  if (!email || !newPassword) {
-    return res.status(400).send("Email and new password are required.");
-  }
-
   try {
-    const user = await User.findOneAndUpdate(
-      { email },
-      { password: newPassword },
-    );
-    if (!user) return res.status(404).send("User not found");
-    return res.send("Password reset successful");
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).send("Please enter all fields");
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.send("Password reset successful");
   } catch (error) {
-    console.error("Error resetting password:", error);
-    return res.status(500).send("Error resetting password");
+    res.status(500).send("Error resetting password");
   }
 });
 

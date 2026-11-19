@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
+
 const requireAuth = require("../requireAuth");
+
 const HealthFitness = require("../models/HealthFitness.model");
 const MindDigitalWellbeing = require("../models/MindDigitalWellbeing.model");
 const AcademicsCareerGrowth = require("../models/AcademicsCareerGrowth.model");
 const LifestylePersonalGrowth = require("../models/LifestylePersonalGrowth.model");
 const Goal = require("../models/Goal.model");
+
 const {
   analyzeHealthFitnessComparison,
   analyzeCategorySuggestions,
@@ -13,6 +16,7 @@ const {
   writeFutureSelfLetter,
 } = require("../services/healthFitnessAnalysis.service");
 
+// Profile categories
 const profileCategories = [
   {
     id: "health-fitness",
@@ -48,8 +52,10 @@ const profileCategories = [
   },
 ];
 
+// Common helper functions
 function ratingScore(...ratings) {
-  const values = ratings.filter((value) => Number.isFinite(value));
+  const values = ratings.filter(Number.isFinite);
+
   return values.length
     ? Math.round(
         values.reduce((sum, value) => sum + value * 10, 0) / values.length,
@@ -62,346 +68,263 @@ function toPlainProfile(doc) {
   return profile;
 }
 
-function addQuantity(list, metric, value, unit, adjustable = false) {
-  if (value == null || !Number.isFinite(Number(value))) return;
-  list.push({ metric, value: Number(value), unit, adjustable });
+function getScore(category, doc) {
+  return Math.max(0, Math.min(100, Math.round(category.score(doc) || 0)));
+}
+
+function getErrorResponse(res, error, message) {
+  console.error(message, error);
+
+  if (error.message?.includes("OPENROUTER_API_KEY")) {
+    return res.status(503).json({ message: error.message });
+  }
+
+  if (error.statusCode === 429) {
+    return res
+      .status(429)
+      .set("Retry-After", "5")
+      .json({
+        message:
+          "Analysis is temporarily busy. Please wait a few seconds and try again.",
+      });
+  }
+
+  if (error.statusCode) {
+    return res.status(error.statusCode).json({
+      message:
+        error.statusCode === 503
+          ? "The analysis service is temporarily unavailable. Please try again shortly."
+          : error.message || message,
+    });
+  }
+
+  return res.status(502).json({
+    message: error.message || message,
+  });
+}
+
+// Profile quantities
+const quantityFields = {
+  "health-fitness": [
+    ["Age", "age", "years"],
+    ["Height", "heightCm", "cm"],
+    ["Current weight", "currentWeightKg", "kg"],
+    ["Target weight", "targetWeightKg", "kg"],
+    ["Daily steps", "physicalActivity.dailySteps", "steps/day", true],
+    ["Workouts", "physicalActivity.workoutsPerWeek", "sessions/week", true],
+    [
+      "Workout duration",
+      "physicalActivity.averageWorkoutMinutes",
+      "minutes/session",
+      true,
+    ],
+    ["Average sleep", "sleepRoutine.averageSleepHours", "hours/night", true],
+    ["Meals", "eatingHabits.mealsPerDay", "meals/day", true],
+    ["Breakfast days", "eatingHabits.breakfastDaysPerWeek", "days/week", true],
+    [
+      "Junk or outside meals",
+      "eatingHabits.junkOrOutsideMealsPerWeek",
+      "meals/week",
+      true,
+    ],
+    ["Water intake", "nutritionHydration.waterMlPerDay", "ml/day", true],
+    [
+      "Fruit and vegetable servings",
+      "nutritionHydration.fruitVegetableServingsPerDay",
+      "servings/day",
+      true,
+    ],
+    ["Fitness consistency", "fitnessConsistencyRating", "/10", true],
+    ["Satisfaction", "satisfaction", "/10"],
+  ],
+
+  "mind-digital": [
+    ["Screen time", "screenTimeMinutesPerDay", "minutes/day", true],
+    [
+      "Social media",
+      "digitalUsage.socialMediaMinutesPerDay",
+      "minutes/day",
+      true,
+    ],
+    [
+      "YouTube and OTT",
+      "digitalUsage.youtubeOttMinutesPerDay",
+      "minutes/day",
+      true,
+    ],
+    ["Gaming", "digitalUsage.gamingMinutesPerDay", "minutes/day", true],
+    [
+      "Phone before sleep",
+      "digitalDistractions.phoneBeforeSleepNightsPerWeek",
+      "nights/week",
+      true,
+    ],
+    [
+      "Phone after waking",
+      "digitalDistractions.phoneAfterWakeNightsPerWeek",
+      "days/week",
+      true,
+    ],
+    ["Mood rating", "moodMentalEnergy.averageMoodRating", "/10"],
+    ["Mental energy", "moodMentalEnergy.mentalEnergyRating", "/10"],
+    ["Stress rating", "stress.rating", "/10"],
+    ["Motivation", "motivationFocus.motivationRating", "/10"],
+    [
+      "Distraction management",
+      "motivationFocus.distractionManagementRating",
+      "/10",
+    ],
+    ["Relaxation sessions", "relaxationSessionsPerWeek", "sessions/week", true],
+    ["Satisfaction", "satisfaction", "/10"],
+  ],
+
+  "academics-career": [
+    ["Current grade", "academicProfile.currentGradeValue", "grade"],
+    ["Target grade", "academicGoals.targetGradeValue", "grade"],
+    ["Weekly study time", "metrics.weeklyStudyHours", "hours/week"],
+    ["Daily study", "studyRoutine.dailyStudyHours", "hours/day", true],
+    ["Attendance", "studyRoutine.attendancePct", "%", true],
+    ["Assignments on time", "studyRoutine.assignmentOnTimePct", "%", true],
+    [
+      "DSA practice",
+      "careerPreparation.dsaPracticeDaysPerWeek",
+      "days/week",
+      true,
+    ],
+    [
+      "DSA problems",
+      "careerPreparation.problemsSolvedPerWeek",
+      "problems/week",
+      true,
+    ],
+    [
+      "Career prep consistency",
+      "careerPreparation.consistencyRating",
+      "/10",
+      true,
+    ],
+    ["In-progress skills", "metrics.skillsInProgressCount", "skills"],
+    ["Satisfaction", "satisfaction", "/10"],
+  ],
+
+  "lifestyle-growth": [
+    ["Free time", "timeManagement.freeMinutesPerDay", "minutes/day"],
+    ["Planning", "timeManagement.planningDaysPerWeek", "days/week", true],
+    [
+      "Procrastination",
+      "timeManagement.procrastinationDaysPerWeek",
+      "days/week",
+      true,
+    ],
+    ["Routine consistency", "personalHabits.routineConsistency", "/10", true],
+    ["Self-discipline", "personalHabits.selfDiscipline", "/10", true],
+    ["Confidence", "personalHabits.confidence", "/10"],
+    ["Monthly allowance", "financialHabits.monthlyAllowance", "currency/month"],
+    ["Monthly income", "financialHabits.monthlyIncome", "currency/month"],
+    [
+      "Monthly savings",
+      "financialHabits.monthlySavings",
+      "currency/month",
+      true,
+    ],
+    ["Monthly spending", "financialHabits.monthlySpending", "currency/month"],
+    [
+      "Social time",
+      "socialLife.timeWithFriendsFamilyHoursPerWeek",
+      "hours/week",
+      true,
+    ],
+    ["Social satisfaction", "socialLife.socialSatisfaction", "/10"],
+    [
+      "Improvement time",
+      "selfImprovement.availableMinutesPerWeek",
+      "minutes/week",
+      true,
+    ],
+    ["Goal progress", "metrics.averageGoalProgressPct", "%"],
+    ["Satisfaction", "satisfaction", "/10"],
+  ],
+};
+
+function getValue(object, path) {
+  return path.split(".").reduce((value, key) => value?.[key], object);
 }
 
 function currentQuantities(id, profile) {
-  const values = [];
-  if (id === "health-fitness") {
-    addQuantity(values, "Age", profile.age, "years");
-    addQuantity(values, "Height", profile.heightCm, "cm");
-    addQuantity(values, "Current weight", profile.currentWeightKg, "kg");
-    addQuantity(values, "Target weight", profile.targetWeightKg, "kg");
-    addQuantity(
-      values,
-      "Daily steps",
-      profile.physicalActivity?.dailySteps,
-      "steps/day",
-      true,
-    );
-    addQuantity(
-      values,
-      "Workouts",
-      profile.physicalActivity?.workoutsPerWeek,
-      "sessions/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Workout duration",
-      profile.physicalActivity?.averageWorkoutMinutes,
-      "minutes/session",
-      true,
-    );
-    addQuantity(
-      values,
-      "Average sleep",
-      profile.sleepRoutine?.averageSleepHours,
-      "hours/night",
-      true,
-    );
-    addQuantity(
-      values,
-      "Meals",
-      profile.eatingHabits?.mealsPerDay,
-      "meals/day",
-      true,
-    );
-    addQuantity(
-      values,
-      "Breakfast days",
-      profile.eatingHabits?.breakfastDaysPerWeek,
-      "days/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Junk or outside meals",
-      profile.eatingHabits?.junkOrOutsideMealsPerWeek,
-      "meals/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Water intake",
-      profile.nutritionHydration?.waterMlPerDay,
-      "ml/day",
-      true,
-    );
-    addQuantity(
-      values,
-      "Fruit and vegetable servings",
-      profile.nutritionHydration?.fruitVegetableServingsPerDay,
-      "servings/day",
-      true,
-    );
-    addQuantity(
-      values,
-      "Fitness consistency",
-      profile.fitnessConsistencyRating,
-      "/10",
-      true,
-    );
-    addQuantity(values, "Satisfaction", profile.satisfaction, "/10");
-  } else if (id === "mind-digital") {
-    addQuantity(
-      values,
-      "Screen time",
-      profile.screenTimeMinutesPerDay,
-      "minutes/day",
-      true,
-    );
-    addQuantity(
-      values,
-      "Social media",
-      profile.digitalUsage?.socialMediaMinutesPerDay,
-      "minutes/day",
-      true,
-    );
-    addQuantity(
-      values,
-      "YouTube and OTT",
-      profile.digitalUsage?.youtubeOttMinutesPerDay,
-      "minutes/day",
-      true,
-    );
-    addQuantity(
-      values,
-      "Gaming",
-      profile.digitalUsage?.gamingMinutesPerDay,
-      "minutes/day",
-      true,
-    );
-    addQuantity(
-      values,
-      "Phone before sleep",
-      profile.digitalDistractions?.phoneBeforeSleepNightsPerWeek,
-      "nights/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Phone after waking",
-      profile.digitalDistractions?.phoneAfterWakeNightsPerWeek,
-      "days/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Mood rating",
-      profile.moodMentalEnergy?.averageMoodRating,
-      "/10",
-    );
-    addQuantity(
-      values,
-      "Mental energy",
-      profile.moodMentalEnergy?.mentalEnergyRating,
-      "/10",
-    );
-    addQuantity(values, "Stress rating", profile.stress?.rating, "/10");
-    addQuantity(
-      values,
-      "Motivation",
-      profile.motivationFocus?.motivationRating,
-      "/10",
-    );
-    addQuantity(
-      values,
-      "Distraction management",
-      profile.motivationFocus?.distractionManagementRating,
-      "/10",
-    );
-    addQuantity(
-      values,
-      "Relaxation sessions",
-      profile.relaxationSessionsPerWeek,
-      "sessions/week",
-      true,
-    );
-    addQuantity(values, "Satisfaction", profile.satisfaction, "/10");
-  } else if (id === "academics-career") {
-    addQuantity(
-      values,
-      "Current grade",
-      profile.academicProfile?.currentGradeValue,
-      `/${profile.academicProfile?.currentGradeScale || "scale"}`,
-    );
-    addQuantity(
-      values,
-      "Target grade",
-      profile.academicGoals?.targetGradeValue,
-      `/${profile.academicGoals?.targetGradeScale || "scale"}`,
-    );
-    addQuantity(
-      values,
-      "Weekly study time",
-      profile.metrics?.weeklyStudyHours,
-      "hours/week",
-    );
-    addQuantity(
-      values,
-      "Daily study",
-      profile.studyRoutine?.dailyStudyHours,
-      "hours/day",
-      true,
-    );
-    addQuantity(
-      values,
-      "Attendance",
-      profile.studyRoutine?.attendancePct,
-      "%",
-      true,
-    );
-    addQuantity(
-      values,
-      "Assignments on time",
-      profile.studyRoutine?.assignmentOnTimePct,
-      "%",
-      true,
-    );
-    addQuantity(
-      values,
-      "DSA practice",
-      profile.careerPreparation?.dsaPracticeDaysPerWeek,
-      "days/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "DSA problems",
-      profile.careerPreparation?.problemsSolvedPerWeek,
-      "problems/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Career prep consistency",
-      profile.careerPreparation?.consistencyRating,
-      "/10",
-      true,
-    );
-    addQuantity(
-      values,
-      "In-progress skills",
-      profile.metrics?.skillsInProgressCount,
-      "skills",
-    );
-    addQuantity(values, "Satisfaction", profile.satisfaction, "/10");
-  } else {
-    addQuantity(
-      values,
-      "Free time",
-      profile.timeManagement?.freeMinutesPerDay,
-      "minutes/day",
-    );
-    addQuantity(
-      values,
-      "Planning",
-      profile.timeManagement?.planningDaysPerWeek,
-      "days/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Procrastination",
-      profile.timeManagement?.procrastinationDaysPerWeek,
-      "days/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Routine consistency",
-      profile.personalHabits?.routineConsistency,
-      "/10",
-      true,
-    );
-    addQuantity(
-      values,
-      "Self-discipline",
-      profile.personalHabits?.selfDiscipline,
-      "/10",
-      true,
-    );
-    addQuantity(
-      values,
-      "Confidence",
-      profile.personalHabits?.confidence,
-      "/10",
-    );
-    addQuantity(
-      values,
-      "Monthly allowance",
-      profile.financialHabits?.monthlyAllowance,
-      profile.financialHabits?.currencyCode || "currency/month",
-    );
-    addQuantity(
-      values,
-      "Monthly income",
-      profile.financialHabits?.monthlyIncome,
-      profile.financialHabits?.currencyCode || "currency/month",
-    );
-    addQuantity(
-      values,
-      "Monthly savings",
-      profile.financialHabits?.monthlySavings,
-      profile.financialHabits?.currencyCode || "currency/month",
-      true,
-    );
-    addQuantity(
-      values,
-      "Monthly spending",
-      profile.financialHabits?.monthlySpending,
-      profile.financialHabits?.currencyCode || "currency/month",
-    );
-    addQuantity(
-      values,
-      "Social time",
-      profile.socialLife?.timeWithFriendsFamilyHoursPerWeek,
-      "hours/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Social satisfaction",
-      profile.socialLife?.socialSatisfaction,
-      "/10",
-    );
-    addQuantity(
-      values,
-      "Improvement time",
-      profile.selfImprovement?.availableMinutesPerWeek,
-      "minutes/week",
-      true,
-    );
-    addQuantity(
-      values,
-      "Goal progress",
-      profile.metrics?.averageGoalProgressPct,
-      "%",
-    );
-    addQuantity(values, "Satisfaction", profile.satisfaction, "/10");
-  }
-  return values;
+  return (quantityFields[id] || [])
+    .map(([metric, path, unit, adjustable]) => {
+      const value = getValue(profile, path);
+
+      if (value == null || !Number.isFinite(Number(value))) return null;
+
+      let finalUnit = unit;
+
+      if (metric === "Current grade") {
+        finalUnit = `/${profile.academicProfile?.currentGradeScale || "scale"}`;
+      }
+
+      if (metric === "Target grade") {
+        finalUnit = `/${profile.academicGoals?.targetGradeScale || "scale"}`;
+      }
+
+      if (path.startsWith("financialHabits.")) {
+        finalUnit = `${profile.financialHabits?.currencyCode || "currency"}/month`;
+      }
+
+      return {
+        metric,
+        value: Number(value),
+        unit: finalUnit,
+        adjustable: Boolean(adjustable),
+      };
+    })
+    .filter(Boolean);
 }
 
+// Fetch all existing profile sections
+async function getProfileSections(userId) {
+  const documents = await Promise.all(
+    profileCategories.map(({ model }) => model.findOne({ userId }).lean()),
+  );
+
+  return profileCategories.flatMap((category, index) => {
+    const doc = documents[index];
+
+    if (!doc) return [];
+
+    const profile = toPlainProfile(doc);
+
+    return [
+      {
+        id: category.id,
+        label: category.label,
+        currentScore: getScore(category, doc),
+        quantities: currentQuantities(category.id, profile),
+        profile,
+      },
+    ];
+  });
+}
+
+// Create suggested goals if they don't already exist
 async function ensureSuggestedGoals(userId, categoryId, changes) {
   const goals = [];
+
   for (const change of changes) {
-    if (
-      !Number.isFinite(Number(change.targetValue)) ||
-      Number(change.targetValue) < 0
-    )
-      continue;
+    const targetValue = Number(change.targetValue);
+
+    if (!Number.isFinite(targetValue) || targetValue < 0) continue;
+
     let goal = await Goal.findOne({
       userId,
       categoryId,
       metric: change.metric,
       active: true,
     });
+
     if (!goal) {
       const unit = String(change.unit || "").trim();
+
       goal = await Goal.create({
         userId,
         categoryId,
@@ -409,17 +332,20 @@ async function ensureSuggestedGoals(userId, categoryId, changes) {
         metric: change.metric,
         reason: String(change.reason || "").slice(0, 300),
         currentValue: Number(change.currentValue),
-        targetValue: Number(change.targetValue),
+        targetValue,
         unit,
-        frequency: /\/week$/i.test(unit) ? "weekly" : "daily",
+        frequency: /week/i.test(unit) ? "weekly" : "daily",
         source: "suggestion",
       });
     }
+
     goals.push(goal);
   }
+
   return goals;
 }
 
+// Fields accepted for Health & Fitness comparison
 const profileFields = {
   age: null,
   heightCm: null,
@@ -443,59 +369,64 @@ const profileFields = {
 };
 
 function pickProfile(source) {
-  const result = {};
-  for (const [key, nestedFields] of Object.entries(profileFields)) {
-    if (nestedFields === null) {
-      result[key] = source[key] ?? null;
-      continue;
+  const profile = {};
+
+  for (const [key, fields] of Object.entries(profileFields)) {
+    if (fields === null) {
+      profile[key] = source[key] ?? null;
+    } else {
+      profile[key] = Object.fromEntries(
+        fields.map((field) => [field, source[key]?.[field] ?? null]),
+      );
     }
-    const nested = source[key];
-    const picked = {};
-    for (const field of nestedFields) {
-      picked[field] = nested?.[field] ?? null;
-    }
-    result[key] = picked;
   }
-  return result;
+
+  return profile;
 }
 
+// Calculate Health & Fitness metrics
 function computeMetrics(profile, savedMetrics = {}) {
-  const heightM =
-    profile.heightCm == null ? NaN : Number(profile.heightCm) / 100;
-  const weight =
-    profile.currentWeightKg == null ? NaN : Number(profile.currentWeightKg);
-  const target =
-    profile.targetWeightKg == null ? NaN : Number(profile.targetWeightKg);
+  const height = Number(profile.heightCm) / 100;
+  const weight = Number(profile.currentWeightKg);
+  const target = Number(profile.targetWeightKg);
+
   const bmi =
-    weight > 0 && heightM > 0
-      ? Math.round((weight / (heightM * heightM)) * 10) / 10
+    weight > 0 && height > 0
+      ? Math.round((weight / (height * height)) * 10) / 10
       : null;
-  const weightGapKg =
-    Number.isFinite(weight) && Number.isFinite(target)
+
+  const weightChangeKg =
+    Number.isFinite(weight) &&
+    Number.isFinite(target) &&
+    profile.currentWeightKg != null &&
+    profile.targetWeightKg != null
       ? Math.round((target - weight) * 10) / 10
       : null;
-  const workouts = profile.physicalActivity?.workoutsPerWeek;
-  const duration = profile.physicalActivity?.averageWorkoutMinutes;
+
+  const workouts = Number(profile.physicalActivity?.workoutsPerWeek);
+  const duration = Number(profile.physicalActivity?.averageWorkoutMinutes);
+
   const workoutMinutesPerWeek =
-    workouts != null &&
-    duration != null &&
-    Number.isFinite(Number(workouts)) &&
-    Number.isFinite(Number(duration))
-      ? Number(workouts) * Number(duration)
+    profile.physicalActivity?.workoutsPerWeek != null &&
+    profile.physicalActivity?.averageWorkoutMinutes != null &&
+    Number.isFinite(workouts) &&
+    Number.isFinite(duration)
+      ? workouts * duration
       : null;
+
+  const fitnessRating = Number(profile.fitnessConsistencyRating);
 
   return {
     bmi,
-    weightChangeKg: weightGapKg,
+    weightChangeKg,
     averageSteps: profile.physicalActivity?.dailySteps ?? null,
     workoutMinutesPerWeek,
     sleepScheduleVarianceMinutes:
       savedMetrics.sleepScheduleVarianceMinutes ?? null,
     goalAdherencePct: savedMetrics.goalAdherencePct ?? null,
     overallScore:
-      profile.fitnessConsistencyRating != null &&
-      Number.isFinite(Number(profile.fitnessConsistencyRating))
-        ? Math.round(Number(profile.fitnessConsistencyRating) * 10)
+      profile.fitnessConsistencyRating != null && Number.isFinite(fitnessRating)
+        ? Math.round(fitnessRating * 10)
         : (savedMetrics.overallScore ?? null),
     dataDays: savedMetrics.dataDays ?? 0,
     coveragePct: savedMetrics.coveragePct ?? null,
@@ -503,12 +434,15 @@ function computeMetrics(profile, savedMetrics = {}) {
   };
 }
 
+// HEALTH & FITNESS COMPARISON
 router.post("/health-fitness/compare", requireAuth, async (req, res) => {
   try {
-    const savedProfile = await HealthFitness.findOne({
-      userId: req.user._id,
-    }).lean();
+    const userId = req.user._id;
+
+    const savedProfile = await HealthFitness.findOne({ userId }).lean();
+
     const suppliedProfile = req.body?.profile ?? req.body?.current ?? req.body;
+
     const hasSuppliedProfile =
       suppliedProfile &&
       typeof suppliedProfile === "object" &&
@@ -516,6 +450,7 @@ router.post("/health-fitness/compare", requireAuth, async (req, res) => {
       Object.keys(suppliedProfile).some(
         (key) => profileFields[key] !== undefined,
       );
+
     if (!hasSuppliedProfile && !savedProfile) {
       return res.status(400).json({
         message:
@@ -525,10 +460,12 @@ router.post("/health-fitness/compare", requireAuth, async (req, res) => {
 
     const source = hasSuppliedProfile ? suppliedProfile : savedProfile;
     const current = pickProfile(source);
-    const candidate = new HealthFitness({ ...current, userId: req.user._id });
+
+    const candidate = new HealthFitness({ ...current, userId });
     await candidate.validate();
 
     const currentMetrics = computeMetrics(current, source.metrics || {});
+
     const result = await analyzeHealthFitnessComparison({
       current,
       currentMetrics,
@@ -546,46 +483,21 @@ router.post("/health-fitness/compare", requireAuth, async (req, res) => {
       persisted: false,
     });
   } catch (error) {
-    if (error.name === "ValidationError" || error.name === "CastError") {
+    if (["ValidationError", "CastError"].includes(error.name)) {
       return res.status(400).json({ message: error.message });
     }
-    console.error("Health & Fitness analysis failed:", error);
-    if (error.message.includes("OPENROUTER_API_KEY")) {
-      return res.status(503).json({ message: error.message });
-    }
-    return res.status(502).json({
-      message:
-        error.message ||
-        "The analysis provider could not complete this request.",
-    });
+
+    return getErrorResponse(res, error, "Health & Fitness analysis failed.");
   }
 });
 
+// FUTURE-SELF LETTER
 router.post("/letter", requireAuth, async (req, res) => {
   try {
     const timeframeMonths = Number(req.body?.timeframeMonths) === 6 ? 6 : 3;
-    const documents = await Promise.all(
-      profileCategories.map(({ model }) =>
-        model.findOne({ userId: req.user._id }).lean(),
-      ),
-    );
-    const sections = profileCategories.flatMap((category, index) => {
-      const document = documents[index];
-      if (!document) return [];
-      const profile = toPlainProfile(document);
-      return [
-        {
-          id: category.id,
-          label: category.label,
-          currentScore: Math.max(
-            0,
-            Math.min(100, Math.round(category.score(document) || 0)),
-          ),
-          quantities: currentQuantities(category.id, profile),
-          profile,
-        },
-      ];
-    });
+
+    const sections = await getProfileSections(req.user._id);
+
     if (!sections.length) {
       return res.status(404).json({
         message:
@@ -594,51 +506,84 @@ router.post("/letter", requireAuth, async (req, res) => {
     }
 
     const goals = await Goal.find({ userId: req.user._id }).lean();
+
     const now = new Date();
     const today = new Date(now);
     today.setHours(0, 0, 0, 0);
+
     const windowStart = new Date(today);
     windowStart.setDate(windowStart.getDate() - 29);
-    windowStart.setHours(0, 0, 0, 0);
-    const dateKey = (value) => {
+
+    function dateKey(value) {
       if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
         return value.slice(0, 10);
       }
+
       const date = value ? new Date(value) : null;
+
       if (!date || Number.isNaN(date.getTime())) return null;
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-    };
+
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0"),
+      ].join("-");
+    }
+
     const recentCompletions = goals.flatMap((goal) =>
-      (goal.logs || []).flatMap((log) => {
-        if (log.completed === false) return [];
-        const day = dateKey(log.date || log.completedAt);
-        if (!day || day < dateKey(windowStart) || day > dateKey(now)) return [];
-        return [{ day }];
-      }),
+      (goal.logs || [])
+        .filter((log) => log.completed !== false)
+        .map((log) => dateKey(log.date || log.completedAt))
+        .filter(
+          (day) => day && day >= dateKey(windowStart) && day <= dateKey(now),
+        ),
     );
-    const activityDays = new Set(recentCompletions.map(({ day }) => day));
+
     const activeGoals = goals.filter((goal) => goal.active !== false);
+
     const expectedCheckIns = activeGoals.reduce((total, goal) => {
       const createdAt = goal.createdAt ? new Date(goal.createdAt) : windowStart;
-      const goalStart = new Date(Math.max(windowStart.getTime(), createdAt.getTime()));
-      goalStart.setHours(0, 0, 0, 0);
-      const activeDays = Math.max(1, Math.floor((today - goalStart) / 86400000) + 1);
-      return total + (goal.frequency === "weekly" ? Math.ceil(activeDays / 7) : activeDays);
+
+      const start = new Date(
+        Math.max(windowStart.getTime(), createdAt.getTime()),
+      );
+
+      start.setHours(0, 0, 0, 0);
+
+      const activeDays = Math.max(
+        1,
+        Math.floor((today - start) / 86400000) + 1,
+      );
+
+      return (
+        total +
+        (goal.frequency === "weekly" ? Math.ceil(activeDays / 7) : activeDays)
+      );
     }, 0);
+
     const activitySummary = {
       windowDays: 30,
       completedActivities: recentCompletions.length,
       activeGoals: activeGoals.length,
-      activeDays: activityDays.size,
-      consistencyPercent: expectedCheckIns > 0 && recentCompletions.length > 0
-        ? Math.min(100, Math.round((recentCompletions.length / expectedCheckIns) * 100))
-        : null,
+      activeDays: new Set(recentCompletions).size,
+      consistencyPercent:
+        expectedCheckIns > 0 && recentCompletions.length
+          ? Math.min(
+              100,
+              Math.round((recentCompletions.length / expectedCheckIns) * 100),
+            )
+          : null,
       consistencyNote: recentCompletions.length
         ? "Consistency is estimated from completed goal check-ins compared with active goal frequency over the last 30 days."
         : "No completed goal check-ins were recorded in the last 30 days, so consistency cannot be estimated yet.",
     };
 
-    const result = await writeFutureSelfLetter({ timeframeMonths, sections, activitySummary });
+    const result = await writeFutureSelfLetter({
+      timeframeMonths,
+      sections,
+      activitySummary,
+    });
+
     return res.json({
       model: result.model,
       letter: result.analysis,
@@ -649,41 +594,19 @@ router.post("/letter", requireAuth, async (req, res) => {
         "A hopeful reflection based on your current check-in, not a prediction of what will happen.",
     });
   } catch (error) {
-    console.error("Future-self letter generation failed:", error);
-    if (error.message.includes("OPENROUTER_API_KEY")) {
-      return res.status(503).json({ message: error.message });
-    }
-    return res.status(502).json({
-      message:
-        error.message || "The letter service could not complete this request.",
-    });
+    return getErrorResponse(
+      res,
+      error,
+      "The letter service could not complete this request.",
+    );
   }
 });
 
+// OVERALL PROGRESS OVERVIEW
 router.post("/overview", requireAuth, async (req, res) => {
   try {
-    const documents = await Promise.all(
-      profileCategories.map(({ model }) =>
-        model.findOne({ userId: req.user._id }).lean(),
-      ),
-    );
-    const sections = profileCategories.flatMap((category, index) => {
-      const document = documents[index];
-      if (!document) return [];
-      const profile = toPlainProfile(document);
-      return [
-        {
-          id: category.id,
-          label: category.label,
-          currentScore: Math.max(
-            0,
-            Math.min(100, Math.round(category.score(document) || 0)),
-          ),
-          quantities: currentQuantities(category.id, profile),
-          profile,
-        },
-      ];
-    });
+    const sections = await getProfileSections(req.user._id);
+
     if (!sections.length) {
       return res.status(404).json({
         message:
@@ -695,9 +618,7 @@ router.post("/overview", requireAuth, async (req, res) => {
       sections.reduce((sum, section) => sum + section.currentScore, 0) /
         sections.length,
     );
-    // Give the model only the compact facts needed for a projection. Full
-    // profile documents contain optional text fields that bloat prompts and
-    // make structured responses more likely to be truncated.
+
     const analysisSections = sections.map(
       ({ id, label, currentScore, quantities }) => ({
         id,
@@ -706,146 +627,152 @@ router.post("/overview", requireAuth, async (req, res) => {
         quantities,
       }),
     );
+
     const result = await analyzeOverviewProjection({
       baselineScore,
       sections: analysisSections,
     });
+
     const expectedWeeks = [0, 2, 4, 6, 8];
-    const pointsByWeek = new Map(
+    const expectedMonths = [0, 3, 6, 12, 24, 36, 48, 60];
+
+    const trajectoryMap = new Map(
       (result.analysis.trajectory || []).map((point) => [
         Number(point.week),
         point,
       ]),
     );
-    if (
-      expectedWeeks.some((week) => {
-        const point = pointsByWeek.get(week);
-        return (
-          !point ||
-          !Number.isFinite(Number(point.currentScore)) ||
-          !Number.isFinite(Number(point.guidelineScore))
-        );
-      })
-    ) {
-      throw new Error(
-        "The overview model returned an incomplete projection. Please retry.",
-      );
-    }
-    const trajectory = expectedWeeks.map((week) => {
-      const point = pointsByWeek.get(week) || {};
-      const currentScore = Math.max(
-        0,
-        Math.min(100, Number(point.currentScore) || 0),
-      );
-      const guidelineScore = Math.max(
-        0,
-        Math.min(100, Number(point.guidelineScore) || 0),
-      );
-      return {
-        week,
-        currentScore: week === 0 ? baselineScore : Math.round(currentScore),
-        guidelineScore: week === 0 ? baselineScore : Math.round(guidelineScore),
-      };
-    });
-    const expectedMonths = [0, 3, 6, 12, 24, 36, 48, 60];
-    const pointsByMonth = new Map(
+
+    const longTermMap = new Map(
       (result.analysis.longTermTrajectory || []).map((point) => [
         Number(point.month),
         point,
       ]),
     );
-    if (
-      expectedMonths.some((month) => {
-        const point = pointsByMonth.get(month);
-        return (
-          !point ||
-          !Number.isFinite(Number(point.currentScore)) ||
-          !Number.isFinite(Number(point.guidelineScore)) ||
-          typeof point.currentSummary !== "string" ||
-          !point.currentSummary.trim() ||
-          typeof point.guidelineSummary !== "string" ||
-          !point.guidelineSummary.trim()
+
+    // Check that the AI returned all required points.
+    for (const week of expectedWeeks) {
+      const point = trajectoryMap.get(week);
+
+      if (
+        !point ||
+        !Number.isFinite(Number(point.currentScore)) ||
+        !Number.isFinite(Number(point.guidelineScore))
+      ) {
+        throw new Error(
+          "The overview model returned an incomplete projection. Please retry.",
         );
-      })
-    ) {
-      throw new Error(
-        "The overview model returned an incomplete long-range projection. Please retry.",
-      );
+      }
     }
+
+    for (const month of expectedMonths) {
+      const point = longTermMap.get(month);
+
+      if (
+        !point ||
+        !Number.isFinite(Number(point.currentScore)) ||
+        !Number.isFinite(Number(point.guidelineScore)) ||
+        typeof point.currentSummary !== "string" ||
+        !point.currentSummary.trim() ||
+        typeof point.guidelineSummary !== "string" ||
+        !point.guidelineSummary.trim()
+      ) {
+        throw new Error(
+          "The overview model returned an incomplete long-range projection. Please retry.",
+        );
+      }
+    }
+
+    function limitScore(value) {
+      return Math.round(Math.max(0, Math.min(100, Number(value))));
+    }
+
+    const trajectory = expectedWeeks.map((week) => {
+      const point = trajectoryMap.get(week);
+
+      return {
+        week,
+        currentScore:
+          week === 0 ? baselineScore : limitScore(point.currentScore),
+        guidelineScore:
+          week === 0 ? baselineScore : limitScore(point.guidelineScore),
+      };
+    });
+
     const longTermTrajectory = expectedMonths.map((month) => {
-      const point = pointsByMonth.get(month);
+      const point = longTermMap.get(month);
+
       return {
         month,
         currentScore:
-          month === 0
-            ? baselineScore
-            : Math.round(Math.max(0, Math.min(100, Number(point.currentScore)))),
+          month === 0 ? baselineScore : limitScore(point.currentScore),
         guidelineScore:
-          month === 0
-            ? baselineScore
-            : Math.round(Math.max(0, Math.min(100, Number(point.guidelineScore)))),
+          month === 0 ? baselineScore : limitScore(point.guidelineScore),
         currentSummary: point.currentSummary.trim(),
         guidelineSummary: point.guidelineSummary.trim(),
       };
     });
-    const currentEnd = trajectory[trajectory.length - 1].currentScore;
-    const guidelineEnd = trajectory[trajectory.length - 1].guidelineScore;
 
     return res.json({
       model: result.model,
       timeHorizonWeeks: 8,
       timeHorizonMonths: 60,
       baselineScore,
+
       sections: sections.map(({ id, label, currentScore }) => ({
         id,
         label,
         currentScore,
       })),
+
       currentPath: {
         label: "If your current patterns continue",
         summary: result.analysis.currentSummary,
         startScore: baselineScore,
-        projectedScore: currentEnd,
+        projectedScore: trajectory[trajectory.length - 1].currentScore,
       },
+
       guidelinePath: {
         label: "If you follow these guidelines",
         summary: result.analysis.guidelineSummary,
         startScore: baselineScore,
-        projectedScore: guidelineEnd,
+        projectedScore: trajectory[trajectory.length - 1].guidelineScore,
         guidelines: result.analysis.guidelines || [],
       },
+
       trajectory,
       longTermTrajectory,
       confidence: result.analysis.confidence,
       keyInsights: result.analysis.keyInsights || [],
       assumptions: result.analysis.assumptions || [],
+
       disclaimer:
         "These are illustrative scenarios based on your current check-in, not measured forecasts. Outcomes vary with consistency and other factors.",
     });
   } catch (error) {
-    console.error("Overview analysis failed:", error);
-    if (error.message.includes("OPENROUTER_API_KEY")) {
-      return res.status(503).json({ message: error.message });
-    }
-    return res.status(502).json({
-      message:
-        error.message ||
-        "The overview analysis provider could not complete this request.",
-    });
+    return getErrorResponse(
+      res,
+      error,
+      "The overview analysis provider could not complete this request.",
+    );
   }
 });
 
+// INDIVIDUAL CATEGORY SUGGESTIONS
 router.post("/category/:categoryId", requireAuth, async (req, res) => {
   const category = profileCategories.find(
     (item) => item.id === req.params.categoryId,
   );
-  if (!category)
+
+  if (!category) {
     return res.status(404).json({ message: "Unknown profile section." });
+  }
 
   try {
     const document = await category.model
       .findOne({ userId: req.user._id })
       .lean();
+
     if (!document) {
       return res.status(404).json({
         message: `Save your ${category.label} section before requesting a comparison.`,
@@ -853,29 +780,30 @@ router.post("/category/:categoryId", requireAuth, async (req, res) => {
     }
 
     const profile = toPlainProfile(document);
-    const currentScore = Math.max(
-      0,
-      Math.min(100, Math.round(category.score(document) || 0)),
-    );
+    const currentScore = getScore(category, document);
     const quantities = currentQuantities(category.id, profile);
+
     const result = await analyzeCategorySuggestions({
       id: category.id,
       label: category.label,
       profile,
       quantities,
     });
-    const changes = result.analysis.changes
+
+    // Match AI suggestions with actual profile values.
+    const changes = (result.analysis.changes || [])
       .map((change) => {
         const actual = quantities.find(
-          (quantity) =>
-            quantity.metric.toLowerCase() ===
-            change.metric.trim().toLowerCase(),
+          (item) =>
+            item.metric.toLowerCase() === change.metric.trim().toLowerCase(),
         );
+
         return actual
           ? { ...change, currentValue: actual.value, unit: actual.unit }
           : null;
       })
       .filter(Boolean);
+
     const goals = await ensureSuggestedGoals(
       req.user._id,
       category.id,
@@ -886,6 +814,7 @@ router.post("/category/:categoryId", requireAuth, async (req, res) => {
       model: result.model,
       categoryId: category.id,
       categoryLabel: category.label,
+
       current: {
         overallScore: currentScore,
         categories: [
@@ -897,6 +826,7 @@ router.post("/category/:categoryId", requireAuth, async (req, res) => {
           },
         ],
       },
+
       future: {
         overallScore: result.analysis.score,
         categories: [
@@ -909,6 +839,7 @@ router.post("/category/:categoryId", requireAuth, async (req, res) => {
           },
         ],
       },
+
       goals: goals.map((goal) => ({
         id: goal._id,
         title: goal.title,
@@ -918,6 +849,7 @@ router.post("/category/:categoryId", requireAuth, async (req, res) => {
         unit: goal.unit,
         frequency: goal.frequency,
       })),
+
       timeHorizon: result.analysis.timeHorizon,
       confidence: result.analysis.confidence,
       keyInsights: result.analysis.keyInsights,
@@ -925,15 +857,7 @@ router.post("/category/:categoryId", requireAuth, async (req, res) => {
       persisted: false,
     });
   } catch (error) {
-    console.error(`${category.label} analysis failed:`, error);
-    if (error.message.includes("OPENROUTER_API_KEY")) {
-      return res.status(503).json({ message: error.message });
-    }
-    return res.status(502).json({
-      message:
-        error.message ||
-        "The analysis provider could not complete this request.",
-    });
+    return getErrorResponse(res, error, `${category.label} analysis failed.`);
   }
 });
 

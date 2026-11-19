@@ -1,13 +1,19 @@
 const express = require("express");
 const router = express.Router();
+
 const requireAuth = require("../requireAuth");
+
 const HealthFitness = require("../models/HealthFitness.model");
 const MindDigitalWellbeing = require("../models/MindDigitalWellbeing.model");
 const AcademicsCareerGrowth = require("../models/AcademicsCareerGrowth.model");
 const LifestylePersonalGrowth = require("../models/LifestylePersonalGrowth.model");
 
+// All categories
 const categories = {
-  "health-fitness": { label: "Health & Fitness", model: HealthFitness },
+  "health-fitness": {
+    label: "Health & Fitness",
+    model: HealthFitness,
+  },
   "mind-digital": {
     label: "Mind & Digital Wellbeing",
     model: MindDigitalWellbeing,
@@ -22,239 +28,221 @@ const categories = {
   },
 };
 
-function average(values) {
-  const available = values.filter((value) => Number.isFinite(value));
-  return available.length
-    ? Math.round(
-        (available.reduce((sum, value) => sum + value, 0) / available.length) *
-          10,
-      ) / 10
-    : undefined;
-}
-
-function calculateMetrics(categoryId, data) {
+// Calculate metrics
+function calculateMetrics(id, data) {
   const metrics = { computedAt: new Date(), dataDays: 0 };
 
-  if (categoryId === "health-fitness") {
-    const heightM = Number(data.heightCm) / 100;
-    if (data.currentWeightKg > 0 && heightM > 0) {
+  // Health and Fitness
+  if (id === "health-fitness") {
+    if (data.heightCm && data.currentWeightKg) {
+      const height = data.heightCm / 100;
       metrics.bmi =
-        Math.round((data.currentWeightKg / (heightM * heightM)) * 10) / 10;
+        Math.round((data.currentWeightKg / (height * height)) * 10) / 10;
     }
-    if (
-      Number.isFinite(data.targetWeightKg) &&
-      Number.isFinite(data.currentWeightKg)
-    ) {
-      metrics.weightChangeKg =
-        Math.round((data.targetWeightKg - data.currentWeightKg) * 10) / 10;
-    }
-    if (Number.isFinite(data.physicalActivity?.dailySteps)) {
-      metrics.averageSteps = data.physicalActivity.dailySteps;
-    }
-    if (
-      Number.isFinite(data.physicalActivity?.workoutsPerWeek) &&
-      Number.isFinite(data.physicalActivity?.averageWorkoutMinutes)
-    ) {
-      metrics.workoutMinutesPerWeek =
-        data.physicalActivity.workoutsPerWeek *
-        data.physicalActivity.averageWorkoutMinutes;
-    }
-    if (Number.isFinite(data.fitnessConsistencyRating)) {
-      metrics.overallScore = data.fitnessConsistencyRating * 10;
-    }
+
+    metrics.weightChangeKg = data.targetWeightKg - data.currentWeightKg;
+
+    metrics.averageSteps = data.physicalActivity?.dailySteps;
+
+    metrics.workoutMinutesPerWeek =
+      (data.physicalActivity?.workoutsPerWeek || 0) *
+      (data.physicalActivity?.averageWorkoutMinutes || 0);
+
+    metrics.overallScore = data.fitnessConsistencyRating * 10;
   }
 
-  if (categoryId === "mind-digital") {
-    if (Number.isFinite(data.screenTimeMinutesPerDay)) {
-      metrics.averageScreenHours =
-        Math.round((data.screenTimeMinutesPerDay / 60) * 10) / 10;
-    }
-    const entertainmentMinutes =
-      (data.digitalUsage?.socialMediaMinutesPerDay || 0) +
-      (data.digitalUsage?.youtubeOttMinutesPerDay || 0) +
-      (data.digitalUsage?.gamingMinutesPerDay || 0);
-    if (data.screenTimeMinutesPerDay > 0) {
-      metrics.entertainmentScreenPct = Math.min(
-        100,
-        Math.round((entertainmentMinutes / data.screenTimeMinutesPerDay) * 100),
-      );
-    }
-    if (
-      Number.isFinite(data.digitalDistractions?.phoneBeforeSleepNightsPerWeek)
-    ) {
-      metrics.phoneBeforeSleepRatePct = Math.round(
-        (data.digitalDistractions.phoneBeforeSleepNightsPerWeek / 7) * 100,
-      );
-    }
+  // Mind and Digital
+  if (id === "mind-digital") {
+    metrics.averageScreenHours = data.screenTimeMinutesPerDay / 60;
+
+    const usage = data.digitalUsage || {};
+
+    const entertainment =
+      (usage.socialMediaMinutesPerDay || 0) +
+      (usage.youtubeOttMinutesPerDay || 0) +
+      (usage.gamingMinutesPerDay || 0);
+
+    metrics.entertainmentScreenPct = data.screenTimeMinutesPerDay
+      ? Math.round((entertainment / data.screenTimeMinutesPerDay) * 100)
+      : 0;
+
+    metrics.phoneBeforeSleepRatePct =
+      ((data.digitalDistractions?.phoneBeforeSleepNightsPerWeek || 0) / 7) *
+      100;
+
     metrics.averageMood = data.moodMentalEnergy?.averageMoodRating;
     metrics.averageEnergy = data.moodMentalEnergy?.mentalEnergyRating;
     metrics.averageStress = data.stress?.rating;
-    const wellbeingInputs = [
-      data.moodMentalEnergy?.averageMoodRating,
-      data.moodMentalEnergy?.mentalEnergyRating,
-      data.motivationFocus?.motivationRating,
-      data.motivationFocus?.distractionManagementRating,
-      Number.isFinite(data.stress?.rating)
-        ? 11 - data.stress.rating
-        : undefined,
-    ];
-    const wellbeingAverage = average(wellbeingInputs);
-    if (wellbeingAverage !== undefined)
-      metrics.focusWellbeingScore = Math.round(wellbeingAverage * 10);
+
+    metrics.focusWellbeingScore = Math.round(
+      (((data.moodMentalEnergy?.averageMoodRating || 0) +
+        (data.moodMentalEnergy?.mentalEnergyRating || 0) +
+        (data.motivationFocus?.motivationRating || 0) +
+        (data.motivationFocus?.distractionManagementRating || 0) +
+        (data.stress?.rating ? 11 - data.stress.rating : 0)) /
+        5) *
+        10,
+    );
   }
 
-  if (categoryId === "academics-career") {
-    const current = data.academicProfile?.currentGradeValue;
-    const currentScale = data.academicProfile?.currentGradeScale;
-    const target = data.academicGoals?.targetGradeValue;
-    const targetScale = data.academicGoals?.targetGradeScale;
-    if (Number.isFinite(current) && currentScale > 0) {
-      metrics.normalizedCurrentGradePct =
-        Math.round((current / currentScale) * 1000) / 10;
-    }
-    if (Number.isFinite(target) && targetScale > 0) {
-      metrics.normalizedTargetGradePct =
-        Math.round((target / targetScale) * 1000) / 10;
-    }
-    if (
-      Number.isFinite(metrics.normalizedCurrentGradePct) &&
-      Number.isFinite(metrics.normalizedTargetGradePct)
-    ) {
-      metrics.gradeGoalGapPct =
-        Math.round(
-          (metrics.normalizedTargetGradePct -
-            metrics.normalizedCurrentGradePct) *
-            10,
-        ) / 10;
-    }
-    if (Number.isFinite(data.studyRoutine?.dailyStudyHours)) {
-      metrics.weeklyStudyHours = data.studyRoutine.dailyStudyHours * 7;
-    }
+  // Academics and Career
+  if (id === "academics-career") {
+    const academic = data.academicProfile || {};
+    const goals = data.academicGoals || {};
+
+    metrics.normalizedCurrentGradePct =
+      (academic.currentGradeValue / academic.currentGradeScale) * 100;
+
+    metrics.normalizedTargetGradePct =
+      (goals.targetGradeValue / goals.targetGradeScale) * 100;
+
+    metrics.gradeGoalGapPct =
+      metrics.normalizedTargetGradePct - metrics.normalizedCurrentGradePct;
+
+    metrics.weeklyStudyHours = (data.studyRoutine?.dailyStudyHours || 0) * 7;
+
     metrics.assignmentConsistencyPct = data.studyRoutine?.assignmentOnTimePct;
-    if (Number.isFinite(data.careerPreparation?.consistencyRating)) {
-      metrics.careerPrepScore = data.careerPreparation.consistencyRating * 10;
-    }
-    if (Array.isArray(data.technicalSkills)) {
-      metrics.skillsInProgressCount = data.technicalSkills.length;
-    }
+
+    metrics.careerPrepScore =
+      (data.careerPreparation?.consistencyRating || 0) * 10;
+
+    metrics.skillsInProgressCount = data.technicalSkills?.length || 0;
   }
 
-  if (categoryId === "lifestyle-growth") {
+  // Lifestyle and Personal Growth
+  if (id === "lifestyle-growth") {
     metrics.planningDaysPerWeek = data.timeManagement?.planningDaysPerWeek;
-    if (Number.isFinite(data.timeManagement?.procrastinationDaysPerWeek)) {
-      metrics.procrastinationRatePct = Math.round(
-        (data.timeManagement.procrastinationDaysPerWeek / 7) * 100,
-      );
-    }
-    const goalProgress = [
+
+    metrics.procrastinationRatePct =
+      ((data.timeManagement?.procrastinationDaysPerWeek || 0) / 7) * 100;
+
+    const goals = [
       ...(data.personalGoals?.shortTerm || []),
       ...(data.personalGoals?.longTerm || []),
-    ].map((goal) => goal.progressPct);
-    const averageProgress = average(goalProgress);
-    if (averageProgress !== undefined)
-      metrics.averageGoalProgressPct = averageProgress;
+    ];
+
+    if (goals.length) {
+      metrics.averageGoalProgressPct =
+        goals.reduce((sum, goal) => sum + goal.progressPct, 0) / goals.length;
+    }
+
     metrics.socialHoursPerWeek =
       data.socialLife?.timeWithFriendsFamilyHoursPerWeek;
+
     const income =
       data.financialHabits?.monthlyIncome ||
       data.financialHabits?.monthlyAllowance;
-    if (income > 0 && Number.isFinite(data.financialHabits?.monthlySavings)) {
-      metrics.savingsRatePct = Math.round(
-        Math.min(100, (data.financialHabits.monthlySavings / income) * 100),
-      );
+
+    if (income > 0) {
+      metrics.savingsRatePct =
+        ((data.financialHabits?.monthlySavings || 0) / income) * 100;
     }
-    if (Number.isFinite(data.selfImprovement?.availableMinutesPerWeek)) {
-      metrics.improvementMinutesPerWeek =
-        data.selfImprovement.availableMinutesPerWeek;
-    }
-    const selfRating = average([
-      data.personalHabits?.routineConsistency,
-      data.personalHabits?.selfDiscipline,
-      data.personalHabits?.confidence,
-    ]);
-    if (selfRating !== undefined)
-      metrics.overallScore = Math.round(selfRating * 10);
+
+    metrics.improvementMinutesPerWeek =
+      data.selfImprovement?.availableMinutesPerWeek;
+
+    const habits = data.personalHabits || {};
+
+    metrics.overallScore =
+      (((habits.routineConsistency || 0) +
+        (habits.selfDiscipline || 0) +
+        (habits.confidence || 0)) /
+        3) *
+      10;
   }
 
   return metrics;
 }
 
+// Get all categories
 router.get("/", requireAuth, async (req, res) => {
   try {
     const result = await Promise.all(
       Object.entries(categories).map(async ([id, category]) => {
-        const profile = await category.model
-          .findOne({ userId: req.user._id })
-          .select("satisfaction updatedAt");
+        const data = await category.model.findOne({
+          userId: req.user._id,
+        });
+
         return {
           id,
           label: category.label,
-          completed: Boolean(profile),
-          satisfaction: profile?.satisfaction ?? null,
-          updatedAt: profile?.updatedAt ?? null,
+          completed: Boolean(data),
+          satisfaction: data?.satisfaction || null,
+          updatedAt: data?.updatedAt || null,
         };
       }),
     );
-    return res.json({ categories: result });
+
+    res.json({ categories: result });
   } catch (error) {
-    console.error("Could not load category status:", error);
-    return res.status(500).json({ message: "Could not load categories" });
+    res.status(500).json({ message: "Could not load categories" });
   }
 });
 
+// Get one category
 router.get("/:categoryId", requireAuth, async (req, res) => {
-  const category = categories[req.params.categoryId];
-  if (!category) return res.status(404).json({ message: "Unknown category" });
-
   try {
-    const data = await category.model.findOne({ userId: req.user._id });
-    return res.json({ categoryId: req.params.categoryId, data });
+    const category = categories[req.params.categoryId];
+
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    const data = await category.model.findOne({
+      userId: req.user._id,
+    });
+
+    res.json({
+      categoryId: req.params.categoryId,
+      data,
+    });
   } catch (error) {
-    console.error("Could not load category profile:", error);
-    return res.status(500).json({ message: "Could not load this category" });
+    res.status(500).json({ message: "Could not load category" });
   }
 });
 
+// Add or update category
 router.put("/:categoryId", requireAuth, async (req, res) => {
-  const category = categories[req.params.categoryId];
-  if (!category) return res.status(404).json({ message: "Unknown category" });
-
-  const input = { ...req.body };
-  for (const protectedField of [
-    "_id",
-    "__v",
-    "userId",
-    "metrics",
-    "createdAt",
-    "updatedAt",
-  ]) {
-    delete input[protectedField];
-  }
-
   try {
-    const data = await category.model.findOneAndUpdate(
+    const id = req.params.categoryId;
+    const category = categories[id];
+
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    const data = { ...req.body };
+
+    // Prevent users from changing protected fields
+    delete data._id;
+    delete data.userId;
+    delete data.metrics;
+    delete data.createdAt;
+    delete data.updatedAt;
+    delete data.__v;
+
+    const metrics = calculateMetrics(id, data);
+
+    const updatedData = await category.model.findOneAndUpdate(
       { userId: req.user._id },
       {
-        $set: {
-          ...input,
-          userId: req.user._id,
-          metrics: calculateMetrics(req.params.categoryId, input),
-        },
+        ...data,
+        userId: req.user._id,
+        metrics,
       },
       {
         new: true,
         upsert: true,
         runValidators: true,
-        setDefaultsOnInsert: true,
       },
     );
-    return res.json({ categoryId: req.params.categoryId, data });
+
+    res.json({
+      categoryId: id,
+      data: updatedData,
+    });
   } catch (error) {
-    if (error.name === "ValidationError" || error.name === "CastError") {
-      return res.status(400).json({ message: error.message });
-    }
-    console.error("Could not save category profile:", error);
-    return res.status(500).json({ message: "Could not save this category" });
+    res.status(500).json({ message: "Could not save category" });
   }
 });
 

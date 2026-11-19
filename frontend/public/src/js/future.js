@@ -159,6 +159,7 @@ function escapeHTML(value) {
 }
 
 async function loadProjection() {
+  status.textContent = "Loading your personalized outlook…";
   try {
     const response = await fetch("/api/analysis/overview", {
       method: "POST",
@@ -174,6 +175,8 @@ async function loadProjection() {
     if (!response.ok) {
       if (response.status === 404) {
         status.innerHTML = 'Add at least one profile area to unlock a personalized comparison. <a href="/forms.html">Complete a check-in →</a>';
+      } else if (response.status === 429 || response.status >= 500) {
+        showRetryStatus(result.message || "Your outlook is temporarily unavailable.");
       } else {
         status.textContent = result.message || "Your comparison is unavailable right now. Try again later.";
       }
@@ -183,6 +186,7 @@ async function loadProjection() {
       range.disabled = true;
       return;
     }
+    status.replaceChildren();
     projectionData = result;
     setText("currentSummary", result.currentPath.summary || "Your current habits form this starting path.");
     setText("suggestedSummary", result.guidelinePath.summary || "Small, consistent changes can build a different routine.");
@@ -197,9 +201,22 @@ async function loadProjection() {
     }
   } catch (error) {
     console.error("Could not load the future comparison:", error);
-    status.textContent = "Could not connect to your analysis. Check your connection and try again.";
+    showRetryStatus("Could not connect to your analysis. Check your connection and try again.");
     range.disabled = true;
   }
+}
+
+function showRetryStatus(message) {
+  const text = document.createElement("span");
+  text.textContent = message;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "future-retry-button";
+  button.textContent = "Try again";
+  button.addEventListener("click", loadProjection, { once: true });
+
+  status.replaceChildren(text, button);
 }
 
 async function loadCharacter() {

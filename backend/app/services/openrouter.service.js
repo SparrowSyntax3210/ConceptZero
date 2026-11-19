@@ -16,28 +16,59 @@ async function createChatCompletion({
 
   const model = process.env.OPENROUTER_MODEL || "qwen/qwen3.5-9b";
   async function sendRequest(requestMessages, requestFormat, maxTokens = 1600) {
-    const response = await fetch(OPENROUTER_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-        "X-Title": "STACKED Profile Analysis",
-      },
-      body: JSON.stringify({
-        model,
-        messages: requestMessages,
-        temperature,
-        max_tokens: maxTokens,
-        response_format: requestFormat,
-        ...(requestFormat?.type === "json_schema"
-          ? { provider: { require_parameters: true } }
-          : {}),
-      }),
-      signal: AbortSignal.timeout(45000),
-    });
-    const result = await response.json().catch(() => ({}));
-    return { response, result };
+    const maxAttempts = 3;
+    const retryableStatuses = new Set([429, 500, 502, 503, 504]);
+
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      let response;
+      try {
+        response = await fetch(OPENROUTER_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
+            "X-Title": "STACKED Profile Analysis",
+          },
+          body: JSON.stringify({
+            model,
+            messages: requestMessages,
+            temperature,
+            max_tokens: maxTokens,
+            response_format: requestFormat,
+            ...(requestFormat?.type === "json_schema"
+              ? { provider: { require_parameters: true } }
+              : {}),
+          }),
+          signal: AbortSignal.timeout(45000),
+        });
+      } catch (error) {
+        const isTimeout = error.name === "TimeoutError" || error.name === "AbortError";
+        if (isTimeout || attempt === maxAttempts - 1) throw error;
+        console.warn(`OpenRouter network error; retry ${attempt + 1}/${maxAttempts - 1}.`);
+        await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+        continue;
+      }
+      const result = await response.json().catch(() => ({}));
+
+      if (!retryableStatuses.has(response.status) || attempt === maxAttempts - 1) {
+        return { response, result };
+      }
+
+      const retryAfterHeader = response.headers.get("retry-after");
+      const retryAfterSeconds = Number(retryAfterHeader);
+      const retryAfterDate = Date.parse(retryAfterHeader || "");
+      const requestedDelay = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+        ? retryAfterSeconds * 1000
+        : Number.isFinite(retryAfterDate)
+          ? retryAfterDate - Date.now()
+          : 0;
+      const delayMs = requestedDelay > 0
+        ? Math.min(requestedDelay, 5000)
+        : 1000 * (attempt + 1);
+      console.warn(`OpenRouter returned ${response.status}; retry ${attempt + 1}/${maxAttempts - 1} in ${delayMs}ms.`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
   }
 
   let response;
@@ -96,9 +127,11 @@ async function createChatCompletion({
       response.status,
       finalProviderMessage || "No error message",
     );
-    throw new Error(
+    const error = new Error(
       `OpenRouter request failed (${response.status})${finalProviderMessage ? `: ${finalProviderMessage}` : ""}`,
     );
+    error.statusCode = response.status === 429 ? 429 : response.status >= 500 ? 503 : 502;
+    throw error;
   }
 
   if (result.choices?.[0]?.finish_reason === "length") {
@@ -121,9 +154,11 @@ async function createChatCompletion({
 
     if (!response.ok) {
       const retryMessage = result.error?.message;
-      throw new Error(
+      const error = new Error(
         `OpenRouter retry failed (${response.status})${retryMessage ? `: ${retryMessage}` : ""}`,
       );
+      error.statusCode = response.status === 429 ? 429 : response.status >= 500 ? 503 : 502;
+      throw error;
     }
     if (result.choices?.[0]?.finish_reason === "length") {
       throw new Error(
@@ -174,9 +209,11 @@ async function createChatCompletion({
     }
     if (!response.ok) {
       const retryMessage = result.error?.message;
-      throw new Error(
+      const error = new Error(
         `OpenRouter retry failed (${response.status})${retryMessage ? `: ${retryMessage}` : ""}`,
       );
+      error.statusCode = response.status === 429 ? 429 : response.status >= 500 ? 503 : 502;
+      throw error;
     }
     if (result.choices?.[0]?.finish_reason === "length") {
       throw new Error("OpenRouter response was cut off before the analysis finished, even after retrying with a larger token limit.");

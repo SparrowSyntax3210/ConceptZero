@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Profile = require("../models/Profile.model");
+
 const requireAuth = require("../requireAuth");
 const HealthFitness = require("../models/HealthFitness.model");
 const MindDigitalWellbeing = require("../models/MindDigitalWellbeing.model");
@@ -8,159 +8,152 @@ const AcademicsCareerGrowth = require("../models/AcademicsCareerGrowth.model");
 const LifestylePersonalGrowth = require("../models/LifestylePersonalGrowth.model");
 const Goal = require("../models/Goal.model");
 
-const profileAreas = [
-  {
-    id: "health-fitness",
-    label: "Health & Fitness",
-    model: HealthFitness,
-    score: (doc) =>
-      doc.metrics?.overallScore ??
-      (doc.fitnessConsistencyRating == null
-        ? null
-        : doc.fitnessConsistencyRating * 10),
-    quantities: (doc) => ({
-      bmi: doc.metrics?.bmi ?? null,
-      dailySteps: doc.physicalActivity?.dailySteps ?? null,
-      workoutsPerWeek: doc.physicalActivity?.workoutsPerWeek ?? null,
-      sleepHours: doc.sleepRoutine?.averageSleepHours ?? null,
-      waterMlPerDay: doc.nutritionHydration?.waterMlPerDay ?? null,
-    }),
-  },
-  {
-    id: "mind-digital",
-    label: "Mind & Digital",
-    model: MindDigitalWellbeing,
-    score: (doc) => doc.metrics?.focusWellbeingScore ?? null,
-    quantities: (doc) => ({
-      screenTimeMinutesPerDay: doc.screenTimeMinutesPerDay ?? null,
-      mood: doc.moodMentalEnergy?.averageMoodRating ?? null,
-      stress: doc.stress?.rating ?? null,
-      relaxationSessionsPerWeek: doc.relaxationSessionsPerWeek ?? null,
-    }),
-  },
-  {
-    id: "academics-career",
-    label: "Academics",
-    model: AcademicsCareerGrowth,
-    score: (doc) => doc.metrics?.careerPrepScore ?? null,
-    quantities: (doc) => ({
-      currentGradePct: doc.metrics?.normalizedCurrentGradePct ?? null,
-      weeklyStudyHours: doc.metrics?.weeklyStudyHours ?? null,
-      attendancePct: doc.studyRoutine?.attendancePct ?? null,
-      skillsInProgress: doc.metrics?.skillsInProgressCount ?? null,
-    }),
-  },
+// Profile models
+const models = [
+  { id: "health-fitness", label: "Health & Fitness", model: HealthFitness },
+  { id: "mind-digital", label: "Mind & Digital", model: MindDigitalWellbeing },
+  { id: "academics-career", label: "Academics", model: AcademicsCareerGrowth },
   {
     id: "lifestyle-growth",
     label: "Lifestyle",
     model: LifestylePersonalGrowth,
-    score: (doc) => doc.metrics?.overallScore ?? null,
-    quantities: (doc) => ({
-      planningDaysPerWeek: doc.timeManagement?.planningDaysPerWeek ?? null,
-      procrastinationDaysPerWeek:
-        doc.timeManagement?.procrastinationDaysPerWeek ?? null,
-      socialHoursPerWeek:
-        doc.socialLife?.timeWithFriendsFamilyHoursPerWeek ?? null,
-      goalProgressPct: doc.metrics?.averageGoalProgressPct ?? null,
-    }),
   },
 ];
 
-function shiftDate(dateKey, offset) {
-  const date = new Date(`${dateKey}T12:00:00.000Z`);
-  date.setUTCDate(date.getUTCDate() + offset);
-  return date.toISOString().slice(0, 10);
-}
-
+// Summary
 router.get("/summary", requireAuth, async (req, res) => {
   try {
-    const requestedDate = /^\d{4}-\d{2}-\d{2}$/.test(req.query.date || "")
-      ? req.query.date
-      : new Date().toISOString().slice(0, 10);
-    const [documents, goals] = await Promise.all([
-      Promise.all(
-        profileAreas.map(({ model }) =>
-          model.findOne({ userId: req.user._id }).lean(),
-        ),
-      ),
-      Goal.find({ userId: req.user._id, active: true }).lean(),
-    ]);
-    const areas = profileAreas.map((area, index) => {
-      const doc = documents[index];
+    const today = req.query.date || new Date().toISOString().slice(0, 10);
+
+    // Get all profile details
+    const profiles = await Promise.all(
+      models.map((item) => item.model.findOne({ userId: req.user._id }).lean()),
+    );
+
+    // Get active goals
+    const goals = await Goal.find({
+      userId: req.user._id,
+      active: true,
+    }).lean();
+
+    // Profile areas
+    const profileAreas = models.map((item, index) => {
+      const doc = profiles[index];
+
+      let score = null;
+
+      if (doc) {
+        score =
+          doc.metrics?.overallScore ??
+          doc.metrics?.focusWellbeingScore ??
+          doc.metrics?.careerPrepScore ??
+          (doc.fitnessConsistencyRating != null
+            ? doc.fitnessConsistencyRating * 10
+            : null);
+      }
+
       return {
-        id: area.id,
-        label: area.label,
+        id: item.id,
+        label: item.label,
         completed: Boolean(doc),
-        score: doc ? area.score(doc) : null,
+        score,
         satisfaction: doc?.satisfaction ?? null,
-        quantities: doc ? area.quantities(doc) : null,
       };
     });
-    const scores = areas
-      .map((area) => area.score)
-      .filter((score) => Number.isFinite(score));
-    const completedToday = goals.filter((goal) =>
-      goal.logs?.some((log) => log.date === requestedDate && log.completed),
-    ).length;
-    const completedDays = new Set(
-      goals.flatMap((goal) =>
-        (goal.logs || []).filter((log) => log.completed).map((log) => log.date),
-      ),
-    );
-    let streak = 0;
-    let cursor = requestedDate;
-    if (!completedDays.has(cursor)) cursor = shiftDate(cursor, -1);
-    while (completedDays.has(cursor)) {
-      streak += 1;
-      cursor = shiftDate(cursor, -1);
-    }
-    const weekStart = shiftDate(
-      requestedDate,
-      -new Date(`${requestedDate}T12:00:00.000Z`).getUTCDay(),
-    );
-    const completionsThisWeek = goals.reduce(
-      (total, goal) =>
-        total +
-        (goal.logs || []).filter(
-          (log) =>
-            log.completed && log.date >= weekStart && log.date <= requestedDate,
-        ).length,
-      0,
-    );
-    const weeklyRate = goals.length
-      ? Math.round((completionsThisWeek / (goals.length * 7)) * 100)
+
+    // Overall score
+    const scores = profileAreas
+      .map((item) => item.score)
+      .filter((score) => score !== null && Number.isFinite(score));
+
+    const overallScore = scores.length
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
       : null;
 
-    return res.json({
+    // Completed goals today
+    const completedToday = goals.filter((goal) =>
+      goal.logs.some((log) => log.date === today && log.completed),
+    ).length;
+
+    // Calculate streak
+    const completedDays = new Set();
+
+    goals.forEach((goal) => {
+      goal.logs.forEach((log) => {
+        if (log.completed) completedDays.add(log.date);
+      });
+    });
+
+    let streak = 0;
+    let date = new Date(today + "T12:00:00Z");
+
+    if (!completedDays.has(today)) {
+      date.setUTCDate(date.getUTCDate() - 1);
+    }
+
+    while (completedDays.has(date.toISOString().slice(0, 10))) {
+      streak++;
+      date.setUTCDate(date.getUTCDate() - 1);
+    }
+
+    // Weekly completion
+    const weekStart = new Date(today + "T12:00:00Z");
+    weekStart.setUTCDate(weekStart.getUTCDate() - weekStart.getUTCDay());
+
+    const startDate = weekStart.toISOString().slice(0, 10);
+
+    let weeklyCompleted = 0;
+
+    goals.forEach((goal) => {
+      goal.logs.forEach((log) => {
+        if (log.completed && log.date >= startDate && log.date <= today) {
+          weeklyCompleted++;
+        }
+      });
+    });
+
+    const weeklyCompletionPct = goals.length
+      ? Math.round((weeklyCompleted / (goals.length * 7)) * 100)
+      : null;
+
+    // Send response
+    res.json({
       user: {
         id: req.user._id,
         username: req.user.username,
         email: req.user.email,
       },
-      overallScore: scores.length
-        ? Math.round(
-            scores.reduce((sum, score) => sum + score, 0) / scores.length,
-          )
-        : null,
-      profileAreas: areas,
+
+      overallScore,
+      profileAreas,
+
       stats: {
         activeGoals: goals.length,
         completedToday,
         currentStreak: streak,
-        weeklyCompletionPct: weeklyRate,
+        weeklyCompletionPct,
       },
-      preferences: { notifications: null, weeklyReport: null, darkMode: null },
+
+      preferences: {
+        notifications: null,
+        weeklyReport: null,
+        darkMode: null,
+      },
     });
   } catch (error) {
-    console.error("Could not load profile summary:", error);
-    return res
-      .status(500)
-      .json({ message: "Could not load your profile summary." });
+    console.log(error);
+    res.status(500).json({ message: "Could not load profile summary" });
   }
 });
 
-router.post("/add-details", (req, res) => {});
+// Add details
+router.post("/add-details", requireAuth, (req, res) => {
+  res.send("Add details route");
+});
 
-router.get("/get-details", (req, res) => {});
+// Get details
+router.get("/get-details", requireAuth, (req, res) => {
+  res.send("Get details route");
+});
 
 module.exports = router;

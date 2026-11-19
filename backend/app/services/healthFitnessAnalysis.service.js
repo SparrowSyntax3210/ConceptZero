@@ -112,6 +112,10 @@ const categorySuggestionFormat = {
   },
 };
 
+const overviewCache = new Map();
+const overviewRequests = new Map();
+const OVERVIEW_CACHE_MS = 10 * 60 * 1000;
+
 async function analyzeCategorySuggestions(category) {
   const messages = [
     {
@@ -205,6 +209,15 @@ const overviewProjectionFormat = {
 };
 
 async function analyzeOverviewProjection(input) {
+  // Future page reloads should reuse the same projection while the saved
+  // profile stays the same. This also prevents duplicate simultaneous calls.
+  const cacheKey = JSON.stringify(input);
+  const cached = overviewCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.result;
+
+  const existingRequest = overviewRequests.get(cacheKey);
+  if (existingRequest) return existingRequest;
+
   const messages = [
     {
       role: "system",
@@ -213,12 +226,26 @@ async function analyzeOverviewProjection(input) {
     },
     { role: "user", content: JSON.stringify(input) },
   ];
-  return createChatCompletion({
+  const request = createChatCompletion({
     messages,
     responseFormat: overviewProjectionFormat,
     temperature: 0.15,
     maxTokens: 2400,
+  }).then((result) => {
+    overviewCache.set(cacheKey, {
+      result,
+      expiresAt: Date.now() + OVERVIEW_CACHE_MS,
+    });
+    if (overviewCache.size > 100) {
+      const oldestKey = overviewCache.keys().next().value;
+      overviewCache.delete(oldestKey);
+    }
+    return result;
+  }).finally(() => {
+    overviewRequests.delete(cacheKey);
   });
+  overviewRequests.set(cacheKey, request);
+  return request;
 }
 
 const futureSelfLetterFormat = {
