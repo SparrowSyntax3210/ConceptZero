@@ -5,23 +5,25 @@
   const directFetch = window.fetch.bind(window);
   const wakeUrl = "/api/wake";
   const healthUrl = "/api/health";
-  const readyKey = "stacked-backend-ready";
-  const reloadKey = "stacked-backend-ready-reload";
   const maxWaitMs = 120_000;
   let ready = false;
   let waiting;
   let notice;
-  let refreshWhenReady = false;
-
-  try {
-    const isReadyReload = sessionStorage.getItem(reloadKey) === "1";
-    if (isReadyReload) sessionStorage.removeItem(reloadKey);
-    refreshWhenReady = !isReadyReload && sessionStorage.getItem(readyKey) !== "1";
-  } catch (_error) {
-    // Continue normally if this browser blocks session storage.
-  }
+  const startupScreen = document.getElementById("backend-startup");
+  const startupTitle = document.getElementById("backend-startup-title");
+  const startupDetail = document.getElementById("backend-startup-detail");
+  const retryButton = document.getElementById("backend-startup-retry");
 
   function showNotice() {
+    if (startupScreen) {
+      startupScreen.hidden = false;
+      startupScreen.setAttribute("aria-busy", "true");
+      startupTitle.textContent = "Waking up STACKED";
+      startupDetail.textContent = "Starting the service and connecting to your habit space…";
+      retryButton.hidden = true;
+      return;
+    }
+
     if (!notice) {
       notice = document.createElement("div");
       notice.setAttribute("role", "status");
@@ -45,14 +47,28 @@
   }
 
   function hideNotice() {
+    if (startupScreen) {
+      startupScreen.hidden = true;
+      startupScreen.setAttribute("aria-busy", "false");
+    }
     notice?.remove();
     notice = null;
+  }
+
+  function showFailure() {
+    if (!startupScreen) return;
+    startupScreen.hidden = false;
+    startupScreen.setAttribute("aria-busy", "false");
+    startupTitle.textContent = "STACKED is taking longer to start";
+    startupDetail.textContent = "The server hasn’t connected yet. Try again in a moment.";
+    retryButton.hidden = false;
   }
 
   async function waitUntilReady() {
     const deadline = Date.now() + maxWaitMs;
     let attempt = 0;
     const noticeTimer = window.setTimeout(showNotice, 1200);
+    if (startupScreen) showNotice();
 
     // Vercel proxies this to Render's lightweight /health route. The first
     // request wakes a sleeping Render instance; readiness is checked below.
@@ -66,6 +82,9 @@
       });
     } catch (_error) {
       // Render may still be starting. Continue polling its readiness route.
+    }
+    if (startupScreen) {
+      startupDetail.textContent = "Render is responding. Checking the database connection…";
     }
 
     while (Date.now() < deadline) {
@@ -84,34 +103,10 @@
             ready = true;
             window.clearTimeout(noticeTimer);
             hideNotice();
-
-            try {
-              sessionStorage.setItem(readyKey, "1");
-              if (refreshWhenReady) {
-                sessionStorage.setItem(reloadKey, "1");
-                window.location.reload();
-                // Keep waiting API calls from racing the page reload.
-                return new Promise(() => {});
-              }
-            } catch (_error) {
-              // If storage is unavailable, keep the page usable without reload.
-            }
             return;
           }
         }
-        try {
-          sessionStorage.removeItem(readyKey);
-          refreshWhenReady = true;
-        } catch (_error) {
-          // Readiness polling still works without session storage.
-        }
       } catch (_error) {
-        try {
-          sessionStorage.removeItem(readyKey);
-          refreshWhenReady = true;
-        } catch (_storageError) {
-          // Readiness polling still works without session storage.
-        }
         // A proxy HTML error or a starting backend is temporary; try again.
       }
 
@@ -121,7 +116,8 @@
     }
 
     window.clearTimeout(noticeTimer);
-    hideNotice();
+    showFailure();
+    if (!startupScreen) hideNotice();
     throw new Error("STACKED is still starting. Please try your request again shortly.");
   }
 
@@ -149,7 +145,19 @@
     return ensureReady().then(() => directFetch(input, options));
   };
 
+  retryButton?.addEventListener("click", () => {
+    ready = false;
+    waiting = null;
+    ensureReady().catch((error) => {
+      showFailure();
+      console.warn(error.message);
+    });
+  });
+
   // Warm pages begin checking in the background. API calls wait for the same
   // health check instead of racing the backend while it is starting.
-  ensureReady().catch((error) => console.warn(error.message));
+  ensureReady().catch((error) => {
+    showFailure();
+    console.warn(error.message);
+  });
 })();

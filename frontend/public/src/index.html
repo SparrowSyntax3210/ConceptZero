@@ -22,8 +22,49 @@
     <link rel="stylesheet" href="./css/landing-static.css" />
     <link rel="stylesheet" href="./css/landing-depth.css" />
     <link rel="stylesheet" href="./css/home-reference.css" />
+    <style>
+      #backend-startup {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(ellipse at 50% 48%, rgba(148, 255, 0, 0.12), transparent 34%),
+          radial-gradient(ellipse at 50% 100%, rgba(73, 130, 62, 0.18), transparent 48%),
+          #07120d;
+        color: #f5f8ef;
+        font-family: 'DM Sans', Arial, sans-serif;
+        transition: opacity 420ms ease, visibility 420ms ease;
+      }
+      #backend-startup[hidden] { display: none; }
+      .backend-startup-card { width: min(100%, 440px); text-align: center; }
+      .backend-startup-brand { margin-bottom: 42px; font-size: 20px; font-weight: 800; letter-spacing: .12em; }
+      .backend-startup-brand span { color: #b9f50b; }
+      .backend-startup-orbit { position: relative; display: grid; place-items: center; width: 92px; height: 92px; margin: 0 auto 28px; border: 1px solid rgba(185,245,11,.25); border-radius: 50%; box-shadow: 0 0 48px rgba(185,245,11,.12), inset 0 0 30px rgba(185,245,11,.08); }
+      .backend-startup-orbit::before, .backend-startup-orbit::after { content: ''; position: absolute; inset: 9px; border: 1px solid rgba(185,245,11,.42); border-radius: 50%; animation: backend-orbit 2.4s linear infinite; }
+      .backend-startup-orbit::after { inset: 19px; border-color: rgba(245,248,239,.35); animation-direction: reverse; animation-duration: 3.4s; }
+      .backend-startup-dot { width: 13px; height: 13px; border-radius: 50%; background: #b9f50b; box-shadow: 0 0 22px #b9f50b; }
+      #backend-startup-title { margin: 0; font-size: clamp(25px, 5vw, 34px); letter-spacing: -.04em; }
+      #backend-startup-detail { min-height: 48px; margin: 12px 0 0; color: #aab8ac; font-size: 15px; line-height: 1.6; }
+      #backend-startup-retry { margin-top: 18px; padding: 12px 24px; border: 0; border-radius: 999px; background: #b9f50b; color: #11190d; font: 700 14px 'DM Sans', Arial, sans-serif; cursor: pointer; }
+      #backend-startup-retry[hidden] { display: none; }
+      @keyframes backend-orbit { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { .backend-startup-orbit::before, .backend-startup-orbit::after { animation: none; } }
+    </style>
+    <script defer src="./js/backend-wake.js"></script>
   </head>
   <body>
+    <div id="backend-startup" role="status" aria-live="polite" aria-busy="true">
+      <div class="backend-startup-card">
+        <div class="backend-startup-brand"><span>▮</span> STACKED</div>
+        <div class="backend-startup-orbit" aria-hidden="true"><span class="backend-startup-dot"></span></div>
+        <h1 id="backend-startup-title">Waking up STACKED</h1>
+        <p id="backend-startup-detail">Connecting to your personal habit space…</p>
+        <button id="backend-startup-retry" type="button" hidden>Try again</button>
+      </div>
+    </div>
     <div class="intro-curtain" aria-hidden="true">
       <div class="intro-panel intro-panel-left">
         <span class="intro-beam"></span>
@@ -512,7 +553,6 @@
       defer
       src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"
     ></script>
-    <script defer src="./js/backend-wake.js"></script>
     <script defer src="./js/auth-ui.js"></script>
     <script defer src="./js/script.js"></script>
   </body>
