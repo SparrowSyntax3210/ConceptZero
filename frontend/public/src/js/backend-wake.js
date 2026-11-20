@@ -3,7 +3,6 @@
   window.__stackedBackendWaitInstalled = true;
 
   const directFetch = window.fetch.bind(window);
-  const wakeUrl = "/api/wake";
   const healthUrl = "/api/health";
   const maxWaitMs = 120_000;
   let ready = false;
@@ -70,23 +69,8 @@
     const noticeTimer = window.setTimeout(showNotice, 1200);
     if (startupScreen) showNotice();
 
-    // Vercel proxies this to Render's lightweight /health route. The first
-    // request wakes a sleeping Render instance; readiness is checked below.
-    try {
-      await directFetch(wakeUrl, {
-        method: "GET",
-        cache: "no-store",
-        credentials: "same-origin",
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(8000),
-      });
-    } catch (_error) {
-      // Render may still be starting. Continue polling its readiness route.
-    }
-    if (startupScreen) {
-      startupDetail.textContent = "Render is responding. Checking the database connection…";
-    }
-
+    // This same-origin Vercel path is explicitly rewritten to Render's
+    // /api/health route. Its first request wakes Render; retries wait for DB.
     while (Date.now() < deadline) {
       try {
         const response = await directFetch(healthUrl, {
@@ -105,6 +89,9 @@
             hideNotice();
             return;
           }
+        }
+        if (startupScreen && attempt === 0) {
+          startupDetail.textContent = "Waking Render and waiting for the database connection…";
         }
       } catch (_error) {
         // A proxy HTML error or a starting backend is temporary; try again.
