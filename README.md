@@ -1,4 +1,4 @@
-# STACKED — A Digital Twin of Everyday Habits
+# STACKED — A Digital Twin of Everyday Habits (Unique Selling Proposition)
 
 STACKED helps users understand how daily routines relate to personal goals and wellbeing. Users create a profile, set goals, and record check-ins. The app uses this information to show activity patterns, generate personalized AI reflections, and explore possible futures.
 
