@@ -3,7 +3,9 @@
   window.__stackedBackendWaitInstalled = true;
 
   const directFetch = window.fetch.bind(window);
-  const healthUrl = "/api/health";
+  const apiOrigin = "https://conceptzero-stacked-api.onrender.com";
+  const healthPath = "/api/health";
+  const healthUrl = `${apiOrigin}${healthPath}`;
   const maxWaitMs = 120_000;
   let ready = false;
   let waiting;
@@ -69,14 +71,15 @@
     const noticeTimer = window.setTimeout(showNotice, 1200);
     if (startupScreen) showNotice();
 
-    // This same-origin Vercel path is explicitly rewritten to Render's
-    // /api/health route. Its first request wakes Render; retries wait for DB.
+    // Call Render directly. The first request wakes the service; retries wait
+    // until the API and database are ready.
     while (Date.now() < deadline) {
       try {
         const response = await directFetch(healthUrl, {
           method: "GET",
           cache: "no-store",
-          credentials: "same-origin",
+          credentials: "include",
+          mode: "cors",
           headers: { Accept: "application/json" },
           signal: AbortSignal.timeout(8000),
         });
@@ -127,9 +130,15 @@
       return directFetch(input, options);
     }
 
-    const isApiRequest = url.origin === window.location.origin && url.pathname.startsWith("/api/");
-    if (!isApiRequest || url.pathname === healthUrl) return directFetch(input, options);
-    return ensureReady().then(() => directFetch(input, options));
+    const isBackendApi =
+      url.pathname.startsWith("/api/") &&
+      (url.origin === window.location.origin || url.origin === apiOrigin);
+    if (!isBackendApi) return directFetch(input, options);
+
+    const backendUrl = `${apiOrigin}${url.pathname}${url.search}`;
+    const backendOptions = { ...options, credentials: "include", mode: "cors" };
+    if (url.pathname === healthPath) return directFetch(backendUrl, backendOptions);
+    return ensureReady().then(() => directFetch(backendUrl, backendOptions));
   };
 
   retryButton?.addEventListener("click", () => {

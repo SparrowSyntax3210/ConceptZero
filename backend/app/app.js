@@ -3,7 +3,51 @@ const mongoose = require("mongoose");
 const app = express();
 const userRoutes = require("./routes/user.routes");
 
+const configuredOrigins = (process.env.CORS_ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = new Set([
+  "https://stacked-alpha.vercel.app",
+  "https://stacked-alpha.app",
+  "https://www.stacked-alpha.app",
+  ...configuredOrigins,
+]);
+
+function isAllowedOrigin(origin) {
+  if (allowedOrigins.has(origin)) return true;
+
+  try {
+    const hostname = new URL(origin).hostname;
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  } catch (_error) {
+    return false;
+  }
+}
+
 // Middleware
+app.use((req, res, next) => {
+  const origin = req.get("Origin");
+
+  if (origin && !isAllowedOrigin(origin)) {
+    return res.status(403).json({ message: "This website is not allowed to access the API." });
+  }
+
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Vary", "Origin");
+  }
+
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Max-Age", "600");
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

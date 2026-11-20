@@ -3,26 +3,5 @@
   "framework": null,
   "buildCommand": null,
   "installCommand": null,
-  "outputDirectory": "frontend/public/src",
-  "rewrites": [
-    {
-      "source": "/api/health",
-      "destination": "https://conceptzero-stacked-api.onrender.com/api/health"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "https://conceptzero-stacked-api.onrender.com/api/:path*"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/api/:path*",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store"
-        }
-      ]
-    }
-  ]
+  "outputDirectory": "frontend/public/src"
 }

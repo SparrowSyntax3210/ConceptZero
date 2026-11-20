@@ -35,8 +35,19 @@ async function createSession(user, req, res) {
     maxAge: SESSION_TIME * 1000,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
+}
+
+function respondAfterLogin(req, res, user) {
+  if (req.accepts("json")) {
+    return res.json({
+      authenticated: true,
+      user: { id: user._id, username: user.username, email: user.email },
+    });
+  }
+
+  return res.redirect("/");
 }
 
 // Register
@@ -55,8 +66,7 @@ router.post("/register", async (req, res) => {
     });
 
     await createSession(user, req, res);
-
-    res.redirect("/");
+    return respondAfterLogin(req, res, user);
   } catch (error) {
     res.status(500).send("Error registering user");
   }
@@ -76,8 +86,7 @@ router.post("/login", async (req, res) => {
     }
 
     await createSession(user, req, res);
-
-    res.redirect("/");
+    return respondAfterLogin(req, res, user);
   } catch (error) {
     res.status(500).send("Error logging in");
   }
@@ -129,7 +138,7 @@ router.post("/logout", async (req, res) => {
     res.clearCookie(COOKIE_NAME, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/",
     });
 

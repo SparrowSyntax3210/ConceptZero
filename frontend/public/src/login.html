@@ -708,7 +708,7 @@
           <p class="auth-error" id="authError" role="alert" aria-live="polite"></p>
 
           <!-- LOGIN FORM -->
-          <form action="/api/users/login" method="POST" id="loginForm">
+          <form action="https://conceptzero-stacked-api.onrender.com/api/users/login" method="POST" id="loginForm">
             <div class="form-group">
               <label for="loginEmail">Email Address</label>
               <div class="input-wrap">
@@ -751,7 +751,7 @@
                 Remember me
               </label>
 
-              <a href="/api/users/forgot-password">Forgot Password?</a>
+              <a href="https://conceptzero-stacked-api.onrender.com/api/users/forgot-password">Forgot Password?</a>
             </div>
 
             <button type="submit" class="submit-btn">
@@ -761,7 +761,7 @@
 
           <!-- REGISTRATION FORM -->
           <form
-            action="/api/users/register"
+            action="https://conceptzero-stacked-api.onrender.com/api/users/register"
             method="POST"
             id="registerForm"
             hidden
@@ -900,25 +900,30 @@
             try {
               const response = await fetch(form.action, {
                 method: "POST",
-                credentials: "same-origin",
                 headers: {
                   "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-                  "Accept": "text/plain",
+                  "Accept": "application/json",
                 },
                 body: new URLSearchParams(new FormData(form)),
               });
 
-              if (response.redirected) {
-                window.location.assign(response.url || "/");
+              const responseText = (await response.text()).trim();
+              if (response.ok) {
+                window.location.assign("/");
                 return;
               }
 
-              const responseText = (await response.text()).trim();
+              let errorMessage = responseText;
+              try {
+                errorMessage = JSON.parse(responseText).message || responseText;
+              } catch (_error) {
+                // The server may return a plain text validation message.
+              }
               const isHtml = /<!doctype html|<html[\s>]/i.test(responseText);
               showAuthError(
                 isHtml || !responseText
                   ? "We couldn’t sign you in right now. Please check your details and try again."
-                  : responseText,
+                  : errorMessage,
               );
             } catch (error) {
               showAuthError("Unable to connect. Check your connection and try again.");
