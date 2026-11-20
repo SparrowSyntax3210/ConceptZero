@@ -1,104 +1,102 @@
 # STACKED — A Digital Twin of Everyday Habits
 
-STACKED helps users understand how everyday routines connect to their personal goals and wellbeing. Users add profile information, set goals, and record daily check-ins. The application uses that information to show activity patterns, generate personalized AI reflections, and illustrate possible future scenarios.
+STACKED helps users understand how daily routines relate to personal goals and wellbeing. Users create a profile, set goals, and record check-ins. The app uses this information to show activity patterns, generate personalized AI reflections, and explore possible futures.
 
-STACKED is designed to make progress easier to notice and reflect on. Its projections are exploratory scenarios—not promises about what will happen.
+These scenarios are for reflection, not promises about what will happen.
 
 ## Key features
 
-- **Personalized profiles:** Users enter information across areas such as physical health, sleep, mental wellbeing, productivity, academics, and lifestyle.
-- **Goal tracking:** Users define routines and record whether they completed each goal, with an optional actual value.
-- **Habit heatmap:** A calendar view shows daily goal completion, helping users spot consistent periods and gaps.
-- **Progress analytics:** Weekly completion percentages and graphs help users review how their activity changes over time.
-- **AI-powered insights:** The analysis service uses available profile data to create personalized summaries and suggested improvements.
-- **Future-self letters:** AI-generated letters reflect the selected time horizon, profile information, and recent recorded activity.
-- **Future scenarios:** Users can compare an illustrative current-pattern path with a suggested-guideline path.
-- **Interactive Future You view:** A draggable timeline and 3D character make it possible to explore different milestones visually.
+- **Personalized profiles:** Record details about health, sleep, mental wellbeing, productivity, academics, and lifestyle.
+- **Goal tracking:** Set routines and log completion, with an optional actual value.
+- **Habit heatmap:** View daily goal completion and spot patterns or gaps.
+- **Progress analytics:** Review weekly completion rates and activity trends.
+- **AI insights:** Get summaries and suggested improvements based on available profile data.
+- **Future-self letters:** Read AI-generated reflections shaped by your profile, recent activity, and selected time horizon.
+- **Future scenarios:** Compare illustrative current-pattern and suggested-guideline paths.
+- **Interactive Future You:** Explore milestones with a draggable timeline and 3D character.
 
 ## How STACKED works
 
 ### 1. Build a personal baseline
 
-Users provide profile information across the areas they want to track. Saved quantities and ratings describe their current profile and establish a starting point for analysis.
+Users enter information for the profile areas they want to track. Saved values and ratings establish a starting point for analysis. Incomplete areas remain unavailable rather than being filled with assumed data.
 
-STACKED uses the information the user has entered. If a profile area is incomplete, that data is treated as unavailable rather than filled in with an assumed value.
+### 2. Set goals and record check-ins
 
-### 2. Create goals and record check-ins
+Users create goals around routines they want to build. Each check-in records the goal, date, completion status, and optional actual value.
 
-Users create goals based on the routines they want to build. A check-in records the goal, date, completion status, and any optional actual value.
+These records connect intended routines with logged activity. Their usefulness depends on goals and check-ins being entered accurately.
 
-Over time, these entries create a history of recorded activity. The history helps STACKED compare goals the user set with the check-ins they logged. Its usefulness depends on the goals and check-ins being recorded accurately.
+### 3. Review completion and consistency
 
-### 3. Review daily completion and consistency
-
-The tracker identifies which goals were active on a given date and counts how many were completed. It uses the completion rate to set that date’s heatmap intensity:
+For each date, the tracker finds the goals active that day and calculates their completion rate:
 
 `Daily completion = completed eligible goals / total eligible goals`
 
-Days with a higher completion rate receive a stronger visual intensity. This makes it easier to see clusters of completed days, gaps, and changes in routine. Dates without eligible goals and future dates are not treated as ordinary missed check-ins.
+The heatmap uses this rate to show patterns, gaps, and changes in routine. Dates without eligible goals and future dates are excluded from ordinary missed-check-in calculations.
 
-The weekly progress line calculates a completion percentage for each of the last seven days and displays the average. The letter service also estimates consistency over a 30-day window by comparing completed check-ins with expected check-ins based on active goals and their frequency.
+The weekly progress line averages daily completion rates over the past seven days. Separately, the letter service estimates 30-day consistency by comparing completed check-ins with expected check-ins based on active goals and their frequency.
 
-These measures describe the check-ins stored in STACKED. They cannot account for activities that users did not log.
+These metrics reflect logged activity and cannot account for unrecorded habits.
 
-### 4. Generate personalized insights and letters
+### 4. Generate insights and letters
 
-For an insight or letter, STACKED combines the available profile information with relevant activity data. A user can select a letter horizon, such as three or six months. The AI service receives that horizon and the activity summary, then generates a reflection grounded in the information available.
+STACKED combines available profile and activity data to create AI-generated insights and letters. Users can select a letter horizon, such as three or six months.
 
-Recorded consistency can change the tone and focus of the letter. A history of regular check-ins gives the reflection evidence of follow-through to acknowledge. When check-ins are less consistent, it can encourage a manageable next step instead of suggesting that progress has already happened.
+The reflection can recognize regular check-ins or, when consistency is lower, encourage a manageable next step. Letters are AI-generated and depend on the information available; they are not actual messages from a future self.
 
-Letters are AI-generated reflections, not real messages from the user’s future self. Their personalization is limited by the profile details and activity history provided.
+### 5. Explore possible scenarios
 
-### 5. Explore illustrative future scenarios
+The overview analysis uses completed profile data to establish a baseline and generate two illustrative paths:
 
-STACKED uses completed profile data to establish a baseline for its overview analysis. The analysis service generates two possible paths:
+- **Current-pattern path:** Based on the user’s current profile and recorded activity.
+- **Suggested-guideline path:** Shows how suggested changes could shape an alternative path.
 
-- **Current-pattern path:** An illustration based on the user’s current profile and recorded patterns.
-- **Suggested-guideline path:** An illustration of how suggested changes could shape a different path.
-
-The scenarios include summaries and score points across short- and long-term milestones. They help users compare possibilities and reflect on potential changes. They are illustrative, not scientifically established forecasts or guaranteed outcomes.
+Summaries and score points across short- and long-term milestones help users compare possibilities. These scenarios are not scientifically established forecasts or guaranteed outcomes.
 
 ## Interactive visual experience
 
-### Heatmap and progress graphs
+### Heatmap and graphs
 
-The calendar heatmap communicates daily goal completion through colour intensity. The weekly progress line shows how the daily completion percentages vary across the week. Scenario graphs display the two illustrative paths across future milestones.
+The heatmap shows daily completion through colour intensity, while the weekly progress line shows changes in completion rates. Scenario graphs compare the two paths across future milestones.
 
-These visualizations help users interpret the recorded data and compare scenarios. They do not make the underlying projections more certain.
+These visuals help users interpret recorded activity and compare scenarios; they do not make projections more certain.
 
 ### Future timeline
 
-The Future You page includes a draggable timeline with multiple milestones. Moving the timeline changes the selected milestone and its associated scenario summary, allowing users to explore how each illustrative path develops over time.
+Users can drag across milestones on the Future You timeline. The selected milestone and its scenario summary update as they explore each path.
 
-### 3D model with Three.js
+### Three.js model
 
-Three.js renders the interactive 3D character shown in the Future You experience. The model provides a visual focal point while users explore the timeline and compare milestones.
+Three.js renders the interactive character at the centre of the Future You experience, providing a visual focus as users explore milestones.
 
-### Animation with GSAP
+### GSAP animations
 
-GSAP powers interface animations and transitions, including motion between timeline states and changes in the visual presentation. These effects help make the experience feel responsive and clarify when the selected milestone changes. GSAP handles presentation; it does not calculate scores or scenarios.
+GSAP animates interface transitions and timeline changes to make the experience responsive and easier to follow. It handles presentation, not the underlying calculations.
 
 ## Screenshots
 
 ### Personalized future-self letter
-<img width="820" height="853" alt="Screenshot 2026-11-21 023025" src="https://github.com/user-attachments/assets/689690ec-fa1e-469e-9b6e-16294bc63bf1" />
+
+<img width="820" height="853" alt="Personalized future-self letter" src="https://github.com/user-attachments/assets/689690ec-fa1e-469e-9b6e-16294bc63bf1" />
 
 ### Future You timeline
-<img width="1615" height="835" alt="Screenshot 2026-11-21 023052" src="https://github.com/user-attachments/assets/b73e6422-9a41-4643-be35-f5d3f6151015" />
 
+<img width="1615" height="835" alt="Future You timeline" src="https://github.com/user-attachments/assets/b73e6422-9a41-4643-be35-f5d3f6151015" />
 
 ### Tracker heatmap and progress
-<img width="1677" height="647" alt="Screenshot 2026-11-21 023251" src="https://github.com/user-attachments/assets/69d58aca-54e2-437f-ae25-10e5d110bb2f" />
+
+<img width="1677" height="647" alt="Tracker heatmap and progress" src="https://github.com/user-attachments/assets/69d58aca-54e2-437f-ae25-10e5d110bb2f" />
 
 ## Technology
 
-- **Frontend:** HTML, CSS, and JavaScript
-- **Backend:** Node.js and Express
+- **Frontend:** HTML, CSS, JavaScript
+- **Backend:** Node.js, Express
 - **Database:** MongoDB
-- **AI:** OpenRouter API for generated insights, scenario summaries, and letters
+- **AI:** OpenRouter API for insights, scenario summaries, and letters
 - **3D rendering:** Three.js
 - **Animation:** GSAP
 
 ## Important note
 
-STACKED provides habit-tracking tools and AI-generated reflections for exploration and motivation. Its future scenarios are illustrative and depend on the information and check-ins available. They are not guaranteed predictions, medical advice, or a substitute for professional guidance.
+STACKED provides habit-tracking tools and AI reflections for exploration and motivation. Scenarios depend on available profile and check-in data; they are not guaranteed predictions, medical advice, or a substitute for professional guidance.
