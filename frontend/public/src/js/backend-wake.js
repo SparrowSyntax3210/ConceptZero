@@ -5,10 +5,21 @@
   const directFetch = window.fetch.bind(window);
   const wakeUrl = "/api/wake";
   const healthUrl = "/api/health";
+  const readyKey = "stacked-backend-ready";
+  const reloadKey = "stacked-backend-ready-reload";
   const maxWaitMs = 120_000;
   let ready = false;
   let waiting;
   let notice;
+  let refreshWhenReady = false;
+
+  try {
+    const isReadyReload = sessionStorage.getItem(reloadKey) === "1";
+    if (isReadyReload) sessionStorage.removeItem(reloadKey);
+    refreshWhenReady = !isReadyReload && sessionStorage.getItem(readyKey) !== "1";
+  } catch (_error) {
+    // Continue normally if this browser blocks session storage.
+  }
 
   function showNotice() {
     if (!notice) {
@@ -73,10 +84,34 @@
             ready = true;
             window.clearTimeout(noticeTimer);
             hideNotice();
+
+            try {
+              sessionStorage.setItem(readyKey, "1");
+              if (refreshWhenReady) {
+                sessionStorage.setItem(reloadKey, "1");
+                window.location.reload();
+                // Keep waiting API calls from racing the page reload.
+                return new Promise(() => {});
+              }
+            } catch (_error) {
+              // If storage is unavailable, keep the page usable without reload.
+            }
             return;
           }
         }
+        try {
+          sessionStorage.removeItem(readyKey);
+          refreshWhenReady = true;
+        } catch (_error) {
+          // Readiness polling still works without session storage.
+        }
       } catch (_error) {
+        try {
+          sessionStorage.removeItem(readyKey);
+          refreshWhenReady = true;
+        } catch (_storageError) {
+          // Readiness polling still works without session storage.
+        }
         // A proxy HTML error or a starting backend is temporary; try again.
       }
 
