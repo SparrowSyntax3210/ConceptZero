@@ -6,6 +6,10 @@
   "outputDirectory": "frontend/public/src",
   "rewrites": [
     {
+      "source": "/api/wake",
+      "destination": "https://conceptzero-stacked-api.onrender.com/health"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://conceptzero-stacked-api.onrender.com/api/:path*"
     }
