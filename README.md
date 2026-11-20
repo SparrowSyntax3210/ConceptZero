@@ -78,7 +78,7 @@ GSAP animates interface transitions and timeline changes to make the experience 
 
 ### Personalized future-self letter
 
-<img width="820" height="853" alt="Personalized future-self letter" src="https://github.com/user-attachments/assets/689690ec-fa1e-469e-9b6e-16294bc63bf1" />
+<img width="820" height="853" alt="download" src="https://github.com/user-attachments/assets/8d17f4e4-3047-4535-9729-2bef9ee1ec8c" />
 
 ### Future You timeline
 
